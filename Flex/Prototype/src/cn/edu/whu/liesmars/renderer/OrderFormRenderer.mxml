@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  horizontalAlign="center" xmlns:services="services.*">
+	
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService" fault="naturalLangService_faultHandler(event)"/>
+		
+		<mx:CallResponder id="getDetailResp" result="getDetailResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.Container.SimpleContainer;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.FeedBackEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.FrameObj;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.FeedbackWin;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.OrderFormWin;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.OrderFormWin2;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.FramePairObj;
+			import valueObjects.NLSearchFeedback;
+			import valueObjects.NLSearchResult;
+			import valueObjects.TDeepframework;
+			import valueObjects.TShallowframework;
+			private var feedbackWin:FeedbackWin;
+			private var searchUuid:String;
+			
+			private var deepFramework:TDeepframework=new TDeepframework();
+			private var shallowFramework:TShallowframework=new TShallowframework();
+			
+			private var deepFrameStr:String;
+			private var shallowFrameStr:String;
+			private var inputStr:String;
+			private var dataclone:Object;
+			private var dataFromServer:FramePairObj;
+		    private var orderWin:OrderFormWin2;
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					dataclone=value;
+					if(value.uuid!="moreInfo"&&value.uuid!="moreFusionReslut"){
+						addBtn();
+						searchUuid=value.uuid;
+						deepFrameStr=value.deepFrame;
+						shallowFrameStr=value.shallowFrame;
+						inputStr=value.inputStr;
+						trace(value.uuid);
+					}
+					else{
+						this.removeAllChildren();
+					}
+					
+					
+				}
+			}    
+			private function showOrderWin():void{
+			
+				Controller.container.removeAllChildren();
+				orderWin=new OrderFormWin2();
+				
+				orderWin.left=0;
+				orderWin.right=0;
+				orderWin.top=0;
+				orderWin.bottom=0;
+				Controller.container.addChild(orderWin);
+				Controller.container.visible=true;
+				Controller.container.width=orderWin.width;
+				Controller.container.height=orderWin.height+15;
+				Controller.container.title="表单";
+			}
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+//				showOrderWin();
+				if(dataclone==null){
+					CursorManager.removeAllCursors();
+					mx.controls.Alert.show("没有数据");
+					
+				}
+				
+				if(dataclone.advancedFrame==null||dataclone.primaryFrame==null){
+					CursorManager.setBusyCursor();
+					getDetailResp.token=naturalLangService.getDetailFrameByUuid(searchUuid);
+				}
+				else{
+					showOrderWin();
+					orderWin.load(dataclone.advancedFrame,dataclone.primaryFrame,dataclone.sensors,inputStr);
+					
+				}
+				
+			}
+			
+			protected function getDetailResp_resultHandler(event:ResultEvent):void
+			{
+				var result:FramePairObj=event.result as FramePairObj;
+				
+				if(result==null){
+					CursorManager.removeAllCursors();
+					mx.controls.Alert.show("返回结果为空");
+					return;
+				}
+				
+				
+				if(dataclone!=null){
+					dataclone.advancedFrame=result.advancedFrame;
+					dataclone.primaryFrame=result.primaryFrame;
+					dataclone.sensors=result.sensors;
+				}
+				else{
+					return ;
+				}
+				CursorManager.removeAllCursors();
+				showOrderWin();
+				orderWin.load(dataclone.advancedFrame,dataclone.primaryFrame,dataclone.sensors,inputStr);
+			}
+			
+			
+			public function addBtn():void{
+				var buttonInGrid:Button=new Button();
+				buttonInGrid.label="查看";
+				buttonInGrid.addEventListener(MouseEvent.CLICK,buttonInGrid_clickHandler);
+				this.removeAllChildren();
+				this.addChild(buttonInGrid);
+			}
+			
+			protected function naturalLangService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接错误");
+			}
+			
+		]]>
+	</fx:Script>
+</mx:HBox> 

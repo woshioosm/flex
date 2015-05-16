@@ -1,0 +1,30 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var placeName:String;
+			[Bindable]
+			private var widthSize:Number;
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					placeName=value.toString();
+					widthSize=placeName.length*8;
+				}
+			}    
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+				//  mx.controls.Alert.show(id);
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Label width="{widthSize}" text="{placeName}">
+	</mx:Label>
+	<mx:Button  click="buttonInGrid_clickHandler(event)" id="buttonInGrid" label="X" width="15" x="{widthSize+15}" height="15"/>
+</mx:HBox> 

@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" cornerRadius="20" backgroundColor="0xffffff" 
+		   backgroundAlpha="0.5" resize="canvas1_resizeHandler(event)"
+		   verticalScrollPolicy="off"    horizontalScrollPolicy="off" creationComplete="canvas1_creationCompleteHandler(event)"
+		   width="700" minWidth="400"  height="51" xmlns:services="services.*" 
+		 >
+	<fx:Script>
+		<![CDATA[
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.Container.FileViewWin;
+			import cn.edu.whu.liesmars.Container.UserView;
+			import cn.edu.whu.liesmars.Container.WaitingWin.NatureLangWaitingWin;
+			import cn.edu.whu.liesmars.asPack.event.CallBackEvent;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.util.CodeTrans;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.DrawingObj;
+			import cn.edu.whu.liesmars.asPack.util.FrameObjParser;
+			import cn.edu.whu.liesmars.asPack.util.PointOnMap;
+			import cn.edu.whu.liesmars.map.MapContainer;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			import valueObjects.FramePairObj;
+			import valueObjects.NLSearchResultWithTime;
+			private var inputHeight:Number; //自然语言输入框初始大小
+			private var curHeight:Number; // 输入框高度变化中 this的height
+			private var curWidth:Number;
+			[Bindable]
+			private var pointsListInSingle:ArrayCollection=new ArrayCollection(); //通过地图选取的点
+			[Bindable]
+			private var pointsListInFormat:ArrayCollection=new ArrayCollection(); //通过地图选取的点
+			
+			private var curInputHeight:Number;  //当前自然语言输入框初始大小
+			private var clickAdd:Boolean=false;
+			private  var singleFile:FileReference=new FileReference(); //打开文件
+			private var isOn:Boolean=false; // 高级查询输入框 是否打开
+			private var queryStringList:ArrayCollection=new ArrayCollection(); 
+	
+			private var isFormatSearchMapSelection:Boolean=false;
+			
+			private var isSingleMapWinOpen:Boolean=false; // 维持一个窗口
+			private var isFormatMaoWinOpen:Boolean=false;
+			private var orderWin:OrderFormWin2;  //订单
+			private var inputStr:String="";
+			[Bindable]
+			private var date:String="";
+			[Bindable]
+			private var space:String="";
+			[Bindable]
+			private var task:String="";
+			[Bindable]
+			private var sensor:String="";
+			[Bindable]
+			private var param:String="";
+			[Bindable]
+			private var fileName:String;
+			
+			
+			private var maxboxHeight:int=335;
+		
+            private var minboxHeight:int=51;
+            private var waitingWin:NatureLangWaitingWin=new NatureLangWaitingWin();
+			private var fileContent:FileViewWin=new FileViewWin();
+		   // private var fileContents:ArrayCollection=new ArrayCollection();
+			
+			/**
+			 *
+			 * 所有控件的事件
+			 * 
+			 * */
+			protected function btnTween_clickHandler(event:MouseEvent):void
+			{
+				txtField.height=inputHeight;
+				if(isOn==false){
+					queryWinManagerOpen();
+					(Controller.userView as UserView).minWin();
+					
+				}else{
+					queryWinManagerClose();
+					
+				}
+				
+			}
+			private function queryWinManagerClose():void{
+				if(isOn==true){
+					Tweener.addTween(this,{height:minboxHeight,transition :"linear", time:0.2 });
+					Tweener.addTween(tweenCan,{height:minboxHeight,transition :"linear", time:0.2 });
+					isOn=false;
+				}
+			}
+			private function queryWinManagerOpen():void{
+				if(isOn==false){
+					Tweener.addTween(this,{height:maxboxHeight,transition :"linear", time:0.2 });
+					Tweener.addTween(tweenCan,{height:maxboxHeight,transition :"linear", time:0.2 });
+					isOn=true;				
+				}
+			}
+			protected function txtField_changeHandler(event:Event):void
+			{
+//				var increase:Number;
+//				
+//				// 记录 每次输入超过一行时  需要增加的输入框高度
+//				increase=txtField.scroller.viewport.contentHeight + 2-txtField.height; 
+//				
+//				//txtField.height 为当前输入框高度的理论值 不能超过maxboxHeight-20
+//				txtField.height = txtField.scroller.viewport.contentHeight + 2; 
+//				
+//				//curInputHeight 记录当前的输入框高度 用于恢复使用
+//				curInputHeight=txtField.height ;
+//				
+//				if(isOn==false){
+//					this.height=this.height+increase;   // 输入框 外围主体尺寸
+//					curHeight=this.height;             //记录当前外围主体高度 用于外围未打开时的高度
+//				}else{
+//					curHeight+=increase;
+//				}
+//				if(this.height>maxboxHeight||txtField.height>maxboxHeight-20 || curHeight>maxboxHeight){
+//					
+//					this.height=maxboxHeight;
+//					curHeight=this.height;
+//					curInputHeight=maxboxHeight-20;
+//					txtField.height=curInputHeight;
+//				}
+			}
+			protected function canvas1_creationCompleteHandler(event:FlexEvent):void
+			{
+//				inputHeight=txtField.height;
+//				curInputHeight=inputHeight;
+				curHeight=this.height;
+				curWidth=this.width;
+			}
+			protected function txtField_focusIn(event:Event):void
+			{
+//				txtField.height = curInputHeight;
+//				if(isOn==false)
+//				   this.height=curHeight;
+//				event.preventDefault();
+			}
+			protected function txtField_focusOut(event:Event):void
+			{
+//				if(isOn==false){
+//					txtField.height=inputHeight;
+//					this.height=minboxHeight;
+//				}
+//				else{
+//					txtField.height=inputHeight;
+//				}
+			}
+			
+			
+			
+			/******************文件操作************************/
+			protected function btnOpenFile_clickHandler(event:MouseEvent):void
+			{
+				singleFile.browse();				
+				singleFile.addEventListener(Event.SELECT,onFileSelected);
+			}
+			private function onFileSelected(e:Event):void{
+				singleFile.load();
+				singleFile.addEventListener(Event.COMPLETE,onComplete);
+				
+			}
+			
+			private function openWaitingWin():void{
+//				if(isOn==true){
+//					Tweener.addTween(this,{height:curHeight,transition :"linear", time:0.4 });
+//					Tweener.addTween(tweenCan,{height:minboxHeight,transition :"linear", time:0.4 });
+//					//txtField.setFocus();
+				isOn=false;
+				
+				this.height=minboxHeight;
+				tweenCan.height=minboxHeight;
+//				txtField.height=inputHeight;
+				
+				waitingWin.init();
+				waitingWin.mdiCanvas=Config.midCanvs2;
+				Config.midCanvs2.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs2.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs2.height/2-waitingWin.height;
+				
+			}
+			private function closeWaitingWin():void{
+				waitingWin.stopProgress();
+				try{
+					Config.midCanvs2.windowManager.remove(waitingWin);
+				}catch(e:Error){
+					
+				}
+				
+			}
+			/**打开文件进行查询***/
+			private function onComplete(e:Event):void{
+				fileName=singleFile.name;
+				var bytes:ByteArray = singleFile.data;
+				
+				var temp:String="";
+				var flag:int=0;
+				var str:String=bytes.readMultiByte(bytes.length,"GBK");
+				var queryStrs:Array=str.split("\n");
+				queryStringList.removeAll();
+				queryStringList=new ArrayCollection(queryStrs);
+				
+				for(var i:int=0;i<queryStringList.length;i++){
+					if(StringUtil.trim(queryStringList.getItemAt(i).toString())=="")
+					{
+						queryStringList.removeItemAt(i);
+						i--;
+					}
+				}
+				
+				fileContent.setData(queryStringList);
+				Config.midCanvs2.windowManager.add(fileContent);
+				fileContent.x=Config.midCanvs2.width/2-fileContent.width/2;
+				fileContent.y=100;
+				queryWinManagerClose();
+			
+			}	
+			
+			//初始化大小
+			private function initSize():void{
+				curInputHeight=inputHeight;
+				txtField.height=curInputHeight;
+			
+				curHeight=minboxHeight;
+				this.height=curHeight;
+			}
+	
+			
+			/***调用自然语句查询方法***/
+			private function btnQuery_click(event:Event):void{
+				if(txtField.text=="")
+					return;
+				var queryStr:String=StringUtil.trim(txtField.text);
+				
+				if(pointsListInSingle.length>0){
+					var coordsStr:String=this.converToCoordstr(pointsListInSingle);
+					queryStr="$"+coordsStr+"$"+queryStr;
+				}
+//				queryStringList.removeAll();   //原为多条查询 现在改为一条查询
+//				queryStringList=new ArrayCollection(queryStrs);
+//				for(var i:int=0;i<queryStringList.length;i++){
+//					if(StringUtil.trim(queryStringList.getItemAt(i).toString())=="")
+//					{
+//						queryStringList.removeItemAt(i);
+//						i--;
+//					}
+//				}
+				queryStringList.removeAll();
+				queryStringList.addItem(queryStr);
+				query.token=naturalLangService.singleNLP(queryStringList,Config.userName,Config.searchId);
+				openWaitingWin();
+				queryWinManagerClose();
+//				txtField.text="";
+				initSize();
+				Config.startTime=(new Date()).time;
+				Config.totleSearchNum=queryStringList.length;
+				pointsListInSingle.removeAll();
+			}
+			public function trim(str:String):String{
+				return StringUtil.trim(str);
+			}
+            /****调用格式化查询方法*****/
+			protected function btnFormatQuery_clickHandler(event:MouseEvent):void
+			{
+				date=trim(txDate.text);
+				space=trim(txSpace.text);
+				if(this.pointsListInFormat.length>0){
+					var coordsStr:String=this.converToCoordstr(pointsListInFormat);
+					space="$"+coordsStr+"$"+space;
+				}
+				task=trim(txTask.text);
+				sensor=trim(txSensor.text);
+				if(date==""&&space==""&&task==""&&sensor==""){
+					mx.controls.Alert.show("不能全部为空");
+					return;
+				}
+				queryform.token=naturalLangService.formatNLP(date,space,task,sensor,Config.userName);
+//				openWaitingWin();
+				
+				this.height=minboxHeight;
+				tweenCan.height=minboxHeight;
+				txtField.height=inputHeight;
+				
+				isOn=false;
+				queryWinManagerClose();
+				Config.startTime=(new Date()).time;
+				Config.totleSearchNum=1;
+				pointsListInFormat.removeAll();
+				CursorManager.setBusyCursor();
+			}
+
+			/***********连接后台服务返回结果处理***********/
+			protected function query_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				closeWaitingWin();
+				EventManager.dispatchEvent(this,new QueryEvent(QueryEvent.COMPLETE,event.result as NLSearchResultWithTime,null));
+			}
+
+			protected function queryform_resultHandler(event:ResultEvent):void
+			{
+
+				CursorManager.removeAllCursors();
+				EventManager.dispatchEvent(this,new QueryEvent(QueryEvent.COMPLETE,event.result as NLSearchResultWithTime,null));
+				
+			}
+
+//			protected function tweenCan_clickHandler(event:MouseEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//				txtField_focusOut(null);
+//			}
+
+
+			protected function canvas1_resizeHandler(event:ResizeEvent):void // resize后重新计算输入框的大小
+			{
+				// TODO Auto-generated method stub
+//				if(curWidth!=this.width){
+//					var increase:Number;
+//					increase=txtField.scroller.viewport.contentHeight + 2-txtField.height;
+//					txtField.height = txtField.scroller.viewport.contentHeight + 2;
+//					curInputHeight=txtField.height ;
+//					if(isOn==false){
+//						this.height=this.height+increase;
+//						curHeight=this.height;
+//					}else{
+//						curHeight+=increase;
+//					}
+//					if(this.height>maxboxHeight){
+//						this.height=maxboxHeight;
+//						curHeight=this.height;
+//						curInputHeight=maxboxHeight-20;
+//						txtField.height=curInputHeight;
+//					}
+//					curWidth=this.width;
+//				}	
+//				if(curWidth!=this.width){
+//					
+//					
+//					
+//					curInputHeight = txtField.scroller.viewport.contentHeight + 2;
+//					
+//						txtField.height=curInputHeight;
+//					
+//					
+//					if(isOn==false){
+//						this.height=curInputHeight+20;
+//						curHeight=this.height;
+//					}else{
+//						curHeight=curInputHeight+20;
+//					}
+//					if(this.height>maxboxHeight||txtField.height>maxboxHeight-20 || curHeight>maxboxHeight){
+//						
+//						this.height=maxboxHeight;
+//						curHeight=this.height;
+//						curInputHeight=maxboxHeight-20;
+//						
+//						txtField.height=curInputHeight;
+//						
+//					}
+//					curWidth=this.width;
+//				}	
+				
+			}
+
+
+			//开始地图选择 格式化
+			protected function mapSelectBtn2_clickHandler(event:MouseEvent):void
+			{
+				if(this.isFormatMaoWinOpen==false){
+					this.isFormatMaoWinOpen=true;
+					isFormatSearchMapSelection=true;
+					var mapSelectionWin:MapSelectionWin=new MapSelectionWin();
+					mapSelectionWin.title="格式化查询 地图拾取";
+					mapSelectionWin.pointsList=clone(pointsListInFormat);
+					Config.midCanvs3.windowManager.add(mapSelectionWin);
+					mapSelectionWin.addEventListener(CallBackEvent.OK_CLICK,selectDoneHanlder2);
+					mapSelectionWin.addEventListener(CallBackEvent.CANCEL_CLICK,selectCancelHanlder2);
+					queryWinManagerClose();
+					if(pointsListInFormat.length>0)
+						(Controller.mapContainer as MapContainer).drawAreaByCoords(converToCoordstr(pointsListInFormat));
+				}else{
+					return;
+				}
+				
+					
+				
+			}
+			
+			//开始地图选择 自然语言
+			protected function mapSelectBtn1_clickHandler(event:MouseEvent):void
+			{
+				if(this.isSingleMapWinOpen==false){
+					isSingleMapWinOpen=true;
+					isFormatSearchMapSelection=false;
+					var mapSelectionWin:MapSelectionWin=new MapSelectionWin();
+					mapSelectionWin.title="自然语言 地图拾取";
+					mapSelectionWin.pointsList=clone(pointsListInSingle);
+					Config.midCanvs3.windowManager.add(mapSelectionWin);
+					mapSelectionWin.addEventListener(CallBackEvent.OK_CLICK,selectDoneHanlder1);
+					mapSelectionWin.addEventListener(CallBackEvent.CANCEL_CLICK,selectCancelHanlder1);
+					queryWinManagerClose();
+					(Controller.mapContainer as MapContainer).clearMap();
+					if(pointsListInSingle.length>0)
+						(Controller.mapContainer as MapContainer).drawAreaByCoords(converToCoordstr(pointsListInSingle));
+				}
+				
+			}
+			
+			protected function clone(input:ArrayCollection):ArrayCollection{
+				var arr:ArrayCollection=new ArrayCollection();
+				for each(var obj:DrawingObj in input){
+					arr.addItem(obj);
+				}
+				return arr;
+			}
+			private function selectCancelHanlder1(e:CallBackEvent):void{
+				isSingleMapWinOpen=false;
+			}
+			private function selectCancelHanlder2(e:CallBackEvent):void{
+				isFormatMaoWinOpen=false;
+			}
+			private function selectDoneHanlder1(e:CallBackEvent):void{
+				isSingleMapWinOpen=false;
+				this.pointsListInSingle=clone(e.callBackArr);
+				if(isFormatSearchMapSelection==true){
+					queryWinManagerOpen();
+					
+				}else{
+					queryWinManagerClose();
+					
+				}
+			}
+			private function selectDoneHanlder2(e:CallBackEvent):void{
+				isFormatMaoWinOpen=false;
+				this.pointsListInFormat=clone(e.callBackArr);
+				if(isFormatSearchMapSelection==true){
+					queryWinManagerOpen();
+					
+				}else{
+					queryWinManagerClose();
+					
+				}
+			}
+			public function converToCoordstr(pointsList:ArrayCollection):String{
+				var coords:String="";
+				
+				for(var k:int=0;k<pointsList.length;k++){
+					var points:ArrayCollection=(pointsList.getItemAt(k) as DrawingObj).children;
+					var count:int=points.length;
+					for(var i:int=0;i<count;i++){
+						coords+=(points.getItemAt(i) as PointOnMap).x+","+(points.getItemAt(i) as PointOnMap).y;
+						if(i!=count-1&&count!=1)
+							coords+=";";
+					}
+					if(k!=pointsList.length-1)
+						coords+="|";
+					
+				}
+				return coords;
+			}
+
+			//一键订单
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(txtField.text=="")
+					return;
+				var queryStr:String=StringUtil.trim(txtField.text);
+				inputStr=queryStr;
+				if(pointsListInSingle.length>0){
+					var coordsStr:String=this.converToCoordstr(pointsListInSingle);
+					queryStr="$"+coordsStr+"$"+queryStr;
+				}
+				orderResp.token=naturalLangService.getOrderFormSingleNLP(queryStr,Config.userName,Config.searchId);
+				CursorManager.setBusyCursor();
+			}
+
+
+			protected function orderResp_resultHandler(event:ResultEvent):void
+			{
+				var result:FramePairObj=event.result as FramePairObj;
+				showOrderWin();
+				orderWin.load(result.advancedFrame,result.primaryFrame,result.sensors,inputStr);
+				CursorManager.removeAllCursors();
+			}
+			private function showOrderWin():void{
+				
+				Controller.container.removeAllChildren();
+				orderWin=new OrderFormWin2();
+				
+				orderWin.left=0;
+				orderWin.right=0;
+				orderWin.top=0;
+				orderWin.bottom=0;
+				Controller.container.addChild(orderWin);
+				Controller.container.visible=true;
+				Controller.container.width=orderWin.width;
+				Controller.container.height=orderWin.height+15;
+				Controller.container.title="表单";
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>
+		<s:CallResponder id="query" result="query_resultHandler(event)"/>
+		<s:CallResponder id="queryform" result="queryform_resultHandler(event)"/>
+		<s:CallResponder id="orderResp" result="orderResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:Canvas id="tweenCan"  left="0" right="0" height="51" cornerRadius="20" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<mx:Canvas  borderStyle="solid" cornerRadius="10" borderColor="0xaaaaaa" backgroundColor="0xffffff" backgroundAlpha="0.5"  left="22" y="53"  height="208" right="22" >
+			<mx:Label x="47" y="15" text="时间" id="lbTime" height="23" fontSize="14" fontFamily="微软雅黑" fontWeight="normal"/>
+			<mx:Label x="47" y="62" text="空间" id="lbSpatial" height="23" fontSize="14" fontFamily="微软雅黑" fontWeight="normal"/>
+			<mx:Label x="36" y="109" text="影像参数" id="lbSensor" height="23" fontSize="14" fontFamily="微软雅黑" fontWeight="normal"/>
+			<mx:Label x="47" y="156" text="任务" id="lbTask" height="23" fontSize="14" fontFamily="微软雅黑" fontWeight="normal"/>
+			
+			
+			<mx:TextInput id="txDate" text="{date}" left="98" right="126" y="12"  height="30" fontSize="15" fontFamily="微软雅黑"/>
+			<mx:TextInput id="txSpace" text="{space}" left="99" right="179" y="59"  height="30" fontSize="15" fontFamily="微软雅黑"/>
+			<mx:TextInput id="txTask" text="{task}" left="98" y="106" right="127"  height="30" fontSize="15" fontFamily="微软雅黑"/>
+			<mx:TextInput id="txSensor" text="{sensor}" left="98" right="127" y="153"  height="30" fontSize="15" fontFamily="微软雅黑"/>
+			
+			<mx:Button right="15" y="99" id="btnFormatQuery" label="格式化查询" fontFamily="微软雅黑" cornerRadius="10" height="37" width="93" click="btnFormatQuery_clickHandler(event)"/>
+			<mx:Button y="60" id="mapSelectBtn"  width="51" fontFamily="微软雅黑" fontSize="11"  height="26" right="127" click="mapSelectBtn2_clickHandler(event)" icon="@Embed(source='../../../../../../../assets/world.png')" label="{pointsListInFormat.length}"/>
+		</mx:Canvas>
+		<mx:Canvas verticalScrollPolicy="off" horizontalScrollPolicy="off" borderStyle="solid" cornerRadius="10" borderColor="0xaaaaaa" backgroundColor="0xffffff" backgroundAlpha="0.5"  left="22" y="268" right="22" height="48">
+			<mx:Button id="btnOpenFile" label="打开文件" fontFamily="微软雅黑" cornerRadius="10" right="20" y="11" click=" btnOpenFile_clickHandler(event)" width="86" height="24"/>
+			<!--<mx:TextInput left="104" top="8" right="130" width="427" height="30" fontSize="15" editable="false"/>-->
+			<mx:Label left="47" right="130" minWidth="100" y="12" text="文件打开多条自然语句(文件格式为.txt 文件编码为ANSI 回车换行)" toolTip="从文件打开多条自然语句(文件格式为.txt 文件编码为ANSI 回车换行)"  height="21" fontFamily="微软雅黑" fontSize="14"/>
+			
+		</mx:Canvas>
+		<mx:Button y="13" id="mapSelectBtn1" toolTip="地图选择"  width="51" fontFamily="微软雅黑" fontSize="11" height="26" right="146" click="mapSelectBtn1_clickHandler(event)" icon="@Embed(source='../../../../../../../assets/world.png')" cornerRadius="5" label="{pointsListInSingle.length}"/>
+		<mx:Button y="13" right="100" label="查询" id="btnQuery" cornerRadius="8" alpha="0.9" height="27" click="btnQuery_click(event)" fontFamily="微软雅黑" width="42"/>
+		<mx:Button y="13" width="42" height="27" right="55" cornerRadius="8" toolTip="一键订单" click="button1_clickHandler(event)" label="订单" fontFamily="微软雅黑"/>
+	</mx:Canvas>
+	<mx:Button id="btnTween" right="10" y="13" label="高级" click="btnTween_clickHandler(event)"   width="42" cornerRadius="8" height="27" fontFamily="微软雅黑"/>
+	<s:TextInput id="txtField" left="22" y="10" right="201"   height="30" fontSize="20" alpha="0.9"  
+				focusIn="txtField_focusIn(event)" focusOut="txtField_focusOut(event)" 
+				change="txtField_changeHandler(event)" fontFamily="微软雅黑"/>
+	
+</mx:Canvas>

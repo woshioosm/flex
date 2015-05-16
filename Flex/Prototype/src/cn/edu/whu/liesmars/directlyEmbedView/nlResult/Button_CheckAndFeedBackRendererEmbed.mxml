@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  horizontalAlign="center" xmlns:services="services.*">
+
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService" fault="naturalLangService_faultHandler(event)"/>
+		
+		<mx:CallResponder id="getDetailResp" result="getDetailResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.Container.SimpleContainer;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.FeedBackEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.FeedbackWin;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.NLSearchFeedback;
+			import valueObjects.NLSearchResult;
+			import valueObjects.TDeepframework;
+			import valueObjects.TShallowframework;
+			private var feedbackWin:FeedbackWin;
+			private var searchUuid:String;
+			
+			private var deepFramework:TDeepframework=new TDeepframework();
+			private var shallowFramework:TShallowframework=new TShallowframework();
+			
+			private var deepFrameStr:String;
+			private var shallowFrameStr:String;
+			private var inputStr:String;
+			private var dataclone:Object;
+			
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					dataclone=value;
+                    if(value.uuid!="moreInfo"&&value.uuid!="moreFusionReslut"){
+						addBtn();
+						searchUuid=value.uuid;
+						deepFrameStr=value.deepFrame;
+						shallowFrameStr=value.shallowFrame;
+						inputStr=value.inputStr;
+						trace(value.uuid);
+					}
+					else{
+						this.removeAllChildren();
+					}
+				
+					
+				}
+			}    
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+				
+//				Controller.container.removeAllChildren();
+//				var feedbackWin:FeedbackWin=new FeedbackWin();
+//				feedbackWin.left=0;
+//				feedbackWin.right=0;
+//				feedbackWin.top=0;
+//				feedbackWin.bottom=0;
+//				Controller.container.addChild(feedbackWin);
+//				Controller.container.visible=true;
+//				Controller.container.width=feedbackWin.width;
+//				Controller.container.height=feedbackWin.height+15;
+//				
+//				Controller.container.title="查询与反馈";
+//			
+//				Controller.container.mdiCanvas=Config.midCanvs;
+			    if(dataclone==null){
+					CursorManager.removeAllCursors();
+					mx.controls.Alert.show("没有数据");
+					
+				}
+				
+				if(dataclone.deepFrame==null||dataclone.deepFrame==""||dataclone.shallowFrame==null||dataclone.shallowFrame==""){
+					CursorManager.setBusyCursor();
+					getDetailResp.token=naturalLangService.getDetailByUuid(searchUuid);
+				}
+			   
+//				if(deepFrameStr==null||deepFrameStr==""||shallowFrameStr==null||shallowFrameStr==""){
+//				    CursorManager.setBusyCursor();
+//					getDetailResp.token=naturalLangService.getDetailByUuid(searchUuid);
+//				}
+				else{
+					deepFramework.searchUuid=searchUuid;
+					deepFramework.deepFrameXml=dataclone.deepFrame;
+					
+					shallowFramework.searchUuid=searchUuid;
+					shallowFramework.shallowFrameXml=dataclone.shallowFrame;
+					
+					Controller.feedBackWin.visible=true;
+					Controller.feedBackWin.load(searchUuid,inputStr,deepFramework,shallowFramework);
+
+				}
+				//EventManager.dispatchEvent(feedbackWin,new FeedBackEvent(FeedBackEvent.FEEDBACK,deepFramework,shallowFramework,searchUuid,inputStr));				
+			}
+
+			protected function getDetailResp_resultHandler(event:ResultEvent):void
+			{
+				var result:NLSearchResult=event.result as NLSearchResult;
+				if(result==null){
+					CursorManager.removeAllCursors();
+					mx.controls.Alert.show("返回结果为空");
+					return;
+				}
+				deepFramework.searchUuid=searchUuid;
+				deepFramework.deepFrameXml=result.deepFramework;
+				
+				shallowFramework.searchUuid=searchUuid;
+				shallowFramework.shallowFrameXml=result.shallowFramework;
+				
+				if(dataclone!=null){
+				   dataclone.deepFrame=result.deepFramework;
+				   dataclone.shallowFrame=result.shallowFramework;
+				}
+				
+				Controller.feedBackWin.visible=true;
+				CursorManager.removeAllCursors();
+				Controller.feedBackWin.load(searchUuid,inputStr,deepFramework,shallowFramework);
+			}
+			
+//			protected function feedBackHandle_resultHandler(event:ResultEvent):void
+//			{
+//				// TODO Auto-generated method stub
+////				deepFramework=event.result as TDeepframework;
+////				feedBackshallowHandle.token=naturalLangService.showFeedbackShallowFramework(searchUuid);
+//			    				
+//			}
+//
+//
+//			protected function feedBackshallowHandle_resultHandler(event:ResultEvent):void
+//			{
+//				
+//				shallowFramework=event.result as TShallowframework;
+////				EventManager.dispatchEvent(feedbackWin,new FeedBackEvent(FeedBackEvent.FEEDBACK,deepFramework,shallowFramework,searchUuid,inputStr));			
+////				var parent:ParentMDI=new ParentMDI();
+////				parent.mdiCanvas=Config.midCanvs;
+////				feedbackWin=new FeedbackWin();
+////				parent.title="查询与反馈";
+////				parent.width=feedbackWin.width;
+////				parent.height=feedbackWin.height;
+////				parent.addChild(feedbackWin);
+////				Config.midCanvs.windowManager.add(parent);
+////				EventManager.dispatchEvent(feedbackWin,new FeedBackEvent(FeedBackEvent.FEEDBACK,deepFramework,shallowFramework,searchUuid));
+//				
+//			}
+
+			public function addBtn():void{
+				var buttonInGrid:Button=new Button();
+				buttonInGrid.label="查询与反馈";
+				buttonInGrid.addEventListener(MouseEvent.CLICK,buttonInGrid_clickHandler);
+				this.removeAllChildren();
+				this.addChild(buttonInGrid);
+			}
+
+			protected function naturalLangService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接错误");
+			}
+
+		]]>
+	</fx:Script>
+</mx:HBox> 

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 left="2" right="2" top="2" bottom="2"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="404" height="92" fontFamily="微软雅黑" xmlns:services="services.*">
+
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.WaitingWin.FusionWaitingWin;
+			import cn.edu.whu.liesmars.Container.WaitingWin.NatureLangWaitingWin;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.rpc.events.ResultEvent;
+			
+			private var waitingWin:FusionWaitingWin=new FusionWaitingWin();
+			
+			public override function loadData():void{
+				initCan.enabled=true;
+				initCan.visible=true;
+				finishCan.visible=false;
+			}
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				initCan.enabled=false;
+				updateResp.token=requirementFusionService.Update(Config.searchId);
+				waitingWin.init();
+				Config.midCanvs3.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+			}
+
+			protected function updateResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				waitingWin.stopProgress();
+				Config.midCanvs3.windowManager.remove(waitingWin);
+				initCan.visible=false;
+				finishCan.visible=true;
+			}
+
+
+//			protected function button2_clickHandler(event:MouseEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//			}
+
+		]]>
+	</fx:Script>
+
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService"/>
+		<s:CallResponder id="updateResp" result="updateResp_resultHandler(event)"/>
+		
+		
+	</fx:Declarations>
+	<mx:Canvas visible="true" id="initCan" x="0" y="0" width="100%" height="100%">
+		<s:Label x="108" y="23" text="点击对知识库缓存进行更新" fontSize="15"/>
+		<s:Button x="164" y="49" label="开始更新" click="button1_clickHandler(event)"/>
+		<s:Button visible="false" x="251" y="56" label="退出" />
+	</mx:Canvas>
+	<mx:Canvas visible="false" id="finishCan" x="0" y="0" width="100%" height="100%">
+		<s:Label x="163" y="23" text="更新完毕" fontSize="15"/>
+	</mx:Canvas>
+</Container:TheCanvas>

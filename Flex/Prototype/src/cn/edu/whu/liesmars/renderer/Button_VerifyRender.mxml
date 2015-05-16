@@ -1,0 +1,82 @@
+<mx:HBox  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  horizontalAlign="center" xmlns:services="services.*">
+	<fx:Declarations>
+		<services:RegisterAndLoginService id="registerAndLoginService" destination="RegisterAndLoginService" fault="registerAndLoginService_faultHandler(event)"/>
+		<mx:CallResponder id="registerHandle"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.UserRegisterHandleObj;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.managers.CursorManager;
+		
+			
+			private var userName:String;
+			
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					userName=value.userName;	
+					if(value.isAdmitted==1){
+						buttonInGrid.label="已通过";
+						buttonInGrid.enabled=false;
+						buttonInGrid2.visible=false;
+					}				
+					else  {
+						buttonInGrid.enabled=true;
+						buttonInGrid2.visible=true;
+						buttonInGrid.label="通过审核";
+						buttonInGrid2.label="不通过审核";
+					}
+				}
+			}
+			private function pass():void{
+				registerHandle.token=registerAndLoginService.admitRegister(userName,1);
+				buttonInGrid.label="已通过";
+				buttonInGrid.enabled=false;
+				buttonInGrid2.visible=false;
+				(super.data as UserRegisterHandleObj).isAdmitted=1;
+			}
+			private function reject():void{
+				registerHandle.token=registerAndLoginService.admitRegister(userName,2);
+				buttonInGrid.label="未通过";
+				buttonInGrid.enabled=false;
+				buttonInGrid2.visible=false;
+				super.data.hasRejected=true;
+				(super.data as UserRegisterHandleObj).isAdmitted=0;
+			}
+			/**
+			 * 通过
+			 * */
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+				pass();
+			}
+
+			/**
+			 * 不通过
+			 * */
+			protected function buttonInGrid2_clickHandler(event:MouseEvent):void
+			{
+				reject();
+			}
+
+
+			protected function registerAndLoginService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接错误");
+			}
+
+		]]>
+	</fx:Script>
+	
+	<mx:Button  click="buttonInGrid_clickHandler(event)"  id="buttonInGrid" label="通过审核"/>
+	<mx:Button  click="buttonInGrid2_clickHandler(event)"  id="buttonInGrid2" label="不通过审核"/>
+</mx:HBox> 

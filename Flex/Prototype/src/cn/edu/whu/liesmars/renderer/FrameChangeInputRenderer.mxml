@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox  xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%">
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.controls.TextInput;
+			import mx.events.FlexEvent;
+			
+            private var type:Boolean;
+			private var setting:String="";
+			private var myData:Object="";
+            private var input:TextInput;
+			override public function set data(value:Object):void
+			{      
+				this.removeAllChildren();
+				if(value != null)
+				{
+				    super.data=value;
+					type=data.canInput;
+					
+					if(type==true){
+						input=new TextInput();
+						input.text=data.changeContent;
+						input.percentWidth=100;
+						input.editable=true;
+	                    input.addEventListener(Event.CHANGE,textChangeHandler);
+						this.addChild(input);
+					}
+				}
+			} 
+			protected function textChangeHandler(event:Event):void{
+				data.changeContent=input.text;
+				//mx.controls.Alert.show("change");
+				
+			}
+			
+
+		]]>
+	</fx:Script>
+
+</mx:HBox>

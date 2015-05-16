@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   chromeColor="0xffffff"
+			   width="468" height="542" title="添加光学传感器典型配置" creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.TypicalConfigInfo;
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.ConfBandInfoModel;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.Conf;
+			import valueObjects.ConfBand;
+			import valueObjects.ConfBandInfo;
+			
+			[Bindable]
+			public var adg1showArray:ArrayCollection = new ArrayCollection();
+			var specialBandPopup;
+			public var returnConfBandInfo:ConfBandInfo;
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				var item:ConfBandInfo = new ConfBandInfo();
+				item.bands = new ArrayCollection();
+				item.conf = new Conf(); 
+				
+				item.conf.name = confname.text;
+				
+				item.conf.spatialmin  = new Number(spatialResMin.text);
+				item.conf.spatialmax = new Number(spatialResMax.text);
+				item.conf.timemin = new Number(TimeResMin.text);
+				item.conf.timemax = new Number(TimeResMax.text);
+				item.conf.bandmin = new Number(bandMin.text);
+				item.conf.bandmax = new Number(bandMax.text);
+				
+				item.conf.isimg = isImg.selectedItem;
+				item.conf.steroimgway = steroimgway.selectedItem;
+				item.conf.agility = agility.selectedItem;
+				item.conf.side = side.selectedItem;
+				item.conf.tracktype = tracktype.selectedItem;
+				item.conf.imgway = imgway.selectedItem;
+				
+				var theSpectral:String = null;
+				if(checkboxFullColor.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "全色";
+					}
+					else
+					{
+						theSpectral += ",全色";
+					}
+				}
+				if(checkboxMultiSpectrum.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "多光谱";
+					}
+					else
+					{
+						theSpectral += ",多光谱";
+					}
+				}
+				if(checkboxHighSpectrum.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "高光谱";
+					}
+					else
+					{
+						theSpectral += ",高光谱";
+					}
+				}
+				if(checkboxVeryHigh.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "甚高";
+					}
+					else
+					{
+						theSpectral += ",甚高";
+					}
+				}
+				if(checkboxVisualSpectrum.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "可见光";
+					}
+					else
+					{
+						theSpectral += ",可见光";
+					}
+				}
+				if(checkboxNearIR.selected == true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "近红外";
+					}
+					else
+					{
+						theSpectral += ",近红外";
+					}
+				}
+				if(checkboxShortIR.selected == true)
+				{
+					
+					if(theSpectral == null)
+					{
+						theSpectral = "短波红外";
+					}
+					else
+					{
+						theSpectral += ",短波红外";
+					}
+				}
+				if(checkboxHotIR.selected = true)
+				{
+					if(theSpectral == null)
+					{
+						theSpectral = "热红外";
+					}
+					else
+					{
+						theSpectral += ",热红外";
+					}
+				}
+				item.conf.spectral = theSpectral;
+				item.bands = adg1showArray;
+				for each(var itemband:ConfBand in item.bands)
+				{
+					itemband.confname = item.conf.name;
+				}
+				returnConfBandInfo = item;
+				
+				PopUpManager.removePopUp(this);
+				
+				var readyEvent:Event = new Event("addConfReadyMessage",false);
+				dispatchEvent(readyEvent);
+			}
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+
+			protected function t1btnAddSpecialBand_clickHandler(event:MouseEvent):void
+			{
+				specialBandPopup = PopUpManager.createPopUp(this,TypicalConfTab1AddSpecialBandPopup, true);
+				specialBandPopup.addEventListener("popupMessage",popupMessageReadyHandler);
+				PopUpManager.centerPopUp(specialBandPopup);
+			}
+
+			protected function popupMessageReadyHandler(event:Event):void
+			{
+				var newBand = specialBandPopup.newConfBand;
+				adg1showArray.addItem(newBand);
+				
+			}
+
+			protected function t1btnDelSpecialBand_clickHandler(event:MouseEvent):void
+			{
+				if(adg1.selectedIndex != -1)
+				{
+					adg1showArray.removeItemAt(adg1showArray.getItemIndex(adg1.selectedItem));
+				}
+			}
+
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				adg1.dataProvider = adg1showArray;
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:BorderContainer width="446" height="37" x="10" y="6" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="12" y="12" text="传感器典型配置名称" fontSize="13"/>
+		<s:TextInput x="138" y="6" width="207" id="confname" tabEnabled="true" tabIndex="1"/>
+	</s:BorderContainer>
+	<mx:Canvas x="10" y="57" width="448" height="390" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="10" y="20" text="空间分辨率(m)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="50" text="时间分辨率(天)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="80" text="幅宽(km)" fontFamily="微软雅黑"/>
+		<s:Label x="265" y="109" text="成像方式" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="140" text="立体成像方式" fontFamily="微软雅黑"/>
+		
+		<s:TextInput x="100" y="15" width="64" id="spatialResMin" tabEnabled="true" tabIndex="2"/>
+		<s:TextInput x="181" y="14" width="64" id="spatialResMax" tabEnabled="true" tabIndex="3"/>
+		<s:TextInput x="100" y="45" width="64" id="TimeResMin" tabEnabled="true" tabIndex="4"/>
+		<s:TextInput x="181" y="45" width="64" id="TimeResMax" tabEnabled="true" tabIndex="5"/>
+		<s:TextInput x="100" y="75" width="64" id="bandMin" tabEnabled="true" tabIndex="6"/>
+		<s:TextInput x="181" y="75" width="64" id="bandMax" tabEnabled="true" tabIndex="7"/>
+		<s:DropDownList x="101" y="105" width="128" id="isImg" tabEnabled="true" tabIndex="8">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>成像</fx:String>
+					<fx:String>非成像</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="101" y="135" width="128" id="steroimgway" tabEnabled="true" tabIndex="9">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>同轨立体</fx:String>
+					<fx:String>异轨立体</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Label x="265" y="20" text="敏捷性" fontFamily="微软雅黑"/>
+		<s:Label x="265" y="50" text="侧摆能力" fontFamily="微软雅黑"/>
+		<s:Label x="265" y="80" text="轨道类型" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="110" text="是否成像" fontFamily="微软雅黑"/>
+		<s:DropDownList x="334" y="15" width="98" id="agility" tabEnabled="true" tabIndex="10">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>强</fx:String>
+					<fx:String>中</fx:String>
+					<fx:String>弱</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="334" y="45" width="98" id="side" tabEnabled="true" tabIndex="11">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>强</fx:String>
+					<fx:String>中</fx:String>
+					<fx:String>弱</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="334" y="74" width="98" id="tracktype" tabEnabled="true" tabIndex="12">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>太阳同步</fx:String>
+					<fx:String>地球同步</fx:String>
+					<fx:String>极地轨道</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="334" y="106" width="98" id="imgway" tabEnabled="true" tabIndex="13">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>推扫式</fx:String>
+					<fx:String>摆扫式</fx:String>
+					<fx:String>框幅相机</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		
+		<s:Label x="168" y="21" text="~"/>
+		<s:Label x="168" y="48" text="~"/>
+		<s:Label x="168" y="79" text="~"/>
+		<s:Label x="10" y="171" text="传感器类型" fontFamily="微软雅黑"/>
+		<s:CheckBox x="101" y="167" label="全色" id="checkboxFullColor" tabEnabled="true" tabIndex="14"/>
+		<s:CheckBox x="156" y="167" label="多光谱" id="checkboxMultiSpectrum" tabEnabled="true" tabIndex="15"/>
+		<s:CheckBox x="220" y="167" label="高光谱" id="checkboxHighSpectrum" tabEnabled="true" tabIndex="16"/>
+		<s:CheckBox x="290" y="167" label="甚高" id="checkboxVeryHigh" tabEnabled="true" tabIndex="17"/>
+		<s:CheckBox x="101" y="188" label="可见光" id="checkboxVisualSpectrum" tabEnabled="true" tabIndex="18"/>
+		<s:CheckBox x="156" y="188" label="近红外" id="checkboxNearIR" tabEnabled="true" tabIndex="19"/>
+		<s:CheckBox x="220" y="188" label="短波红外" id="checkboxShortIR" tabEnabled="true" tabIndex="20"/>
+		<s:CheckBox x="290" y="188" label="热红外" id="checkboxHotIR" tabEnabled="true" tabIndex="21"/>
+		<s:Label x="10" y="217" text="特殊波段(nm)" width="93"/>
+		<mx:AdvancedDataGrid x="10" y="237" id="adg1" designViewDataType="flat" height="140" width="351">
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="波段名称" dataField="bandname"/>
+				<mx:AdvancedDataGridColumn headerText="最小值" dataField="minvalue"/>
+				<mx:AdvancedDataGridColumn headerText="最大值" dataField="maxvalue"/>
+				<mx:AdvancedDataGridColumn headerText="单位" dataField="unit"/>
+			</mx:columns>
+		</mx:AdvancedDataGrid>
+		<s:Button x="372" y="237" label="添加" id="t1btnAddSpecialBand" click="t1btnAddSpecialBand_clickHandler(event)"/>
+		<s:Button x="372" y="278" label="删除" id="t1btnDelSpecialBand" click="t1btnDelSpecialBand_clickHandler(event)"/>
+		
+		
+	</mx:Canvas>
+	<s:Label x="16" y="51" text="详细信息" fontFamily="微软雅黑" fontSize="13" backgroundColor="#FCFCFC"/>
+	<s:Button x="111" y="452" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="289" y="454" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+	
+</s:TitleWindow>

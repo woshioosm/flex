@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			private var list:ArrayCollection=new ArrayCollection();
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					
+					list.addItem(value);
+					
+				}
+			}
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+				//  mx.controls.Alert.show(id);
+				
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:MenuBar dataProvider="{list}"   labelField="data"  height="100%" id="myMenu" width="100%"/>
+</mx:HBox> 

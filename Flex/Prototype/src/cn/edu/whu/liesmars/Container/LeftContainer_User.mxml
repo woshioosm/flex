@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 代码作废-->
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 headerHeight="0"  
+					 layout="absolute" width="100%" height="100%" 
+					 initialize="parentmdi1_initializeHandler(event)" 
+					 backgroundAlpha="0"
+					 borderAlpha="0"
+					 verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+					 creationComplete="parentmdi1_creationCompleteHandler(event)" 
+					 xmlns:natureLanguageQuery="cn.edu.whu.liesmars.components.user.natureLanguageQuery.*"
+					 xmlns:suggestion="cn.edu.whu.liesmars.components.user.suggestion.*"
+					 xmlns:requireImageRecord="cn.edu.whu.liesmars.components.user.requireImageRecord.*"
+					 xmlns:requirementFusion="cn.edu.whu.liesmars.components.admin.requirementFusion.*">
+	<fx:Script>
+		<![CDATA[
+			import assets.LogoAsset;
+			
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			
+			import valueObjects.NLSearchResultWithTime;
+			
+			
+		
+			
+//			private var curWidth:Number=940;
+//			private var curHeight:Number=400;
+			internal static const HideAsset:Class=assets.HideAsset;
+			internal static const ShowAsset:Class=assets.ShowAsset;
+			
+			private var btnHide:Button;
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{				// TODO Auto-generated method stu
+				
+				
+			}
+
+			internal static const LogoAssert:Class=assets.LogoAsset;
+			protected function parentmdi1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				curWidth=940;
+				curHeight=400;
+				this.maximizeRestoreBtn.visible=false;
+				this.minimizeBtn.visible=false;
+				this.closeBtn.visible=false;
+				isOpen=false;
+			
+				EventManager.registerEventListener(this,QueryEvent.COMPLETE,queryComplete);
+			}
+			public function queryCompleteFun(result:NLSearchResultWithTime):void{
+				queryResultWin.queryCompleteFun(result);
+				this.open(0);
+			}
+			private function queryComplete(event:QueryEvent):void{
+				
+				queryResultWin.dispatchEvent(event);
+				this.open(0);
+				
+			}
+			public function open(index:int):void{   // 通过界面上方打开左边的接口
+				
+				this.isOpen=true;
+				this.visible=true;
+
+//				(Controller.userView as UserView).btnHide.source=HideAsset;
+				accordion.selectedIndex=index;
+				this.resizable=true;
+				accordion.dispatchEvent(new IndexChangedEvent(IndexChangedEvent.CHANGE,false,false,accordion,accordion.selectedIndex,index,null) );
+			}
+
+			protected function accordion_changeHandler(event:IndexChangedEvent):void
+			{
+				trace(accordion.selectedIndex);
+				switch(accordion.selectedIndex){
+					case 1:
+						if(queryHistoryWin!=null)
+							EventManager.dispatchEvent(queryHistoryWin,new QueryEvent(QueryEvent.QUERYHISTORY_START,null,null));
+						break;
+					case 2:
+						break;
+					case 3:
+						if(userSuggestionWin!=null){
+							EventManager.dispatchEvent(userSuggestionWin,new QueryEvent(QueryEvent.USER_SUGGESTION_START,null,null));
+						}
+						break;
+					default:
+						break;
+				}
+				
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+
+	
+	<mx:Accordion change="accordion_changeHandler(event)" id="accordion" backgroundAlpha="0" alpha="1"  x="10" top="2" width="100%" height="100%" bottom="2" enabled="true">
+		<s:NavigatorContent id="content1" label="    当前查询结果"  width="100%" height="100%">
+			<natureLanguageQuery:QueryResultWin id="queryResultWin" width="100%" height="98%">
+				
+			</natureLanguageQuery:QueryResultWin>
+		</s:NavigatorContent>
+		<s:NavigatorContent id="content2" label="    历史查询结果" width="100%" height="100%" >
+			<natureLanguageQuery:QueryResultHistoryWin id="queryHistoryWin" width="100%" height="98%">
+				
+			</natureLanguageQuery:QueryResultHistoryWin>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="content3" label="    查看用户推荐内容" width="100%" height="100%">
+			<suggestion:SuggestionWin id="userSuggestionWin" width="100%" height="98%">
+				
+			</suggestion:SuggestionWin>
+		</s:NavigatorContent>
+		
+		<s:NavigatorContent id="content4" label="    用户背景知识录入" width="100%" height="100%">
+			<requireImageRecord:RequireImageMainWin id="userRSS" width="100%" height="98%">
+				
+			</requireImageRecord:RequireImageMainWin>
+		</s:NavigatorContent>
+		<!--<s:NavigatorContent id="content5" label="    查看产品分解" width="100%" height="100%">
+		<requirementFusion:ProdutSeperateWin width="100%" height="98%">
+		
+		</requirementFusion:ProdutSeperateWin>
+		</s:NavigatorContent>-->
+	</mx:Accordion>
+	
+	<!--<mx:Image  id="btnHide" source="{ShowAsset}" left="4" top="4" height="19" width="19"
+			  mouseOver="btnHide_mouseOverHandler(event)"		
+			  mouseOut="btnHide_mouseOutHandler(event)"
+			  click="btnHide_clickHandler(event)" /> -->
+</Container:ParentMDI>

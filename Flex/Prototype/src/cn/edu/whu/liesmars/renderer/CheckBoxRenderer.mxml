@@ -1,0 +1,28 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			private var obj:Object;
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					obj=value;
+					choose.selected=value.checked;
+					obj.checked=choose.selected;
+					
+				}
+			}    
+			protected function choose_changeHandler(event:Event):void
+			{
+				obj.checked=choose.selected;
+			}
+		
+		]]>
+	</mx:Script>
+	
+	<mx:CheckBox  id="choose" change="choose_changeHandler(event)"/>
+</mx:HBox> 

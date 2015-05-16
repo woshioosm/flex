@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Departments>
+    <department name="测绘" id="1"/>
+	<department name="林业" id="2"/>
+	<department name="农业" id="3"/>
+	<department name="减灾" id="4"/>
+	<department name="国土" id="5"/>
+	<department name="地矿" id="6"/>
+	<department name="环保" id="7"/>
+	<department name="住建" id="8"/>
+	<department name="交通" id="9"/>
+	<department name="水利" id="10"/>
+	<department name="统计" id="11"/>
+	<department name="地震" id="12"/>
+	<department name="气象" id="13"/>
+	<department name="海洋" id="14"/>
+</Departments>

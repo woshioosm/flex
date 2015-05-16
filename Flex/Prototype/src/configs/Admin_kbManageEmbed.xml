@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Admin>
+    <Items name="管理">
+       <!-- <Item name="用户注册请求管理"> </Item> -->
+      <!-- <Item name="用户反馈管理"> </Item> -->
+      <!-- <Item name="反馈学习管理"> </Item> -->
+       <!-- <Item name="用户推荐管理"> </Item> -->
+        <Item name="语义概念定位"></Item>
+    </Items>
+ 
+   <!--   <Items name="需求融合">-->
+       <!--   <Item name="深层语义框架输入"> </Item>-->
+       <!--   <Item name="最新融合结果查看"></Item>-->
+       <!--   <Item name="历史融合结果"> </Item>-->
+        
+      <!--  <Item name="产品分解"> </Item> -->
+      <!--   <Item name="查看生产状态"> </Item> -->
+      <!--   <Item name="查看产品分解"> </Item>-->
+    <!--  </Items>-->
+ 
+    <Items name="配置">
+        <Item name="传感器信息"> </Item>
+        <!-- <Item name="典型配置信息"> </Item>-->
+        <!-- <Item name="任务和典型配置关系"> </Item>-->
+        <Item name="地名管理"> </Item>
+        <Item name="规则库管理"></Item>
+        <Item name="更新知识库缓存"> </Item>
+        <Item name="更新地名词典"></Item>
+    </Items>
+</Admin>

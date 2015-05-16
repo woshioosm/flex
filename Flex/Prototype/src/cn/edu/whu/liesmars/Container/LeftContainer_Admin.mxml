@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 headerHeight="0"  
+					 layout="absolute" width="228" height="100%" 
+					 initialize="parentmdi1_initializeHandler(event)" 
+					 backgroundAlpha="0"
+					 borderAlpha="0"
+					 resizable="true"
+					 addedToStage="parentmdi1_addedToStageHandler(event)"
+					 verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+					 creationComplete="parentmdi1_creationCompleteHandler(event)"
+					 xmlns:natureLanguageQuery="cn.edu.whu.liesmars.components.user.natureLanguageQuery.*"
+					 xmlns:suggestion="cn.edu.whu.liesmars.components.user.suggestion.*">
+	<fx:Script>
+		<![CDATA[
+			import assets.LogoAsset;
+			
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.UserRegisterHandleObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.components.admin.ConceptQueryWin;
+			import cn.edu.whu.liesmars.components.admin.FeedbackStudyHandleWin;
+			import cn.edu.whu.liesmars.components.admin.UserFeedbackHandleWin;
+			import cn.edu.whu.liesmars.components.admin.UserRegisterHandleWin;
+			import cn.edu.whu.liesmars.components.admin.configTool.PlaceNameManagerWin;
+			import cn.edu.whu.liesmars.components.admin.configTool.SensorInfo;
+			import cn.edu.whu.liesmars.components.admin.configTool.TaskAndSensorConfig;
+			import cn.edu.whu.liesmars.components.admin.configTool.TypicalConfigInfo;
+			import cn.edu.whu.liesmars.components.admin.configTool.UpdateDicMap;
+			import cn.edu.whu.liesmars.components.admin.configTool.UpdateWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.FusionInputWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.FusionResultWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.LatestFusionResultWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.ProduceStateWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.ProductSeperateRunWin;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.ProdutSeperateWin;
+			import cn.edu.whu.liesmars.components.admin.ruleManager.RuleManagerWin;
+			import cn.edu.whu.liesmars.components.admin.suggestionAdmin.ImitatePublishWin;
+			import cn.edu.whu.liesmars.components.admin.suggestionAdmin.SuggestionHandleWin;
+			
+			import flexlib.mdi.containers.MDICanvas;
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.containers.Canvas;
+			import mx.events.FlexEvent;
+			import mx.managers.FocusManager;
+			
+			import valueObjects.Sensor;
+			
+			private var win:TheCanvas;
+			public var parentMdi:MdiAdmin=new MdiAdmin();
+			private var userRegisterHandleWin:UserRegisterHandleWin;
+			private var queryFeedbackHandleWin:UserFeedbackHandleWin;
+			private var feedbackStudyHandleWin:FeedbackStudyHandleWin;
+			private var suggestionHandleWin:SuggestionHandleWin;
+			private var fusionInputWin:FusionInputWin;
+			public var lastFusionresultWin:LatestFusionResultWin;
+			private var resultWin:LatestFusionResultWin;
+			private var produceStateWin:ProduceStateWin;
+			private var produtSeperateWin:ProdutSeperateWin;
+			private var addPlaceNameWin:PlaceNameManagerWin;
+			private var ruleManagerWin:RuleManagerWin;
+			private var productSepRunWin:ProductSeperateRunWin;
+			private var updateWin:UpdateWin;
+			private var updateDicWin:UpdateDicMap;
+			private var conceptQueryWin:ConceptQueryWin;
+			
+			private var  canLoadData:Boolean=true;
+			//配置
+			private var sensorInfoWin:SensorInfo;
+			private var taskAndSensorConfig:TaskAndSensorConfig;
+			private var typicalConfigInfo:TypicalConfigInfo;
+			
+			private  var curX:Number=0;
+			private  var curY:Number=0;
+			
+			
+			
+			[Bindable]
+			public var canShow:Boolean=false;  // 绑定右下button是否可将
+			internal static const HideAsset:Class=assets.HideAsset;
+			internal static const ShowAsset:Class=assets.ShowAsset;
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{				// TODO Auto-generated method stub
+				
+				Controller.container.visible=false;
+				Controller.container.left=Config.midCanvs3.width/2-50;
+				Config.midCanvs4.windowManager.add(Controller.container);
+				
+				parentMdi.mdiCanvas=Config.midCanvs2;
+				this.mdiCanvas=Config.midCanvs;
+				for each(var item:XML in AdminTree.dataProvider)
+				AdminTree.expandChildrenOf(item,true);
+				
+			}
+			
+			internal static const LogoAssert:Class=assets.LogoAsset;
+			protected function parentmdi1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.maximizeRestoreBtn.visible=false;
+				this.minimizeBtn.visible=false;
+				this.closeBtn.visible=false;
+				isOpen=true;
+				
+				if((this.parentApplication as Prototype).kbManageEmbedView){
+					adminList.source = adminKbManageXml.children();
+				}
+			}
+			protected function btnHide_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(isOpen==true){
+					curWidth=this.width;
+					isOpen=false;
+					this.resizable=false;
+					Tweener.addTween(container,{visible:false,transition :"linear", time:0.4});
+					Tweener.addTween(this,{width:25,height:25,alpha:0.5,transition :"linear", time:0.4});
+					btnHide.source=ShowAsset;
+				}
+				else{
+					
+					
+					///backgroundAlpha=1;
+					Tweener.addTween(container,{visible:true,transition :"linear", time:0.4});
+					Tweener.addTween(this,{width:curWidth,percentHeight:100,alpha:1,transition :"linear", time:0.4 });
+					
+					this.resizable=true;
+					isOpen=true;
+					btnHide.source=HideAsset;
+				}
+				
+			}
+			
+			
+			protected function btnHide_mouseOverHandler(event:MouseEvent):void
+			{
+				btnHide.height=25;
+				btnHide.width=25;
+				btnHide.top=6;
+			}
+			protected function btnHide_mouseOutHandler(event:MouseEvent):void
+			{
+				btnHide.height=20;
+				btnHide.width=20;
+				btnHide.top=6;
+			}
+			
+			protected function parentmdi1_addedToStageHandler(event:Event):void
+			{
+				
+			}
+			
+			protected function AdminTree_clickHandler(event:MouseEvent):void
+			{
+				if(	AdminTree.selectedItem==null)
+					return;
+				var item:XML=AdminTree.selectedItem as XML;
+				if(item.hasComplexContent() )
+					return;
+				
+				if(parentMdi==null || parentMdi.isOpen==false){
+					parentMdi=new MdiAdmin();
+					parentMdi.verticalScrollPolicy="off";
+					parentMdi.horizontalScrollPolicy="off";
+					parentMdi.mdiCanvas=Config.midCanvs2;
+					Config.midCanvs2.windowManager.add(parentMdi);
+					
+				}
+				openWinByName(item.@name);
+			}
+
+			private function openWinByName(name:String):void{
+				canLoadData=true;
+				if(parentMdi!=null &&parentMdi.title==name && parentMdi.isOpen==true ){
+					if(parentMdi.isMinlize==true){
+						parentMdi.backToSize();		
+						parentMdi.isMinlize=false;
+					}
+					return;
+				}
+				else
+					parentMdi.removeAllChildren();
+				
+				parentMdi.title=name;
+				
+				var win:TheCanvas=new TheCanvas();
+				if(parentMdi.isMinlize==true){
+					parentMdi.backToSize();		
+					parentMdi.isMinlize=false;
+				}
+				parentMdi.resizable=true;
+				win.clearDate();
+				switch(name){
+					case "用户注册请求管理":
+						if(userRegisterHandleWin==null){
+							userRegisterHandleWin=new UserRegisterHandleWin();
+							userRegisterHandleWin.name=name;
+							win=userRegisterHandleWin;
+						}else{
+							win=userRegisterHandleWin;
+							
+						}
+						
+						break;
+//					case "用户反馈管理":
+//						
+//						if(queryFeedbackHandleWin==null){
+//							queryFeedbackHandleWin=new UserFeedbackHandleWin();
+//							queryFeedbackHandleWin.name=name;
+//							win=queryFeedbackHandleWin;
+//						}else{
+//							win=queryFeedbackHandleWin;
+//						}
+//						break;
+//					case "反馈学习管理":
+//						if(feedbackStudyHandleWin==null){
+//							feedbackStudyHandleWin=new FeedbackStudyHandleWin();
+//							feedbackStudyHandleWin.name=name;
+//							win=feedbackStudyHandleWin;
+//						}else{
+//							win=feedbackStudyHandleWin;
+//						}
+//						break;
+					case "用户推荐管理":
+						if(suggestionHandleWin==null){
+							suggestionHandleWin=new SuggestionHandleWin();
+							suggestionHandleWin.name=name;
+							win=suggestionHandleWin;
+						}else{
+							win=suggestionHandleWin;
+						}
+						break;
+					case "深层语义框架输入":
+						if(fusionInputWin==null){
+							fusionInputWin=new FusionInputWin();
+							fusionInputWin.name=name;
+							win=fusionInputWin;
+						}else{
+							win=fusionInputWin;
+						}
+						
+						break;
+					case "最新融合结果查看":
+						canLoadData=false;
+						if(lastFusionresultWin==null){
+							lastFusionresultWin=new LatestFusionResultWin();
+							lastFusionresultWin.name=name;
+							win=lastFusionresultWin;
+						}else{
+							win=lastFusionresultWin;
+						}
+						break;
+					case "历史融合结果":
+						
+						if(resultWin==null){
+							resultWin=new LatestFusionResultWin();
+							resultWin.name=name;
+							win=resultWin;
+						}else{
+							win=resultWin;
+						}
+						break;
+//					case "查看生产状态":
+//						if(produceStateWin==null){
+//							produceStateWin=new ProduceStateWin();
+//							produceStateWin.name=name;
+//							win=produceStateWin;
+//						}else{
+//							win=produceStateWin;
+//						}
+//						
+//						break;
+//					case "查看产品分解":
+//						if(produtSeperateWin==null){
+//							produtSeperateWin=new ProdutSeperateWin();
+//							produtSeperateWin.name=name;
+//							win=produtSeperateWin;
+//						}else{
+//							win=produtSeperateWin;
+//						}
+//						break;
+					case "地名管理":
+						parentMdi.resizable=false;
+						if(addPlaceNameWin==null){
+							addPlaceNameWin=new PlaceNameManagerWin();
+							addPlaceNameWin.name=name;
+							win=addPlaceNameWin;
+						}else{
+							win=addPlaceNameWin;
+						}
+						break;
+					case "规则库管理":
+						parentMdi.resizable=false;
+						if(ruleManagerWin==null){
+							ruleManagerWin=new RuleManagerWin();
+							ruleManagerWin.name=name;
+							win=ruleManagerWin;
+						}else{
+							win=ruleManagerWin;
+						}
+						break;
+//					case "产品分解":
+//						if(productSepRunWin==null){
+//							productSepRunWin=new ProductSeperateRunWin();
+//							productSepRunWin.name=name;
+//							win=productSepRunWin;
+//						}
+//						else{
+//							win=addPlaceNameWin;
+//						}
+//						break;
+					case "传感器信息":
+						if(sensorInfoWin==null){
+							sensorInfoWin=new SensorInfo();
+							sensorInfoWin.name=name;
+							win=sensorInfoWin;
+						}
+						else{
+							win=sensorInfoWin;
+						}
+						break;
+					case "典型配置信息":
+						if(typicalConfigInfo==null){
+							typicalConfigInfo=new TypicalConfigInfo();
+							typicalConfigInfo.name=name;
+							win=typicalConfigInfo;
+						}
+						else{
+							win=typicalConfigInfo;
+						}
+						
+						break;
+					case "任务和典型配置关系":
+						if(taskAndSensorConfig==null){
+							taskAndSensorConfig=new TaskAndSensorConfig();
+							taskAndSensorConfig.name=name;
+							win=taskAndSensorConfig;
+						}
+						else{
+							win=taskAndSensorConfig;
+						}
+						break;
+					case "更新知识库缓存":
+						parentMdi.resizable=false;
+						if(updateWin==null){
+							updateWin=new UpdateWin();
+							updateWin.name=name;
+							win=updateWin;
+						}
+						else{
+							win=updateWin;
+						}
+						break;
+					case "更新地名词典":
+						parentMdi.resizable=false;
+						if(updateDicWin==null){
+							updateDicWin=new UpdateDicMap();
+							updateDicWin.name=name;
+							win=updateDicWin;
+						}
+						else{
+							win=updateDicWin;
+						}
+						break;
+					case "语义概念定位":
+						parentMdi.resizable=true;
+						if(conceptQueryWin==null){
+							conceptQueryWin=new ConceptQueryWin();
+							conceptQueryWin.name=name;
+							win=conceptQueryWin;
+						}
+						else{
+							win=conceptQueryWin;
+						}
+						
+						break;
+					default:
+						break;
+				}
+				curWin.label=win.name+" ";
+				canShow=true;
+				
+				setParent(parentMdi,win);
+				if(canLoadData)
+					win.loadData();
+			}
+			private function setParent(parent:MdiAdmin,win:TheCanvas):void{
+				if(win!=null){
+					parent.width=win.width+4;
+					parent.height=win.height+4+22; // 20为headerhight
+					parent.addChild(win);
+					var showX:int=160;
+					var showY:int=100;
+					if(win.height>this.stage.height*3/4){
+						showY=5;
+						showX=150;
+					}
+					Tweener.addTween(parent,{x:showX,y:showY,transition :"linear",onComplete:tweenerComplete(),time:0.2});
+					
+				}
+				parent.isOpen=true;
+				parent.win=win;
+			}
+			private function tweenerComplete():void{
+				
+//				if(parentMdi.x+parentMdi.wi+<0) // 先使右边不出界
+//					parentMdi.right=4;
+//				if(parentMdi.left<0)  //最终要帮正左边不出界
+//					parentMdi.left=4;
+			}
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(parentMdi!=null && parentMdi.isOpen==true ){
+					if(parentMdi.isMinlize==true){
+						parentMdi.backToSize();					
+					}
+					else{
+						parentMdi.minLize();
+					}
+				}
+				
+			}
+			
+			public function winOpenEffect():void{  // 讲打开窗口恢复的效果
+				Tweener.addTween(parentMdi,{x:curX,y:curY,transition :"linear",alpha:1, time:0.3});
+			}
+			public function winCloseEffect():void{  //将打开窗口最小化的效果
+				this.curX=parentMdi.x;
+				this.curY=parentMdi.y;
+				Tweener.addTween(parentMdi,{x:0,y:this.height-10,transition :"linear",visible:false, time:0.3});
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<fx:XML id="adminXml" source="configs/Admin.xml" xmlns=""/>
+		<fx:XML id="adminKbManageXml" source="configs/Admin_kbManageEmbed.xml" xmlns=""/>
+		<s:XMLListCollection id="adminList" source="{adminXml.children()}"/>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas width="100%" height="100%" bottom="-2" id="container" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+		<mx:Tree fontFamily="微软雅黑" id="AdminTree" left="1" top="1" right="1" bottom="1" alpha="0.7"
+				 click="AdminTree_clickHandler(event)"
+				 dataProvider="{adminList}" labelField="@name"></mx:Tree>
+		
+		<s:Button fontFamily="微软雅黑" id="curWin" visible="{canShow}" left="2" right="2" bottom="10" label="123"  width="100%" click="button1_clickHandler(event)"/>
+	</mx:Canvas>
+	<mx:Image id="btnHide" source="{HideAsset}" right="1" top="6" height="20" width="20"
+			  mouseOver="btnHide_mouseOverHandler(event)"		
+			  mouseOut="btnHide_mouseOutHandler(event)"
+			  click="btnHide_clickHandler(event)" />
+</Container:ParentMDI>

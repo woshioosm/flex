@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   width="654" height="366" fontFamily="微软雅黑"
+			   >
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.componentsData.FeedbackDataHandler;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.TDeepframework;
+			
+			private var flag:Boolean=true;
+			[Bindable]
+			private var bindArr:ArrayCollection=new ArrayCollection();
+			
+			public function loadData(deepFrameWork:TDeepframework):void{
+				var dataHandler:FeedbackDataHandler=new FeedbackDataHandler(deepFrameWork);
+				dataHandler.bindData(bindArr);
+				adg1.expandAll();
+			}
+			
+//			
+//			protected function titlewindow1_closeHandler(event:CloseEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//				PopUpManager.removePopUp(this);
+//			}
+			
+
+			protected function adg1_updateCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(flag){
+				   adg1.expandAll();
+				   flag=false;
+				}
+			}
+
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				// TODO Auto-generated method stub
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:AdvancedDataGrid id="adg1" designViewDataType="flat"  updateComplete="adg1_updateCompleteHandler(event)" left="6" right="6" top="6" bottom="6">
+		<mx:dataProvider>
+			<mx:HierarchicalData source="{bindArr}"
+								 childrenField="children" />
+		</mx:dataProvider>
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="属性" dataField="name"/>
+			<mx:AdvancedDataGridColumn headerText="属性值" dataField="content"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</mx:Canvas>

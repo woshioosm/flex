@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark"
+		   
+		  
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="574" height="306" fontFamily="微软雅黑">
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.SuggestionDetailObj;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			private var result:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var bindArray:ArrayCollection=new ArrayCollection();
+			
+			public function loadData(arr:ArrayCollection,productId:String,taskName:String,arrSimilarity:ArrayCollection):void{
+				
+				
+				var arr1:Array=arr.getItemAt(0) as Array;
+				var arr2:Array=arr.getItemAt(1)as Array;
+				bindArray.removeAll();
+				bindSuggestionDetailObj(bindArray,"id",productId,taskName,"");
+				bindSuggestionDetailObj(bindArray,"时间(0.3)",convertToString(arr1,1),convertToString(arr2,1),convertToString(arrSimilarity.toArray(),1));
+				bindSuggestionDetailObj(bindArray,"空间(0.1)",convertToString(arr1,2),convertToString(arr2,2),convertToString(arrSimilarity.toArray(),2));
+				bindSuggestionDetailObj(bindArray,"空间分辨率",convertToString(arr1,3),convertToString(arr2,3),convertToString(arrSimilarity.toArray(),3));
+				bindSuggestionDetailObj(bindArray,"传感器类型",convertToString(arr1,4),convertToString(arr2,4),convertToString(arrSimilarity.toArray(),4));
+//				bindSuggestionDetailObj(bindArray,"波段",convertToString(arr1,5),convertToString(arr2,5),convertToString(arrSimilarity.toArray(),5));
+				
+//				bindSuggestionDetailObj(bindArray,"综合评价结果","","",convertToString(arrSimilarity.toArray(),8));
+
+			}
+			private function convertToString(arr:Array,index:int):String{
+				if(arr==null)
+					return "";
+				if(arr.length<=index)
+					return "";
+				if(arr[index]!=null)
+					return arr[index].toString();
+				return "";
+			}
+			private function bindSuggestionDetailObj(arr:ArrayCollection,typeName:String,productParam:String,taskParam:String,similarity:String):void{
+				var obj:SuggestionDetailObj=new SuggestionDetailObj();
+				obj.typeName=typeName;
+				obj.productParam=productParam;
+				obj.taskParam=taskParam;
+				obj.similarity=similarity;
+				arr.addItem(obj);
+			}
+			
+//			protected function titlewindow1_closeHandler(event:CloseEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//				PopUpManager.removePopUp(this);
+//			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:AdvancedDataGrid id="adg1" dataProvider="{bindArray}" designViewDataType="flat" left="10" right="12" top="10" bottom="33">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="特征项" dataField="typeName"/>
+			<mx:AdvancedDataGridColumn headerText="产品参数" dataField="productParam"/>
+			<mx:AdvancedDataGridColumn headerText="查询参数" dataField="taskParam"/>
+			<!--<mx:AdvancedDataGridColumn headerText="相似度" dataField="similarity"/>-->
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	<s:Label x="13" y="281" text="*注:综合评价阈值取值为0.7" height="15" width="208" fontSize="14"/>
+</mx:Canvas>

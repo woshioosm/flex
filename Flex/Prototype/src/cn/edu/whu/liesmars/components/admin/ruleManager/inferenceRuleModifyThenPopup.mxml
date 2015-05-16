@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="550" height="348" title="修改规则结论" 
+			   creationComplete="titlewindow1_creationCompleteHandler(event)" xmlns:services="services.*" close="titlewindow1_closeHandler(event)" creationPolicy="all">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<services:RuleManagerService id="ruleManagerService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+		<s:CallResponder id="loadAllR2302RulesResult" result="loadAllR2302RulesResult_resultHandler(event)"/>
+	
+		<s:ArrayCollection id="calcTypeData">
+			<fx:Object value="RangeBufferVal" label="范围区间计算"/>
+			<fx:Object value="SingleBufferVal" label="单值区间计算"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.RuleCodeAndName;
+			import valueObjects.TRule;
+			
+			public var tabSelectedIndex:int;
+			public var ruleThenString:String;
+			
+			[Bindable]
+			var operatorDropdownData:ArrayCollection = new ArrayCollection([">",">=","=","<","<="]);
+			
+			var tab2String3:String;
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(tabSelectedIndex == 0)
+				{
+					myTab.selectedIndex = 0;
+					if(ruleThenString != null && ruleThenString != "")
+					{
+						for each(var item:String in operatorDropdownData)
+						{
+							if(ruleThenString == item)
+							{
+								operatorThenDropdown.selectedItem = item;
+								break;
+							}
+						}
+					}
+				}
+				else if(tabSelectedIndex == 1)
+				{
+					myTab.selectedIndex = 1;
+					if(ruleThenString != null && ruleThenString != "")
+					{
+						var tempStrings:Array = ruleThenString.split(",");
+						if(tempStrings.length == 3)
+						{
+							mintext.text = tempStrings[0];
+							maxtext.text = tempStrings[1];
+							unittext.text = tempStrings[2];
+						}
+						else
+						{
+							Alert.show("参数错误！！","Error");
+						}
+					}
+					
+				}
+				else if(tabSelectedIndex == 2)
+				{
+					myTab.selectedIndex = 2;
+					if(ruleThenString != null && ruleThenString != "")
+					{
+						var tempStrings:Array = ruleThenString.split(";");
+						if(tempStrings.length == 3)
+						{
+							for each(var tempitem:Object in calcTypeData)
+							{
+								if(tempitem.value == tempStrings[0])
+								{
+									calcTypeDropdown.selectedItem = tempitem;
+									break;
+								}
+							}
+							//calcTypeDropdown.text = "TypeLevelVal";
+							operatorDropdown.selectedItem = tempStrings[1];
+							//ruleClassCodeDropdown.selectedItem = tempStrings[2];
+							tab2String3 = tempStrings[2];
+							loadAllR2302Rules();
+						}
+						else
+						{
+							Alert.show("参数错误！！","Error");
+							loadAllR2302Rules();
+						}
+					}
+				}
+			}
+
+			
+			protected function loadAllR2302Rules():void
+			{
+				loadAllR2302RulesResult.token = ruleManagerService.loadAllR2302Rules();
+			}
+			
+
+			protected function loadAllR2302RulesResult_resultHandler(event:ResultEvent):void
+			{
+				var R2302rules = loadAllR2302RulesResult.lastResult;
+				ruleClassCodeDropdown.dataProvider = R2302rules;
+				ruleClassCodeDropdown.labelField = "rulecode";
+				for each(var tempitem:RuleCodeAndName in R2302rules)
+				{
+					if(tempitem.rulecode == tab2String3)
+					{
+						ruleClassCodeDropdown.selectedItem = tempitem;
+						break;
+					}
+				}
+			}
+
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				if(myTab.selectedIndex == 0)
+				{
+					ruleThenString = operatorThenDropdown.selectedItem;
+				}	
+				else if(myTab.selectedIndex == 1)
+				{
+					ruleThenString = mintext.text + "," + maxtext.text + "," + unittext.text;
+				}
+				else if(myTab.selectedIndex == 2)
+				{
+					ruleThenString = calcTypeDropdown.selectedItem.value + ";" + operatorDropdown.selectedItem + ";" + (ruleClassCodeDropdown.selectedItem as RuleCodeAndName).rulecode;
+				}
+				var outgoingEvent:Event = new Event("inferenceModifyThenReadyMessage",false);
+				dispatchEvent(outgoingEvent);
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function ruleClassCodeDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				var selectedDropdown = ruleClassCodeDropdown.selectedItem;
+			}
+
+		]]>
+	</fx:Script>
+	<mx:TabNavigator x="10" y="10" width="528" height="247" id="myTab">
+		<s:NavigatorContent label="运算符类" width="100%" height="100%">
+			<s:Label x="117" y="68" text="规则结论" fontSize="12"/>
+			<s:DropDownList x="185" y="61" width="211" id="operatorThenDropdown" dataProvider="{operatorDropdownData}"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent label="区间范围类" width="100%" height="100%">
+			<mx:Form x="121" y="43">
+				<mx:FormItem label="最小值（运算符）">
+					<s:TextInput id="mintext"/>
+				</mx:FormItem>
+				<mx:FormItem label="最大值">
+					<s:TextInput id="maxtext"/>
+				</mx:FormItem>
+				<mx:FormItem label="单位">
+					<s:TextInput id="unittext"/>
+				</mx:FormItem>
+			</mx:Form>
+		</s:NavigatorContent>
+		<s:NavigatorContent label="区间运算类" width="100%" height="100%">
+			<mx:Form x="121" y="41">
+				<mx:FormItem label="区间运算类型">
+					<s:DropDownList id="calcTypeDropdown"  enabled="true" width="175" dataProvider="{calcTypeData}" labelField="label"/>
+				</mx:FormItem>
+				<mx:FormItem label="运算符">
+					<s:DropDownList id="operatorDropdown" width="175" dataProvider="{operatorDropdownData}"/>
+				</mx:FormItem>
+				<mx:FormItem label="推理规则分类号">
+					<s:DropDownList id="ruleClassCodeDropdown" width="175" change="ruleClassCodeDropdown_changeHandler(event)"/>
+				</mx:FormItem>
+			</mx:Form>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+	<s:Button x="146" y="278" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="325" y="277" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑" creationComplete="thecanvas1_creationCompleteHandler(event)"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" layout="absolute"
+		             headerHeight="15" resizable="false"
+					 width="356" height="234">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.event.CallBackEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.DrawingObj;
+			import cn.edu.whu.liesmars.asPack.util.PointOnMap;
+			import cn.edu.whu.liesmars.map.MapContainer;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import org.liesmars.flashwebclient.GeoEvent.DrawResultEvent;
+
+			
+			private var lastX:Number;
+			private var lastY:Number;
+			private var drawIndex:int=1; //第几个图形
+			private var pointIndex:int=1;//图形中的第几个点
+			private var drawObj:DrawingObj;
+			private var drawType:String; //地图上勾选的类型
+			
+			[Bindable]
+			public var pointsList:ArrayCollection=new ArrayCollection();  //地图勾选坐标列表
+			
+			protected function thecanvas1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.maximizeRestoreBtn.visible=false;
+				this.minimizeBtn.visible=false;
+				(Controller.mapContainer as MapContainer).geomap.sprite.addEventListener(DrawResultEvent.DRAW_END,drawResultHandler);
+				 panBtn.selected=true;
+				(Controller.mapContainer as MapContainer).stopDraw();
+		         
+			}
+			private function drawResultHandler(event:DrawResultEvent):void{
+				drawIndex=pointsList.length+1;
+				var resultType:String=event.resultType;
+				var state:String=event.state;
+			
+				if(resultType=="polygon" || resultType=="point" || resultType=="polyline"){
+					switch(state){
+						case "DrawStart":
+							pointIndex=1;
+							drawObj=new DrawingObj();
+							drawObj.id="范围"+drawIndex;
+							var point:PointOnMap=new PointOnMap();
+							point.id=pointIndex;
+							point.x=event.x;
+							point.y=event.y;
+							drawObj.children.addItem(point);
+							pointsList.addItem(drawObj);
+							pointIndex++;
+							break;
+						case "Drawing":
+							var point:PointOnMap=new PointOnMap();
+							point.id=pointIndex;
+							point.x=event.x;
+							point.y=event.y;
+							drawObj.children.addItem(point);
+							pointIndex++;
+							break;
+						case "DrawFinished":					
+							drawObj.children.removeItemAt(drawObj.children.length-1);
+							break;
+						default:
+							break;
+					}
+				}
+				else if(resultType=="rect"){
+					switch(state){
+						case "DrawStart":
+							pointIndex=1;
+							drawObj=new DrawingObj();
+							drawObj.id="范围"+drawIndex;
+							var point:PointOnMap=new PointOnMap();
+							point.id=pointIndex;
+							point.x=event.x;
+							point.y=event.y;
+							lastX=event.x;
+							lastY=event.y;
+							drawObj.children.addItem(point);
+							pointsList.addItem(drawObj);
+							pointIndex++;
+							drawIndex++;
+							break;
+						case "DrawFinished":
+							var point:PointOnMap=new PointOnMap();
+							point.id=pointIndex++;
+							point.x=event.x;
+							point.y=lastY;
+							drawObj.children.addItem(point);
+							
+							point=new PointOnMap();
+							point.id=pointIndex++;
+							point.x=event.x;
+							point.y=event.y;
+							drawObj.children.addItem(point);
+							
+							point=new PointOnMap();
+							point.id=pointIndex++;
+							point.x=lastX;
+							point.y=event.y;
+							drawObj.children.addItem(point);
+							
+							break;
+						default:
+							break;
+					}
+				}
+				
+			}
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.dispatchEvent(new CallBackEvent(CallBackEvent.OK_CLICK,pointsList));
+				
+				(Controller.mapContainer as MapContainer).stopDraw();
+				(Controller.mapContainer as MapContainer).clearMap();
+				this.removeAllChildren();
+				Config.midCanvs3.windowManager.remove(this);
+			}
+
+
+			protected function disAll():void{
+				panBtn.selected=false;
+				polyBtn.selected=false;
+				rectBtn.selected=false;
+			}
+
+
+			protected function panBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				disAll();
+				
+				panBtn.selected=true;
+				(Controller.mapContainer as MapContainer).stopDraw();
+				
+			}
+
+
+			protected function polyBtn_clickHandler(event:MouseEvent):void
+			{
+				disAll();
+				polyBtn.selected=true;
+				drawType="polygon";
+				(Controller.mapContainer as MapContainer).drawPolygon();
+			}
+
+
+			protected function rectBtn_clickHandler(event:MouseEvent):void
+			{
+				disAll();
+				rectBtn.selected=true;
+				drawType="polygon";
+				(Controller.mapContainer as MapContainer).drawRect();
+			}
+
+
+			protected function clearBtn_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				disAll();
+				pointsList.removeAll();
+				(Controller.mapContainer as MapContainer).clearMap();
+			}
+			public override  function closeWin(event:MDIWindowEvent):void{
+				this.dispatchEvent(new CallBackEvent(CallBackEvent.OK_CLICK,pointsList));
+				this.removeAllChildren();
+				(Controller.mapContainer as MapContainer).stopDraw();
+				(Controller.mapContainer as MapContainer).clearMap();
+				Config.midCanvs3.windowManager.remove(this);
+			
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<mx:Button id="panBtn"  x="12" y="8" icon="@Embed(source='../../../../../../../assets/hand0.gif')" width="25" height="25" toolTip="漫游"  click="panBtn_clickHandler(event)"/>
+	<mx:Button id="rectBtn" x="62" y="8" icon="@Embed(source='../../../../../../../assets/rect.gif')" width="25" height="25" toolTip="矩形拉框" click="rectBtn_clickHandler(event)"/>
+	<mx:Button id="polyBtn" x="37" y="8" icon="@Embed(source='../../../../../../../assets/poly.gif')" width="25" height="25" toolTip="多边形拉框" click="polyBtn_clickHandler(event)"/>
+	<mx:Button id="clearBtn" x="87" y="8" icon="@Embed(source='../../../../../../../assets/delete.png')" width="25" height="25" toolTip="清空" click="clearBtn_clickHandler(event)"/>
+	<s:Button x="270" y="10" label="确定" cornerRadius="8" click="button1_clickHandler(event)"/>
+	<mx:AdvancedDataGrid  x="10" y="41" id="adg1" designViewDataType="flat" height="164" width="334" >
+		<mx:dataProvider>
+			<mx:HierarchicalData source="{pointsList}"
+								 childrenField="children" />
+		</mx:dataProvider>
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" dataField="id"/>
+			<mx:AdvancedDataGridColumn headerText="X" dataField="x"/>
+			<mx:AdvancedDataGridColumn headerText="Y" dataField="y"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	
+</Container:ParentMDI>

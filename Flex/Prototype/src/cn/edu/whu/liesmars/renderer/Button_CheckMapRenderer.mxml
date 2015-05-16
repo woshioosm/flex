@@ -1,0 +1,276 @@
+<mx:HBox  xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  horizontalAlign="center" xmlns:services="services.*">
+	
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService" fault="naturalLangService_faultHandler(event)"/>
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService" fault="requirementFusionService_faultHandler(event)"/>
+		<mx:CallResponder id="resultResp" result="resultResp_resultHandler(event)"/>
+		
+		<mx:CallResponder id="getDetailResp" result="getDetailResp_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.LeftContainer_Admin;
+			import cn.edu.whu.liesmars.Container.LeftContainer_User;
+			import cn.edu.whu.liesmars.Container.MdiAdmin;
+			import cn.edu.whu.liesmars.Container.MdiUser;
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.Container.UserView;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionResultDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionSourceDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultHistoryWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.LocateEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.QueryResultObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.Coordinate;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			import cn.edu.whu.liesmars.map.MapContainer;
+			
+			import flexlib.mdi.containers.MDIWindow;
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.AdvancedDataGrid;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.NameUtil;
+			
+			import valueObjects.NLSearchResult;
+			
+			private var flag:int=0; // 0显示地图 1显示坐标
+			private var natureLangFlag:Boolean=false;
+			private var imageArea:ArrayCollection;
+			private var areaStrs:ArrayCollection=new ArrayCollection();
+			
+			private var dataClone:Object;
+			
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					
+					trace(NameUtil.getUnqualifiedClassName(value));
+					if(NameUtil.getUnqualifiedClassName(value) =="QueryResultObj"||NameUtil.getUnqualifiedClassName(value)=="RequirementInputObj")
+						natureLangFlag=true;
+					super.data = value;
+					dataClone=value;
+					imageArea=value.imageArea;
+					this.removeAllChildren();
+					if(value.uuid=="moreInfo"){
+						//						addBtnMore();
+					}
+					else if(value.uuid=="moreFusionReslut"){
+						//						addBtnMore2();
+					}
+					else{
+						addMapButtons();
+					}
+				}
+			}
+			
+			protected function btnMap_clickHandler(event:MouseEvent):void
+			{
+				if(dataClone==null){
+					mx.controls.Alert.show("无数据");
+					return;
+				}
+				
+				if(natureLangFlag==true){
+					if(dataClone.deepFrame==null||dataClone.deepFrame==""){
+						flag=0;
+						getDetailResp.token=naturalLangService.getDetailByUuid(dataClone.uuid);
+					}else{
+						var xml:XML=GetDataFromXml.formatXmlString(dataClone.deepFrame);	
+						dataClone.imageArea=GetDataFromXml.getImageRange(xml);
+						this.imageArea=dataClone.imageArea;
+						drawCoords();
+					}
+				}
+				else{
+					drawCoords();
+				}
+			}	
+			
+			protected function btncoords_clickHandler(event:MouseEvent):void
+			{
+				if(dataClone==null){
+					mx.controls.Alert.show("无数据");
+					return;
+				}
+				if(natureLangFlag==true){
+					if(dataClone.deepFrame==null||dataClone.deepFrame==""){
+						flag=1;
+						getDetailResp.token=naturalLangService.getDetailByUuid(dataClone.uuid);
+					}else{
+						var xml:XML=GetDataFromXml.formatXmlString(dataClone.deepFrame);	
+						dataClone.imageArea=GetDataFromXml.getImageRange(xml);
+						this.imageArea=dataClone.imageArea;
+						showCoords();
+					}
+				}else{
+					showCoords();
+				}
+				
+				
+			}
+			protected function getDetailResp_resultHandler(event:ResultEvent):void
+			{
+				var result:NLSearchResult=event.result as NLSearchResult;
+				if(result==null){
+					mx.controls.Alert.show("没有数据");
+					CursorManager.removeAllCursors();
+					return ;
+				}
+				dataClone.deepFrame=result.deepFramework;
+				dataClone.shallowFrame=result.shallowFramework;
+				if(dataClone.deepFrame==null||dataClone.deepFrame=="")
+				{
+					mx.controls.Alert.show("无数据");
+					return;
+				}
+				var xml:XML=GetDataFromXml.formatXmlString(result.deepFramework);	
+				dataClone.imageArea=GetDataFromXml.getImageRange(xml);
+				this.imageArea=dataClone.imageArea;
+				if(flag==0){
+					drawCoords();
+				}else if(flag==1){
+					showCoords();
+				}
+				
+			}
+			private function drawCoords():void{
+				var coordsStr:String="";
+				for(var i:int=0;i<imageArea.length;i++){
+					
+					coordsStr+=imageArea.getItemAt(i).toString();
+					if(i!=imageArea.length-1)
+						coordsStr+="|";
+				}
+				if(coordsStr.length>0){
+					(Controller.mapContainer as MapContainer).drawAreaByCoords(coordsStr);
+					if(Config.isAdmin==false){
+						var mdiUser:MdiUser=(Controller.userView as UserView).parentMdi;
+						mdiUser.minLize();
+					}
+					else{
+						var mdiAdmin:MdiAdmin=(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi;
+						mdiAdmin.minLize();
+					}
+				}
+				else{
+					(Controller.mapContainer as MapContainer).clearMap();
+					mx.controls.Alert.show("没有地理范围");
+				}
+			}
+			private function showCoords():void{
+				Controller.container.removeAllChildren();
+				
+				Controller.container.depth=100;
+				var coordsWin:showCoordsWin=new showCoordsWin();
+				coordsWin.left=0;
+				coordsWin.right=0;
+				coordsWin.top=0;
+				coordsWin.bottom=0;
+				Controller.container.addChild(coordsWin);
+				Controller.container.visible=true;
+				Controller.container.width=coordsWin.width;
+				Controller.container.height=coordsWin.height+15;
+				
+				Controller.container.title="坐标范围";
+				var coordsList:ArrayCollection=new ArrayCollection();
+				
+				
+				if(imageArea!=null && imageArea.length>0){
+					for each(var area:String in imageArea){
+						var points:Array=area.split(";");
+						for(var i:int=0;i<points.length;i++){
+							var point:Array=points[i].split(",");
+							if(point!=null && point.length==2){
+								var coord:Coordinate=new Coordinate(point[0],point[1]);
+								coordsList.addItem(coord);
+							}	
+						}	
+					}
+					coordsWin.coordsArray=coordsList;
+				}
+			}
+			protected function btnMore_clickHandler(event:MouseEvent):void
+			{
+				
+				CursorManager.setBusyCursor();
+				Config.page=Config.page+1;
+				resultResp.token=naturalLangService.showAllNLSearchResult(Config.userName,40,Config.page);
+			}
+//			protected function btnMore_clickHandler2(event:MouseEvent):void
+//			{
+//				
+//				CursorManager.setBusyCursor();
+//				Config.fusionResultCurPage=Config.fusionResultCurPage+1;
+////				fusionresultResp.token=requirementFusionService.showFusionResultList(30,Config.fusionResultCurPage);
+//			}
+			public function addMapButtons():void{
+				var btnMap:Button=new Button();
+				btnMap.label="地图显示";
+				btnMap.addEventListener(MouseEvent.CLICK,btnMap_clickHandler);
+				var btncoords:Button=new Button();
+				btncoords.label="坐标显示";
+				btncoords.addEventListener(MouseEvent.CLICK,btncoords_clickHandler);
+				this.removeAllChildren();
+				this.addChild(btnMap);
+				this.addChild(btncoords);
+			}
+			
+			//获得更多的历史结果
+			public function addBtnMore():void{
+				var btnMore:Button=new Button();
+				btnMore.label="查看更多";
+				this.removeAllChildren();
+				this.addChild(btnMore);
+				btnMore.addEventListener(MouseEvent.CLICK,btnMore_clickHandler);
+			}
+			//获得更多的融合结果 作废!
+//			public function addBtnMore2():void{
+//				var btnMore2:Button=new Button();
+//				btnMore2.label="更多结果";
+//				this.removeAllChildren();
+//				this.addChild(btnMore2);
+//				btnMore2.addEventListener(MouseEvent.CLICK,btnMore_clickHandler2);
+//			}
+			
+			protected function resultResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				var handler:QueryResultHistoryWinDataHandler=new QueryResultHistoryWinDataHandler(event.result as ArrayCollection);
+				handler.addData((this.owner as AdvancedDataGrid).dataProvider as ArrayCollection);
+				CursorManager.removeBusyCursor();
+				
+			}
+			
+
+			
+
+			protected function naturalLangService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接超时");
+			}
+
+
+			protected function requirementFusionService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接超时");
+			}
+
+		]]>
+	</fx:Script>
+</mx:HBox> 

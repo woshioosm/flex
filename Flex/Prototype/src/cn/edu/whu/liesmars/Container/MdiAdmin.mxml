@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 creationComplete="parentmdi1_creationCompleteHandler(event)"
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*" layout="absolute" width="400" height="300">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.components.admin.configTool.PlaceNameManagerWin;
+			import cn.edu.whu.liesmars.map.MapContainer;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			
+			
+			public var win:TheCanvas;
+			
+			public function minLize():void{
+//                this.visible=false;
+				this.isMinlize=true;
+				(Controller.leftContainer_admin as LeftContainer_Admin).winCloseEffect();
+			}
+			public function backToSize():void{
+				this.visible=true;
+				this.isMinlize=false;
+				(Controller.leftContainer_admin as LeftContainer_Admin).winOpenEffect();
+			}
+			
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.curHeight=this.height;
+				this.curWidth=this.width;
+			    this.doubleClickEnabled=false;
+			   this.maximizeRestoreBtn.visible=false;
+				this.addEventListener(MDIWindowEvent.FOCUS_START,fouse);
+			}
+			public function fouse(event:MDIWindowEvent):void{
+				
+			}
+			public override function closeWin(event:MDIWindowEvent):void{
+				if(this.isOpen)
+				   this.mdiCanvas.windowManager.remove(this);
+				isOpen=false;
+				if(win!=null)
+					win.clearDate();
+				(Controller.leftContainer_admin as LeftContainer_Admin).canShow=false;
+				CursorManager.removeAllCursors();
+				if(this.title=="地名管理"){
+					var palceWin:PlaceNameManagerWin=(this.getChildAt(0) as PlaceNameManagerWin);
+					if(palceWin!=null){
+						palceWin.disableAll();
+					}
+					(Controller.mapContainer as MapContainer).clearMap();
+					(Controller.mapContainer as MapContainer).stopDraw();
+				}
+			}
+
+		]]>
+	</fx:Script>
+</Container:ParentMDI>

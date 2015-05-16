@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 verticalScrollPolicy="auto"
+		 backgroundAlpha="0.8"
+		 width="520" height="280">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			public var coordsArray:ArrayCollection=new ArrayCollection();
+			
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid id="adg1" designViewDataType="flat" width="100%" dataProvider="{coordsArray}"
+                         height="100%" top="10" left="10" right="10" bottom="10">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" itemRenderer="cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="x坐标" dataField="lon"/>
+			<mx:AdvancedDataGridColumn headerText="y坐标" dataField="lat"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</mx:Canvas>

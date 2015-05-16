@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="68" height="236" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+	<mx:Script>
+		<![CDATA[
+			import mx.events.SliderEvent;
+			
+			import org.liesmars.flashwebclient.GeoEvent.MapEvent;
+			import org.liesmars.flashwebclient.GeoMap;
+//			import com.poyanghu.geomapExt.events.ZoomEvent;
+//			import com.poyanghu.geomapExt.GeoMapWithGE;
+//			import org.liesmars.flashwebclient.Layer;
+//			import com.poyanghu.geomapExt.util.MercatorProjection;
+//			import org.liesmars.flashwebclient.Layer;
+//	    	import org.liesmars.flashwebclient.BaseTypes.Bounds;
+//			import org.liesmars.flashwebclient.BaseTypes.LonLat;
+//			import org.liesmars.flashwebclient.BaseTypes.Size;	
+//			import org.liesmars.flashwebclient.Handler.Draw;
+//			import org.liesmars.flashwebclient.MapUIEvent.*;
+//			import com.google.maps.LatLng;
+//			import mx.managers.CursorManager;
+//			import mx.events.SliderEvent;
+
+			private var geomap:GeoMap = null;
+			
+			public function initMap(newGeoMap:GeoMap):void
+			{
+				
+				this.geomap = newGeoMap;
+				this.geomap.sprite.addEventListener(MapEvent.MAP_ZOOM,zoomChanged);
+				this.zoomSlider.value = this.geomap.zoom;
+			}
+			/**
+			 * deal with the basic map event
+			 * @
+			 */
+			internal function doZoomIn(e:MouseEvent):void
+			{
+				this.geomap.zoomIn();
+				zoomSlider.value = this.geomap.zoom;
+			}
+			internal function doZoomOut(e:MouseEvent):void
+			{
+				this.geomap.zoomOut();
+				zoomSlider.value = this.geomap.zoom;	
+			}
+			internal function doOrigin(e:MouseEvent):void
+			{
+				//this.geomap.setCenterWithGoogleMap(MercatorProjection.Lonlat2Mercator(115.89,28.68),6);
+			}
+			internal function doPan(e:MouseEvent):void
+			{
+				this.geomap.drag();
+			}
+			
+			internal function zoomChanged(e:MapEvent):void
+			{
+				this.zoomSlider.value = geomap.getZoom();
+			}
+			
+			
+	 		
+	 		internal function changeZoom(event:SliderEvent):void {
+	 			if(geomap.zoom != event.value)
+	 			{
+					geomap.zoomTo(event.value);
+					zoomSlider.value = event.value;
+	 			}
+			}
+			
+			/**
+			 * deal with the move map event
+			 * @
+			 */
+			internal function mapUp(e:MouseEvent):void
+			{
+				this.geomap.panUp();
+			}
+			internal function mapDown(e:MouseEvent):void
+			{
+				this.geomap.panBottom();
+			}
+			internal function mapLeft(e:MouseEvent):void
+			{
+				this.geomap.panLeft();
+			}
+			internal function mapRight(e:MouseEvent):void{
+				this.geomap.panRight();
+			}
+		]]>
+	</mx:Script>
+	<mx:Button id="MZoomIn" x="27" y="69" label="{resourceManager.getString('poyanghu','ZoomIn')}" styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/enlarge.png')"  click="doZoomIn(event)" />
+	<mx:VSlider id="zoomSlider" x="0" y="98" snapInterval="1" maximum="7"
+		 minimum="0" labels="['0','7']" tickInterval="1"  change="changeZoom(event)" styleName="sdVSlider" width="48" height="120"/>
+	<mx:Button id="MZoomOut" x="27" y="215"  styleName="mButton" 
+		icon="@Embed(source='assets/small.png')" width="18" height="18" click="doZoomOut(event)" />
+	<mx:Button id="upMove" x="27" y="2"  styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/up.png')" click="mapUp(event)"  />
+	<mx:Button id="lMove" x="7" y="22" styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/left.png')" click="mapLeft(event)" />
+	<mx:Button id="rMove" x="47" y="22" styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/right.png')" click="mapRight(event)"/>
+	<mx:Button id="MOrigin" x="27" y="22"  styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/origin.png')" click="doOrigin(event)"/>
+	<mx:Button id="downMove" x="27" y="42" styleName="mButton" width="18" 
+		height="18" icon="@Embed(source='assets/down.png')" click="mapDown(event)"/>
+	<mx:Label text="{zoomSlider.value}" x="17" y="85" width="40" height="20" styleName="fillLabel" fontFamily="Arial" fontSize="16" textAlign="center" color="#009DFF" fontWeight="bold"/>
+</mx:Canvas>

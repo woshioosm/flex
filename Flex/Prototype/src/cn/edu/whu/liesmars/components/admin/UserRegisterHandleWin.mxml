@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 left="2" right="2" bottom="2" top="2"  width="700" height="400" 
+		 creationComplete="group1_creationCompleteHandler(event)"
+		 xmlns:services="services.*" fontFamily="微软雅黑" fontSize="13">
+
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.UserRegisterHandleObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserRegisterWinDataHandler;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+            
+			[Bindable]
+			private var requestHandleArr:ArrayCollection=new ArrayCollection();
+			
+			public override function clearDate():void{
+				requestHandleArr.removeAll();
+			}
+			public override function loadData():void{
+				handleRegister.token=registerAndLoginService.showRegisterAskList();
+			}
+		
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+			//	loadData();
+			}
+
+			protected function handleRegister_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:UserRegisterWinDataHandler=new UserRegisterWinDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(requestHandleArr);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:RegisterAndLoginService id="registerAndLoginService" destination="RegisterAndLoginService"/>
+		<s:CallResponder id="handleRegister" result="handleRegister_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:AdvancedDataGrid sortableColumns="false" id="adg1" designViewDataType="flat" dataProvider="{requestHandleArr}"
+						 left="10" right="9" top="10" bottom="9">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" textAlign="center"  itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="用户名" dataField="userName"/>
+			<mx:AdvancedDataGridColumn headerText="真实姓名" dataField="realName"/>
+			<mx:AdvancedDataGridColumn headerText="部门" dataField="department"/>
+			<mx:AdvancedDataGridColumn headerText="E-mail" dataField="e_mail"/>
+			<mx:AdvancedDataGridColumn headerText="操作" width="190" itemRenderer="cn.edu.whu.liesmars.renderer.Button_VerifyRender"  />
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>

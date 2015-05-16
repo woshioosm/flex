@@ -1,0 +1,89 @@
+<mx:HBox xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 horizontalAlign="center"
+		 xmlns:services="services.*"
+		 verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>
+		
+		<mx:CallResponder id="resultResp" result="resultResp_resultHandler(event)"/>
+		
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultHistoryWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.AdvancedDataGrid;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.controls.Label;
+			import mx.controls.ToolTip;
+			import mx.events.FlexEvent;
+			import mx.events.ToolTipEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.ToolTipManager;
+			import mx.rpc.events.ResultEvent;
+			
+			private var toolTipStr:String;
+			override public function set data(value:Object):void
+			{   
+				if(value != null)
+				{
+					if(value.uuid=="moreInfo"){
+						addBtnMore();
+					}else{
+						super.data = value;
+						addLabel(value.inputStr);
+					}
+					
+				}
+				
+			}    
+			public function addBtnMore():void{
+				var btnMore:Button=new Button();
+				btnMore.label="查看更多";
+				this.removeAllChildren();
+				this.addChild(btnMore);
+				btnMore.addEventListener(MouseEvent.CLICK,btnMore_clickHandler);
+			}	
+			private function addLabel(str:String):void{
+				var label:Label=new Label();
+				label.text=str;
+				label.percentHeight=100;
+				label.percentWidth=100;
+				this.removeAllChildren();
+				this.addChild(label);
+//				this.addEventListener(MouseEvent.MOUSE_OVER,LbSequence_mouseOverHandler);
+			}
+			protected function btnMore_clickHandler(event:MouseEvent):void
+			{
+				
+				CursorManager.setBusyCursor();
+				Config.page=Config.page+1;
+				resultResp.token=naturalLangService.showAllNLSearchResult(Config.userName,20,Config.page);
+			}
+			protected function resultResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				var handler:QueryResultHistoryWinDataHandler=new QueryResultHistoryWinDataHandler(event.result as ArrayCollection);
+				handler.addData((this.owner as AdvancedDataGrid).dataProvider as ArrayCollection);
+				CursorManager.removeBusyCursor();
+				
+			}
+//			protected function LbSequence_mouseOverHandler(event:MouseEvent):void
+//			{
+//				var label:Label=event.target as Label;
+//				if(label.text!="")
+//					label.toolTip=label.text;
+//			}
+			
+		]]>
+	</fx:Script>
+	<!--
+	<mx:Label  id="LbToolTip" text=""  mouseOver="LbSequence_mouseOverHandler(event)"   width="100%" height="100%"  />
+    -->
+	
+	</mx:HBox> 

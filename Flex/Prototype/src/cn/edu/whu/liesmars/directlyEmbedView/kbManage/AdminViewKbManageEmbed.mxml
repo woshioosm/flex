@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%" 
+		   initialize="canvas1_initializeHandler(event)"
+		   verticalScrollPolicy="off"
+		   horizontalScrollPolicy="off"
+		   xmlns:natureLanguageQuery="cn.edu.whu.liesmars.components.user.natureLanguageQuery.*"
+		   resize="application1_resizeHandler(event)" creationComplete="application1_creationCompleteHandler(event)"
+		   xmlns:code="http://code.google.com/p/flexlib/" xmlns:map="cn.edu.whu.liesmars.map.*" xmlns:Container="cn.edu.whu.liesmars.Container.*" xmlns:kbManage="cn.edu.whu.liesmars.directlyEmbedView.kbManage.*">
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.LogoAsset;
+			
+			import cn.edu.whu.liesmars.Container.LeftContainer_Admin;
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			internal static const LogoAssert:Class=assets.LogoAsset;
+			[Bindable]
+			private var curUser:String="";
+			
+			protected function application1_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(banner!=null){
+					if(this.width>1280 )
+						banner.width=this.width-30;
+					else
+						banner.width=1250;
+				}
+				
+			}
+			
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				map.init();
+				Controller.leftContainer_admin=leftcontainer;
+				Controller.mapContainer=map;
+//				curUser="当前登录： "+Config.userName;
+			}
+			
+			
+			protected function canvas1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				Config.midCanvs=this.mdiCanvas;
+				Config.midCanvs2=this.mdiCanvas2;
+				Config.midCanvs3=this.mdiCanvas3;
+				Config.midCanvs4=this.mdiCanvas4;
+				var point:Point=map.globalToContent(new Point(0,0)); // 应用程序窗口距 map的相对位置
+				Config.stageOffsetX=point.x;
+				Config.stageOffsetY=point.y;
+			}
+			
+			
+			protected function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+//				if(leftcontainer.parentMdi!=null)
+//					leftcontainer.parentMdi.dispatchEvent(new MDIWindowEvent(MDIWindowEvent.CLOSE,leftcontainer.parentMdi));
+//				(Config.mainApp as Prototype).setLogined("");
+				ExternalInterface.call("myrefresh");
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:Canvas  x="0" y="0" height="25" width="665">
+		<s:Label  x="16" y="8" text="当前登录:"  height="15" width="54" fontFamily="微软雅黑"/>
+		<s:Label  x="66" y="8" text="{Config.userName}"  height="15" fontFamily="微软雅黑" width="53"/>
+		<mx:LinkButton x="109" y="3" label="| 退出" color="0x017189" height="20" click="linkbutton1_clickHandler(event)"/>
+		
+		
+	</mx:Canvas>
+	
+	<mx:Panel id="banner" x="12" y="26" width="1250" headerHeight="0" backgroundColor="0x017189"  height="110" >
+		<mx:Image y="2" width="100%" height="98%" source="{LogoAssert}" />
+	</mx:Panel>
+	
+	
+	
+	
+	<code:MDICanvas id="mdiCanvas" x="0" y="144" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<map:MapContainer  id="map" left="8" right="8" width="100%" height="100%"></map:MapContainer>
+		<kbManage:LeftContainer_Admin_KbManageEmbed  backgroundAlpha="0" mdiCanvas="{mdiCanvas}" bottom="-10" id="leftcontainer"  top="-1" height="100%" width="250">	
+		</kbManage:LeftContainer_Admin_KbManageEmbed>
+		
+		
+	</code:MDICanvas>	
+	<s:Label x="0" y="142" height="9" width="100%" backgroundColor="#E4E3E3"/>
+	<code:MDICanvas id="mdiCanvas2" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+		
+	</code:MDICanvas>	
+	<code:MDICanvas id="mdiCanvas3" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+		
+	</code:MDICanvas>	
+	<code:MDICanvas id="mdiCanvas4" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+		
+	</code:MDICanvas>
+	<natureLanguageQuery:SearchInputPanel visible="false" x="350" y="55">
+		
+	</natureLanguageQuery:SearchInputPanel>
+</mx:Canvas>

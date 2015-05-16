@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+						   xmlns:s="library://ns.adobe.com/flex/spark" 
+						   xmlns:mx="library://ns.adobe.com/flex/mx"
+						   xmlns:Container="cn.edu.whu.liesmars.Container.*"
+						   width="980" height="600"  fontFamily="微软雅黑" 
+						   minWidth="980" minHeight="600"
+						   backgroundAlpha="1" backgroundColor="0xffffff"
+						   title="查询与反馈" alpha="1"
+						   creationPolicy="all"
+						   headerHeight="20"
+						   cornerRadius="5"
+						   fontWeight="bold" creationComplete="panel1_creationCompleteHandler(event)" xmlns:services="services.*" >
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<!--<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>-->
+		<services:UserRecommendationService id="userRecommendationService" destination="UserRecommendationService"/>
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="getSensorResp" result="getSensorResp_resultHandler(event)"/>
+		<s:CallResponder id="getTaskSensor" result="getTaskSensor_resultHandler(event)"/>
+		<s:CallResponder id="updateResp" result="updateResp_resultHandler(event)"/>
+		<s:CallResponder id="prodectResp" result="prodectResp_resultHandler(event)"/>
+		
+		<s:CallResponder id="getNLByIDResult" result="getNLByIDResult_resultHandler(event)"/>
+		<services:NaturalLangService id="naturalLangService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+		<s:CallResponder id="getDetailFrameByUuidResult" result="getDetailFrameByUuidResult_resultHandler(event)"/>
+		<mx:CallResponder id="getDetailResp" result="getDetailResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.Container.WaitingWin.RecomendWaiingWin;
+			import cn.edu.whu.liesmars.asPack.componentsData.DataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FeedbackDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.ImageQueryResultToAdmDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.ImitatePublishDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.FeedBackEvent;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.SensorChooseObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.FrameObj;
+			import cn.edu.whu.liesmars.asPack.util.ListUtil;
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.SensorBandInfoModel;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.effects.Fade;
+			import mx.events.DividerEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.NLSearchResult;
+			import valueObjects.RecommendResultToAdmin;
+			import valueObjects.SensorBand;
+			import valueObjects.SensorBandInfo;
+			import valueObjects.TDeepframework;
+			import valueObjects.TNaturallang;
+			import valueObjects.TShallowframework;
+			import valueObjects.TaskSensor;
+			
+			private var feedBack:String;
+			public var uuid:String;
+			
+			private var deepFramework:TDeepframework=new TDeepframework();
+			private var shallowFramework:TShallowframework=new TShallowframework();
+			
+			[Bindable]
+			private var inputStr:String;
+			
+			private var flag:Boolean=false;  // 避免多次刷新
+			//	private var flag2:Boolean=false;
+			private var primaryStr:String;   //反馈后的xml string
+			private var advancedStr:String;   //反馈后的 xml string
+			[Bindable]
+			private var primaryDataGrid:ArrayCollection=new ArrayCollection();  // 浅层框架
+			[Bindable]
+			private var advancedDataGrid:ArrayCollection=new ArrayCollection();	  //深层框架
+			
+			[Bindable]
+			private var sensorCollection:ArrayCollection=new ArrayCollection();  //绑定 传感器信息
+			
+			[Bindable]
+			private var publishArray:ArrayCollection=new ArrayCollection(); //绑定产品
+			
+			[Bindable]
+			private var sensorType:String;
+			[Bindable]
+			private var doImage:String;
+			[Bindable]
+			private var doPolar:String;
+			[Bindable]
+			private var spectRes:String;
+			[Bindable]
+			private var timeRes:String;
+			[Bindable]
+			private var spaceRes:String;
+			[Bindable]
+			private var imageType:String="";
+			
+			private var primaryXml:XML=new XML(); // 加载的xml
+			
+			private var advancedXml:XML=new XML(); // 加载的xml
+			
+			private var deepFrameworkStr:String="";
+			private var dataHandle1:FeedbackDataHandler;//处理深层
+			private var dataHandle2:FeedbackDataHandler;//处理浅层
+			
+			
+			private var waitingWin:RecomendWaiingWin=new RecomendWaiingWin();// 产品查询进度
+			public function testInit():void{
+				
+			}		
+			
+			protected function getNLByIDResult_resultHandler(event:ResultEvent):void
+			{
+				var nl:TNaturallang = event.result as TNaturallang;
+				inputStr = nl.nlstring;
+				
+				//getDetailFrameByUuidResult.token = naturalLangService.getDetailFrameByUuid(uuid);
+				getDetailResp.token=naturalLangService.getDetailByUuid(uuid);
+			}
+			
+			
+			protected function getDetailFrameByUuidResult_resultHandler(event:ResultEvent):void
+			{
+				
+			}
+			
+			
+			public function load(uuid:String,input:String,deepFrameWork:TDeepframework,shallowFrameWork:TShallowframework):void{
+				tabnavigator1.selectedIndex=0;
+				
+				this.uuid=uuid;
+				adg1.selectedIndex=0;
+				//adg1.dispatchEvent(new IndexChangedEvent(IndexChangedEvent.CHANGE,false,false,adg1,adg1.selectedIndex,0,null) );
+				uuid=uuid;
+				advancedDataGrid.removeAll();
+				primaryDataGrid.removeAll();
+				publishArray.removeAll();
+				
+				inputStr=input;
+				deepFrameworkStr=deepFrameWork==null?"":deepFrameWork.deepFrameXml;
+				dataHandle1=new FeedbackDataHandler(deepFrameWork);
+				dataHandle1.bindData(advancedDataGrid);   //绑定 深层框架
+				dataHandle2=new FeedbackDataHandler(shallowFrameWork);
+				dataHandle2.bindData(primaryDataGrid);    //绑定浅层框架
+				if(adg1!=null)
+					adg1.expandAll();
+				if(adg2!=null)
+					adg2.expandAll();
+				
+				clearLb();
+				getSensorResp.token=fusionService.getSensors(deepFrameWork);
+				
+			}
+			
+			protected function getDetailResp_resultHandler(event:ResultEvent):void
+			{
+				var result:NLSearchResult=event.result as NLSearchResult;
+				if(result==null){
+					CursorManager.removeAllCursors();
+					mx.controls.Alert.show("返回结果为空");
+					return;
+				}
+				deepFramework.searchUuid=uuid;
+				deepFramework.deepFrameXml=result.deepFramework;
+				
+				shallowFramework.searchUuid=uuid;
+				shallowFramework.shallowFrameXml=result.shallowFramework;
+				
+				/* if(dataclone!=null){
+					dataclone.deepFrame=result.deepFramework;
+					dataclone.shallowFrame=result.shallowFramework;
+				}
+				 */
+				Controller.feedBackWinEmbed.visible=true;
+				CursorManager.removeAllCursors();
+				Controller.feedBackWinEmbed.load(uuid,inputStr,deepFramework,shallowFramework);
+			}
+			
+			
+			//获取此框架的传感器列表
+			protected function getSensorResp_resultHandler(event:ResultEvent):void
+			{
+				sensorCollection.removeAll();
+				if(event.result==null){
+					return;
+				}
+					
+				var sonsors:ArrayCollection=event.result as ArrayCollection;
+				for each(var sonsorInfo:SensorBandInfo in sonsors){
+					var sensorChoose:SensorChooseObj=new SensorChooseObj();
+					sensorChoose.checked=false;
+					sensorChoose.sensorName=sonsorInfo.sensor.name;
+					sensorChoose.sensorBandInfo=sonsorInfo;
+					
+					sensorCollection.addItem(sensorChoose);
+				}
+				if(sensorCollection.length>0){
+					getSensorDetail(sensorCollection.getItemAt(0) as SensorChooseObj);
+					getTaskSensor.token=fusionService.getTaskSensor(uuid);
+				}
+				
+				
+			}
+			//获取用户指定的传感器
+			protected function getTaskSensor_resultHandler(event:ResultEvent):void
+			{
+				var result:ArrayCollection=event.result as ArrayCollection;
+				for each(var taskSensor:TaskSensor in result){
+					for each(var sensorChoose:SensorChooseObj in sensorCollection){
+						if(sensorChoose.sensorName==taskSensor.sensorname){
+							sensorChoose.checked=true;
+						}
+					}
+				}
+				if(sonsorList!=null)
+					sonsorList.dataProvider=sensorCollection;
+			}
+			private function clearLb():void{
+				sensorType="无";
+				doImage="无";
+				doPolar="无";
+				spectRes="无";
+				timeRes="无";
+				spaceRes="无";
+				imageType="";
+			}
+			/**
+			 * 
+			 * 控件事件
+			 * */
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void
+			{
+				getNLByIDResult.token = naturalLangService.getNLByID(uuid);
+				
+			}
+			
+			protected function submit(event:MouseEvent):void{
+				primaryStr=dataHandle1.XMlFromCollecton2(primaryDataGrid,"primaryFrame");
+				advancedStr=dataHandle1.XMlFromCollecton2(advancedDataGrid,"advancedFrame");
+				
+				naturalLangService.submitFeedback(uuid,primaryStr,advancedStr);
+				mx.controls.Alert.show("提交成功");
+			} 
+			
+			protected function adg2_updateCompleteHandler(event:FlexEvent):void
+			{
+				
+				if(flag==false){
+					adg2.expandAll();
+					flag=true;
+				}
+			}
+			/* public override function closeWin(event:MDIWindowEvent):void{
+				event.preventDefault();
+				this.visible=false;
+				//				mdiCanvas.windowManager.remove(this);
+				isOpen=false;
+			} 
+			 */
+			protected function sonsorList_clickHandler(event:MouseEvent):void
+			{
+				clearLb();
+				var sensorBandInfoModel:SensorChooseObj=sonsorList.selectedItem as SensorChooseObj;
+				getSensorDetail(sensorBandInfoModel);
+				
+			}
+			private function getSensorDetail( sensorBandInfoModel:SensorChooseObj):void{
+				if(sensorBandInfoModel==null)
+					return;
+				if(sensorBandInfoModel.sensorBandInfo.sensor.sensortype==0){
+					sensorType="光学传感器";
+					doImage=sensorBandInfoModel.sensorBandInfo.sensor.imgway;
+					imageType="成像方式:";
+				}else if(sensorBandInfoModel.sensorBandInfo.sensor.sensortype==1){
+					sensorType="SAR";
+					doImage=sensorBandInfoModel.sensorBandInfo.sensor.polarway;
+					imageType="极化方式:";
+				}
+				if(doImage==null||doImage=="")
+					doImage="  /";
+				spectRes=sensorBandInfoModel.sensorBandInfo.sensor.spectralresolution.toString();
+				if(spectRes==""||spectRes=="0")
+					spectRes="  /";
+				else{
+					spectRes+="(nm)";
+				}
+				timeRes=sensorBandInfoModel.sensorBandInfo.sensor.timeresolution.toString();
+				if(timeRes==""||timeRes=="0")
+					timeRes="  /";
+				else{
+					timeRes+="(天/次)";
+				}
+				
+				var tempStr:String="";
+				for each(var senserBand:SensorBand in sensorBandInfoModel.sensorBandInfo.bands)
+				{
+					tempStr+=senserBand.bandname+" : "+senserBand.spatialresolution+"m"+"\n";
+				}
+				if(tempStr==""){
+					tempStr=" /";
+				}
+				spaceRes=tempStr;
+			}
+			private function lableFun(data:Object,column:AdvancedDataGridColumn):String{
+				var labelStr:String = "";  
+				var str:String=(data as FrameObj).content;
+				labelStr=str.substr(0,Math.min(str.length,200));
+				return labelStr;
+			}
+			
+			
+			protected function tabnavigator1_changeHandler(event:IndexChangedEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(tabnavigator1.selectedIndex==2){
+					btnFeedBack.visible=false;
+					btnUpdate.visible=true;
+					btnQuery.visible=false;
+				}
+				else if(tabnavigator1.selectedIndex==3){
+					btnUpdate.visible=false;
+					btnFeedBack.visible=false;
+					btnQuery.visible=true;
+					
+					
+				}else{
+					btnFeedBack.visible=true;
+					btnUpdate.visible=false;
+					btnQuery.visible=false;
+				}
+			}
+			
+			
+			
+			//更新指定传感器
+			protected function btnUpdate_clickHandler(event:MouseEvent):void
+			{
+				var sensorHasChoosed:ArrayCollection=new ArrayCollection();
+				
+				for each(var sensor:SensorChooseObj in sensorCollection){
+					if(sensor.checked==true){
+						var taskSensor:TaskSensor=new TaskSensor();
+						taskSensor.uuid=uuid;
+						taskSensor.sensorname=sensor.sensorName;
+						sensorHasChoosed.addItem(taskSensor);
+					}
+				}
+				//				mx.controls.Alert.show(sensorHasChoosed.length.toString());
+				if(sensorHasChoosed.length>0){
+					updateResp.token=fusionService.updateTaskSensor(sensorHasChoosed);
+				}else if(sensorHasChoosed.length==0){
+					updateResp.token=fusionService.deleteTaskSensor(uuid);
+					
+				}
+			}
+			protected function updateResp_resultHandler(event:ResultEvent):void
+			{
+				var result:int =event.result as int;
+				if(result==1)
+					mx.controls.Alert.show("更新成功");
+				else
+					mx.controls.Alert.show("更新失败");
+				
+			}
+			
+			//产品查询
+			protected function btnQuery_clickHandler(event:MouseEvent):void
+			{
+				publishArray.removeAll();
+				
+					prodectResp.token=userRecommendationService.productQuery(deepFrameworkStr,Config.userName,Config.searchId);
+					waitingWin.init();
+//					PopUpManager.addPopUp(waitingWin,Config.midCanvs3,true);
+					Config.midCanvs3.windowManager.add(waitingWin);
+					
+					waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+					waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+				
+			}
+			//产品查询结果
+			protected function prodectResp_resultHandler(event:ResultEvent):void
+			{
+				
+				try{
+					waitingWin.stopProgress();
+					Config.midCanvs3.windowManager.remove(waitingWin);
+				}catch(e:Error){
+					
+				}
+			
+				var result:ArrayCollection=event.result as ArrayCollection;
+				if(result==null||result.length==0)
+				{
+		           // Tweener.addTween(fadeTxt,{alpha:1,onComplete:tweenerComplete,transition:"linear",time:0.5});
+					return;
+				}
+				else{
+					var dataHandler:DataHandler=new ImageQueryResultToAdmDataHandler(result);
+					dataHandler.bindData(publishArray);
+				}
+			}
+			private function tweenerComplete():void{
+				//Tweener.addTween(fadeTxt,{alpha:0,transition:"linear",time:2});
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:Canvas width="100%" height="100%" backgroundAlpha="1"  backgroundColor="0xffffff">
+		<s:Label x="14" y="11" text="自然语言查询" fontFamily="微软雅黑" fontSize="14" fontWeight="bold"/>
+		<s:Label left="117" y="10" backgroundAlpha="1" text="{inputStr}" height="30" right="30" fontSize="13" fontFamily="微软雅黑" fontWeight="normal"/>
+		
+		<!--
+		<mx:HDividedBox   id="divideBox" width="100%" height="100%"  left="2" right="2" top="40" bottom="50">
+		<mx:Canvas width="50%" height="100%">
+		<s:Label x="4" y="2" text="浅层语义" fontWeight="bold" fontFamily="宋体"/>
+		<mx:AdvancedDataGrid id="adg1" verticalScrollPolicy="auto" horizontalScrollPolicy="off"
+		designViewDataType="flat" fontWeight="normal" width="100%" height="100%"  bottom="2" right="2" left="2" top="20">
+		<mx:dataProvider>
+		<mx:HierarchicalData source="{primaryDataGrid}"
+		childrenField="children" />
+		</mx:dataProvider>
+		<mx:columns>
+		<mx:AdvancedDataGridColumn width="150"  headerText="项 目" dataField="name"/>
+		<mx:AdvancedDataGridColumn headerText="系统分析结果" dataField="content"/>
+		<mx:AdvancedDataGridColumn headerText="用户反馈" itemRenderer="cn.edu.whu.liesmars.renderer.FrameChangeInputRenderer"/>
+		</mx:columns>
+		</mx:AdvancedDataGrid>
+		</mx:Canvas>
+		
+		<mx:Canvas width="50%" height="100%">
+		<s:Label x="4" y="2" text="深层语义"  fontWeight="bold" fontFamily="宋体"/>
+		<mx:AdvancedDataGrid  id="adg2" verticalScrollPolicy="auto" 
+		horizontalScrollPolicy="off" designViewDataType="flat"  fontWeight="normal"
+		width="100%" height="100%"  bottom="2" right="2" left="2" top="20">
+		<mx:dataProvider>
+		<mx:HierarchicalData  source="{advancedDataGrid}"
+		childrenField="children" />
+		</mx:dataProvider>
+		<mx:columns>
+		<mx:AdvancedDataGridColumn  width="150" headerText="项 目" dataField="name"/>
+		<mx:AdvancedDataGridColumn headerText="系统分析结果" dataField="content"/>
+		<mx:AdvancedDataGridColumn headerText="用户反馈"  itemRenderer="cn.edu.whu.liesmars.renderer.FrameChangeInputRenderer"/>
+		</mx:columns>
+		</mx:AdvancedDataGrid>
+		</mx:Canvas>
+		
+		</mx:HDividedBox> -->
+		<s:Button label="反馈提交" id="btnFeedBack" width="106" bottom="10" horizontalCenter="0" click="submit(event)" fontSize="13" fontFamily="微软雅黑"/>
+		<s:Button label="更新指定传感器" id="btnUpdate" visible="false" width="119" horizontalCenter="0" bottom="10" click="btnUpdate_clickHandler(event)"/>
+		<s:Button label="产品查询" visible="false" id="btnQuery" width="106" horizontalCenter="0" bottom="10" click="btnQuery_clickHandler(event)"/>
+		<mx:TabNavigator id="tabnavigator1" left="10" right="10" top="45" bottom="41" change="tabnavigator1_changeHandler(event)" >
+			<s:NavigatorContent id="tab1" label="  浅层语义" width="100%" height="100%" fontSize="15" fontFamily="微软雅黑" fontWeight="normal">
+				<mx:AdvancedDataGrid sortableColumns="false" id="adg1" verticalScrollPolicy="auto" horizontalScrollPolicy="off" 
+									 designViewDataType="flat" fontWeight="normal" width="100%" height="100%"  bottom="2" right="2" left="2" top="0" fontSize="14">
+					<mx:dataProvider>
+						<mx:HierarchicalData source="{primaryDataGrid}"
+											 childrenField="children" />
+					</mx:dataProvider>
+					<mx:columns>
+						<mx:AdvancedDataGridColumn width="300"   headerText="项 目" dataField="name"/>
+						<mx:AdvancedDataGridColumn    headerText="系统分析结果"  dataField="content" labelFunction="lableFun" />
+						<mx:AdvancedDataGridColumn  width="160"  headerText="用户反馈" itemRenderer="cn.edu.whu.liesmars.renderer.FrameChangeInputRenderer"/>
+					</mx:columns>
+				</mx:AdvancedDataGrid>
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent id="tab2" label="深层语义" width="100%" height="100%" fontFamily="微软雅黑" fontWeight="normal">
+				<mx:AdvancedDataGrid sortableColumns="false"  id="adg2" verticalScrollPolicy="auto" updateComplete="adg2_updateCompleteHandler(event)" 
+									 horizontalScrollPolicy="off" designViewDataType="flat"  fontWeight="normal"
+									 width="100%" height="100%"  bottom="2" right="2" left="2" top="0" fontSize="13">
+					<mx:dataProvider>
+						<mx:HierarchicalData  source="{advancedDataGrid}"
+											  childrenField="children" />
+					</mx:dataProvider>
+					<mx:columns>
+						<mx:AdvancedDataGridColumn width="300"   headerText="项 目" dataField="name"/>
+						<mx:AdvancedDataGridColumn  headerText="系统分析结果" dataField="content" labelFunction="lableFun"/>
+						<mx:AdvancedDataGridColumn width="160" headerText="用户反馈"  itemRenderer="cn.edu.whu.liesmars.renderer.FrameChangeInputRenderer"/>
+					</mx:columns>
+				</mx:AdvancedDataGrid>
+			</s:NavigatorContent>
+			
+			<s:NavigatorContent id="tab3" label="传感器信息" width="100%" height="100%"  fontFamily="微软雅黑" fontWeight="normal">
+				<!--
+				<s:List id="sonsorList" dataProvider="{sensorCollection}" labelField="name" 
+				click="sonsorList_clickHandler(event)"
+				left="19" bottom="10" top="28" width="247" fontFamily="微软雅黑" allowMultipleSelection="true"></s:List>
+				-->
+				<s:Label  text="传感器列表(勾选为用户指定传感器)" fontFamily="微软雅黑" fontSize="14" left="15" top="2" height="13" width="243" fontWeight="normal"/>
+				<mx:Canvas width="542" right="10" bottom="10" top="10" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+					<s:Label x="28" y="19" text="传感器类型:" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					<s:Label x="252" y="18" id="lbImageType" text="{imageType}" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					<s:Label x="470" y="34" visible="false" text="极化方式:" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					<s:Label x="28" y="64" text="光谱分辨率:" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					<s:Label x="28" y="109" text="时间分辨率:" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					<s:Label x="28" y="154" text="空间分辨率:" width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal" verticalAlign="justify" textAlign="right"/>
+					
+					<s:Label id="lbSensorType" text="{sensorType}" x="129" y="19"  width="102" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					<s:Label id="lbImage" text="{doImage}" x="351" y="17"  width="181" height="51" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					<s:Label id="lbPolar" visible="false" text="{doPolar}" x="573" y="33"  width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					<s:Label id="lbSpec" text="{spectRes}" x="129" y="63"  width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					<s:Label id="lbTime" text="{timeRes}" x="129" y="109"  width="87" height="18" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					<s:Label id="lbSpace" text="{spaceRes}" x="129" y="155"  width="367" height="115" fontFamily="微软雅黑" fontSize="14" fontWeight="normal"/>
+					
+				</mx:Canvas>
+				
+				<mx:AdvancedDataGrid id="sonsorList" designViewDataType="tree" dataProvider="{sensorCollection}" left="12" right="562" top="20" bottom="10" click="sonsorList_clickHandler(event)">
+					<mx:columns>
+						<mx:AdvancedDataGridColumn headerText="选择" minWidth="70" width="70" itemRenderer="cn.edu.whu.liesmars.renderer.CheckBoxRenderer"/>
+						<mx:AdvancedDataGridColumn headerText="传感器名称" dataField="sensorName"/>
+					</mx:columns>
+				</mx:AdvancedDataGrid>
+				
+			</s:NavigatorContent>
+			
+			
+			
+		</mx:TabNavigator>
+		
+		
+	</mx:Canvas>
+</mx:Panel>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<code:MDIWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				xmlns:code="http://code.google.com/p/flexlib/" initialize="initlize(event)"
+				backgroundAlpha="{backAlpha}"
+				verticalScrollPolicy="off"
+				horizontalScrollPolicy="off"
+				headerHeight="20"
+				backgroundColor="0xffffff" cornerRadius="5"  resizable="true"
+				borderAlpha="0.4" layout="absolute" width="200" height="200">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import flexlib.mdi.containers.MDICanvas;
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.containers.Tile;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			[Bindable]
+			protected var backAlpha:Number=0.8;
+			public var mdiCanvas:MDICanvas;
+			private var _isOpen:Boolean=false;
+			private var _imageUrl:String;
+			private var _allowMax:Boolean=false;
+			
+			public var isMinlize:Boolean=false;
+			
+			public var curHeight:Number;
+			public var curWidth:Number;
+			public function get allowMax():Boolean
+			{
+				return _allowMax;
+			}
+			
+			public function set allowMax(value:Boolean):void
+			{
+				_allowMax = value;
+			}
+			
+			public function get imageUrl():String
+			{
+				
+				return _imageUrl;
+			}
+			
+			public function set imageUrl(value:String):void
+			{
+				_imageUrl = value;
+			}
+			
+			public function get isOpen():Boolean
+			{
+				return _isOpen;
+			}
+			
+			public function set isOpen(value:Boolean):void
+			{
+				_isOpen = value;
+			}
+			
+			
+			private function initlize(event:FlexEvent):void
+			{
+				
+				this.addEventListener(MDIWindowEvent.CLOSE,closeWin);
+				
+				this.maximizeRestoreBtn.enabled=false;
+				this.maximizeRestoreBtn.visible=false;
+			    this.doubleClickEnabled=false;
+				this.minimizeBtn.visible=false;
+				//Config.midCanvs.windowManager.add(this);
+				
+			}
+			//			public  function minlize(event:MDIWindowEvent):void
+			//			{
+			//				event.preventDefault();
+			//			}
+			//			public  function maxlize(event:MDIWindowEvent):void
+			//			{
+			//				event.preventDefault();
+			//			}
+			public  function closeWin(event:MDIWindowEvent):void{
+				event.preventDefault();
+				this.visible=false;
+				this.removeAllChildren();
+				isOpen=false;
+			}
+			
+			
+
+
+
+		]]>
+	</fx:Script>
+</code:MDIWindow>

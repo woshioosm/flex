@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 width="900" height="460"  left="2" right="2" bottom="2" top="2" creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*">
+	
+	<fx:Declarations>
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService"/>
+        <s:CallResponder id="resultResp" result="resultResp_resultHandler(event)"/>
+		<s:CallResponder id="sourceResp" result="sourceResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.FusionResultObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionResultDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionSourceDataHandler;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.TFusionresult;
+			
+			[Bindable]
+			private var resultArray:ArrayCollection=new ArrayCollection(); //融合结果
+			[Bindable]
+			private var SourceArray:ArrayCollection=new ArrayCollection(); //融合源数据
+		
+			
+			protected function resultResp_resultHandler(event:ResultEvent):void
+			{
+				CursorManager.removeAllCursors();
+				var dataHandler:FusionResultDataHandler=new FusionResultDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(resultArray);
+			}
+			
+			
+			protected function sourceResp_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:FusionSourceDataHandler=new FusionSourceDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(SourceArray);
+				CursorManager.removeAllCursors();
+			}
+			public override function loadData():void{
+				CursorManager.setBusyCursor();
+				Config.fusionResultCurPage=0;
+				resultResp.token=requirementFusionService.showFusionResultList(30,Config.fusionResultCurPage);
+			}
+			
+			
+			public function loadResult(result:ArrayCollection):void{
+				resultArray.removeAll();
+				SourceArray.removeAll();
+				var dataHandler:FusionResultDataHandler=new FusionResultDataHandler(result);
+				dataHandler.bindData(resultArray);
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+
+
+			protected function adg1_itemClickHandler(event:ListEvent):void
+			{
+				// TODO Auto-generated method stub
+				SourceArray.removeAll();
+				CursorManager.setBusyCursor();
+				var id:String=(adg1.selectedItem as FusionResultObj).uuid;
+				sourceResp.token=requirementFusionService.showFusionSource(id);
+				
+			}
+
+		]]>
+	</fx:Script>
+	<mx:VDividedBox   id="divideBox" width="100%" height="100%"  left="2" right="2" top="5" bottom="5">
+		<mx:Canvas width="100%" height="45%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+			<mx:AdvancedDataGrid sortableColumns="false" id="adg1" dataProvider="{resultArray}" itemClick="adg1_itemClickHandler(event)" designViewDataType="flat" 
+								 left="10" right="10" top="15" bottom="0" fontFamily="微软雅黑" fontSize="13">
+				<mx:columns>
+					<mx:AdvancedDataGridColumn headerText="序 号" width="70" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+					<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="90" width="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+					<mx:AdvancedDataGridColumn headerText="影像范围"  minWidth="160" width="160" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+					<mx:AdvancedDataGridColumn headerText="幅宽"  width="70" minWidth="90" dataField="imageWidth"/>
+					<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+					<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+					<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="110" width="110" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+				</mx:columns>
+			</mx:AdvancedDataGrid>
+			<s:Label x="0" y="2" text="融合结果" fontFamily="微软雅黑" fontSize="13"/>
+		</mx:Canvas>
+		<mx:Canvas width="100%" height="55%"  verticalScrollPolicy="off" horizontalScrollPolicy="off">
+			
+			<mx:AdvancedDataGrid sortableColumns="false" id="adg0" dataProvider="{SourceArray}" designViewDataType="flat"
+								 left="10" right="10" top="17" bottom="10" fontFamily="微软雅黑" fontSize="13">
+				<mx:columns>
+					<mx:AdvancedDataGridColumn headerText="序 号" width="70" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+					<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="90" width="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+					<mx:AdvancedDataGridColumn headerText="影像范围"  minWidth="160" width="160" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+					<mx:AdvancedDataGridColumn headerText="幅宽"  width="90" minWidth="90" dataField="imageWidth"/>
+					<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+					<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+					<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="110" width="110" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+				</mx:columns>
+			</mx:AdvancedDataGrid>
+			<s:Label x="0" y="2" text="融合源数据" fontFamily="微软雅黑" fontSize="13"/>
+		</mx:Canvas>
+	</mx:VDividedBox>
+
+</Container:TheCanvas>

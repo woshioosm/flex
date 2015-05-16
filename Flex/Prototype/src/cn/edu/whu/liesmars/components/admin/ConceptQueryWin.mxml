@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 left="2" right="2" top="2" bottom="2" 
+					 width="574" height="346" fontFamily="微软雅黑"
+					 creationComplete="thecanvas1_creationCompleteHandler(event)" xmlns:services="services.*">
+	<fx:Declarations>
+		<services:ConceptQueryService id="conceptQueryService" destination="ConceptQueryService"/>
+		<s:CallResponder id="queryResult" result="queryResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.WaitingWin.ConceptWaitingWin;
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.ConceptQryResultObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			import valueObjects.ConceptQryResult;
+			import valueObjects.ConceptQryRsltFlex;
+			
+			
+			[Bindable]
+			private var presion:String=""; //覆盖率
+			
+			[Bindable]
+			private var ConceptQryResultList:ArrayCollection=new ArrayCollection();
+			
+			private var queryStringList:ArrayCollection=new ArrayCollection(); //批量查询语句
+			private  var singleFile:FileReference=new FileReference(); //打开文件
+			
+			
+			private var waitingWin:ConceptWaitingWin=new ConceptWaitingWin();
+			protected function thecanvas1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			//单句查询
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				
+				if(input.text==null||StringUtil.trim(input.text)==""){
+					mx.controls.Alert.show("输入不能为空");
+					return ;
+				}
+				var inputList:ArrayCollection=new ArrayCollection();
+				inputList.addItem(input.text);
+				
+				queryResult.token=conceptQueryService.QryConcepts(inputList,Config.searchId);
+				Config.midCanvs3.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+			}
+			protected function queryResult_resultHandler(event:ResultEvent):void
+			{
+				waitingWin.stopProgress();
+				Config.midCanvs3.windowManager.remove(waitingWin);
+				
+				ConceptQryResultList.removeAll();
+				
+				var result:ConceptQryRsltFlex=event.result as ConceptQryRsltFlex;
+				if(result==null){
+					mx.controls.Alert.show("无数据返回");
+				}
+				var resultList:ArrayCollection=result._qryRslt;
+				presion=(result._presion*100).toFixed(2)+"%";
+				
+				for each(var concept:ConceptQryResult in resultList ){
+					var conceptObj:ConceptQryResultObj=new ConceptQryResultObj();
+					conceptObj.conceptName=concept._conceptName;
+					conceptObj.conceptExists=concept._conceptExists==true?"存在":"不存在";
+					var locationLength:int=concept._conceptLocation==null?0:concept._conceptLocation.length;
+					if(locationLength==0){
+						
+					}
+					else if(locationLength==1){
+						conceptObj.location=concept._conceptLocation.getItemAt(0).toString();
+					}else{
+						var arr:ArrayCollection=new ArrayCollection();
+						var i:int=0;
+						for each(var str:String in concept._conceptLocation){
+							var conceptObj2:ConceptQryResultObj=new ConceptQryResultObj();
+							conceptObj2.conceptName=(++i).toString();
+							conceptObj2.conceptExists="";
+							conceptObj2.location=str;
+							arr.addItem(conceptObj2);
+						}
+						conceptObj.children=arr;
+					}
+					ConceptQryResultList.addItem(conceptObj);
+				}
+				
+			}
+			//打开文件
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				singleFile.browse();				
+				singleFile.addEventListener(Event.SELECT,onFileSelected);
+			}
+			private function onFileSelected(e:Event):void{
+				singleFile.load();
+				singleFile.addEventListener(Event.COMPLETE,onComplete);
+				
+			}
+			private function onComplete(e:Event):void{
+				var bytes:ByteArray = singleFile.data;
+				
+				var temp:String="";
+				var flag:int=0;
+				var str:String=bytes.readMultiByte(bytes.length,"GBK");
+				var queryStrs:Array=str.split("\n");
+				queryStringList.removeAll();
+				queryStringList=new ArrayCollection(queryStrs);
+				
+				for(var i:int=0;i<queryStringList.length;i++){
+					if(StringUtil.trim(queryStringList.getItemAt(i).toString())=="")
+					{
+						queryStringList.removeItemAt(i);
+						i--;
+					}
+				}
+				if(queryStringList!=null&&queryStringList.length>0){
+					queryResult.token=conceptQueryService.QryConcepts(queryStringList,Config.searchId);
+					waitingWin.init();
+					Config.midCanvs3.windowManager.add(waitingWin);
+					waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+					waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+				}else{
+					mx.controls.Alert.show("文件内容为空");
+					return;
+				}
+			}	
+			
+			
+		]]>
+	</fx:Script>
+	<s:TextInput id="input" x="109" y="16" width="205"/>
+	<s:Label x="23" y="22" text="输入语义概念"/>
+	<s:Button x="334" y="17" label="查询" click="button1_clickHandler(event)"/>
+	<mx:AdvancedDataGrid id="adg1" designViewDataType="tree" right="9" left="11" top="52" bottom="39">
+		<mx:dataProvider>
+			<mx:HierarchicalData  source="{ConceptQryResultList}"
+								  childrenField="children" />
+		</mx:dataProvider>
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="概念名" width="100" dataField="conceptName"/>
+			<mx:AdvancedDataGridColumn headerText="是否存在" width="100" dataField="conceptExists"/>
+			<mx:AdvancedDataGridColumn headerText="概念位置" dataField="location"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	<s:Label x="16" bottom="14" text="覆盖率:"/>
+	<s:Label x="60" bottom="15" text="{presion}"/>
+	<s:Button x="416" y="17" label="文件导入" click="button2_clickHandler(event)"/>
+</Container:TheCanvas>

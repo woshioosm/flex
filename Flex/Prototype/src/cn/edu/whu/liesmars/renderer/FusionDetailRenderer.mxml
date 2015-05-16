@@ -1,0 +1,106 @@
+<mx:HBox xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 horizontalAlign="center" xmlns:services="services.*">
+	
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService" fault="naturalLangService_faultHandler(event)"/>
+		<mx:CallResponder id="getDetailResp" result="getDetailResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.RequirementInputObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			import cn.edu.whu.liesmars.components.admin.requirementFusion.DetailPopUp;
+			import cn.edu.whu.liesmars.components.admin.suggestionAdmin.SuggestionDetailWin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.NLSearchResult;
+			import valueObjects.TDeepFrameWithLang;
+			import valueObjects.TDeepframework;
+			private var frame:String;
+			private var dataClone:Object;
+			
+			
+			override public function set data(value:Object):void
+			{      
+				dataClone=value;
+				if(value != null)
+				{
+					super.data = value;
+//					frame=data.deepFrame;
+				}
+			}    
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(dataClone==null){
+					mx.controls.Alert.show("无数据");
+					return;
+				}
+				
+				if(dataClone.deepFrame==null||dataClone.deepFrame==""){
+					getDetailResp.token=naturalLangService.getDetailByUuid(dataClone.uuid);
+				}
+				else{
+					var tDeepFrameWork:TDeepframework=new TDeepframework();
+					tDeepFrameWork.deepFrameXml=dataClone.deepFrame;
+					popUp(tDeepFrameWork);
+				}
+			}
+			
+			private function popUp(frame:TDeepframework):void{
+				var pop:DetailPopUp=new DetailPopUp();	
+				Controller.container.removeAllChildren();
+				pop.left=0;
+				pop.right=0;
+				pop.top=0;
+				pop.bottom=0;
+				Controller.container.addChild(pop);
+				Controller.container.visible=true;
+				Controller.container.width=pop.width;
+				Controller.container.height=pop.height+15;
+				Controller.container.title="融合项详细查看";
+				
+				pop.loadData(frame);
+			}
+			
+			
+
+			protected function getDetailResp_resultHandler(event:ResultEvent):void
+			{
+				var result:NLSearchResult=event.result as NLSearchResult;
+				if(result==null||result.deepFramework==null){
+					mx.controls.Alert.show("没有数据");
+					CursorManager.removeAllCursors();
+					return ;
+				}
+				dataClone.deepFrame=result.deepFramework;
+				
+				var tDeepFrameWork:TDeepframework=new TDeepframework();
+				tDeepFrameWork.deepFrameXml=result.deepFramework;
+				
+				popUp(tDeepFrameWork);
+			}
+
+
+			protected function naturalLangService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接错误");
+			}
+
+		]]>
+	</fx:Script>
+	
+	<mx:Button label="详细" click="button1_clickHandler(event)"  fontFamily="微软雅黑"/>
+</mx:HBox> 

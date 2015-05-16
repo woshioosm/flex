@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*" 
+					 creationComplete="parentmdi1_creationCompleteHandler(event)"
+					 headerHeight="0"
+					 verticalScrollPolicy="off"
+					 horizontalScrollPolicy="off"
+					 backgroundAlpha="0.8"
+					 layout="absolute" width="302" height="50" xmlns:services="services.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.controls.SWFLoader;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.rpc.CallResponder;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.ProgressObj;
+			protected var timer:Timer=new Timer(800);
+		    public var progessResp:CallResponder=new CallResponder();
+			public var isStoped:Boolean=false;
+			
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.maximizeRestoreBtn.visible=false;
+				this.minimizeBtn.visible=false;
+				progessResp.addEventListener(ResultEvent.RESULT,progessResp_resultHandler);
+				this.resizable=false;
+				init();
+			}
+			public function run():void{
+				
+			}
+			public function runTimer(event:TimerEvent):void{
+				isStoped=false;
+				run();
+			}
+			
+			public function init():void{
+				if(progressBar!=null){
+					this.maximizeRestoreBtn.visible=false;
+					this.minimizeBtn.visible=false;
+					this.closeBtn.visible=false;
+					this.closeBtn.enabled=false;
+					this.resizable=false;
+					progressBar.setProgress(0,0);
+					timer.addEventListener(TimerEvent.TIMER,runTimer);
+					timer.start();
+				}
+			}
+			protected function progessResp_resultHandler(event:ResultEvent):void
+			{
+				var progress:ProgressObj=event.result as ProgressObj;
+				progressBar.setProgress(progress.progress,progress.totleCount);
+			}
+			public  function stopProgress():void{
+				isStoped=true;
+				timer.removeEventListener(TimerEvent.TIMER,runTimer);
+				if(timer.running){
+					timer.stop();
+				}
+			}
+			
+			protected function progressBar_completeHandler(event:Event):void
+			{
+				timer.removeEventListener(TimerEvent.TIMER,runTimer);
+				if(timer.running)
+					timer.stop();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<!--<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>-->
+		<!--<s:CallResponder id="progessResp" result="progessResp_resultHandler(event)"/>-->
+	</fx:Declarations>
+	<mx:ProgressBar id="progressBar" mode="manual" label="正在处理%3%"  labelPlacement="center" x="10" y="10" width="280" height="28" complete="progressBar_completeHandler(event)"/>
+</Container:ParentMDI>

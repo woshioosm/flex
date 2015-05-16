@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 verticalScrollPolicy="off" horizontalScrollPolicy="off"
+					 left="2" right="2" top="2" bottom="2"
+					 width="900" height="440"  minWidth="830" minHeight="430"  
+					 creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*">
+	
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService" />
+		<s:CallResponder id="fusionInputList" result="fusionInputList_resultHandler(event)" />
+		<s:CallResponder id="fusionResult" result="fusionResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.WaitingWin.FusionWaitingWin;
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.Container.LeftContainer_Admin;
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.PageResult;
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.RequirementInputObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionInputWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CalendarLayoutChangeEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.TextOperationEvent;
+			
+			import valueObjects.ResultWithPageTotle;
+			import valueObjects.TDeepframework;
+			//			[Bindable]
+			//		    private var param1:int;
+			//			[Bindable]
+			//			private var param2:int;
+			//			[Bindable]
+			//			private var param3:int;
+			//			[Bindable]
+			//			private var param4:int;
+			
+			private  var singleFile:FileReference=new FileReference(); //打开文件
+			
+			
+			private var curStartTime:String;
+			
+			private var curEndTime:String;
+			
+			//			[Bindable]
+			//			private var startTime:String;
+			//			[Bindable]
+			//			private var endTime:String;
+			
+			private var endTimeReal:String; //因为 后台查询 若endTime为25号 则查不出25号 而是24和24前 故在此退后一天
+			
+			private var pageCount:int=0; //总的分页数
+			[Bindable]
+			private var curPage:int=0; //当前分页数 从0开始算
+			private var resultsListWithPage:Dictionary=new Dictionary();//类型PageResult  记录分页和分页下的数据
+			
+			[Bindable]
+			private var pageList:ArrayCollection=new ArrayCollection();
+			
+			
+			[Bindable]
+			private var inputArray:ArrayCollection=new ArrayCollection();
+			
+			
+			private var waitingWin:FusionWaitingWin=new FusionWaitingWin();
+			//private var latestFusionResult:FusionResultWin=new FusionResultWin();
+			
+			private function Init():void{
+				//				param1Hslider.minimum=0;
+				//				param2Hslider.minimum=0;
+				//				param3Hslider.minimum=0;
+				//				param4Hslider.minimum=0;
+				//				
+				//				param1Hslider.maximum=100;
+				//				param2Hslider.maximum=100;
+				//				param3Hslider.maximum=100;
+				//				param4Hslider.maximum=100;
+				
+				//				param1=38;
+				//				param2=59;
+				//				param3=64;
+				//				param4=91;
+			}
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//loadData();
+				
+			}
+			public function clearAll():void{
+				inputArray.removeAll();
+				clearResultsListWithPage();
+				clearRadioBtn();
+				pageCount=0;
+				curPage=0;
+			}
+			public override function clearDate():void{
+				clearAll();
+			}
+			
+			public override function loadData():void{
+				clearAll();
+				dfStartTime.selectedDate=new Date();
+				dfEndTime.selectedDate=new Date();
+				
+			}
+			protected function doWithResult():void{
+				
+			}		
+			//读取融合输入
+			protected function fusionInputList_resultHandler(event:ResultEvent):void
+			{
+				
+				var curResult:ResultWithPageTotle=event.result as ResultWithPageTotle;
+				
+				if(curResult==null||curResult.result==null||curResult.result.length==0){
+					lbNext.enabled=false;
+					mx.controls.Alert.show("无数据");
+					CursorManager.removeAllCursors();
+					return ;
+				}
+				pageCount=curResult.totlePage%20==0?curResult.totlePage/20:curResult.totlePage/20+1;
+				
+				lbNext.enabled=true;
+				lbLast.enabled=true;
+				if(curPage==pageCount-1){
+					lbNext.enabled=false;
+				}
+				if(curPage==0){
+					lbLast.enabled=false;
+				}
+				
+				
+				
+				pageList.removeAll();
+				for(var i:int=1;i<=pageCount;i++){
+					pageList.addItem(i.toString());
+				}
+				cbPageList.selectedIndex=curPage;
+				var curInputArray:ArrayCollection=new ArrayCollection();
+				var dataHandler:FusionInputWinDataHandler=new FusionInputWinDataHandler(curResult.result as ArrayCollection);
+				dataHandler.bindData(curInputArray);
+				inputArray=curInputArray;
+				
+				resultsListWithPage[curPage]=curInputArray;
+				
+				CursorManager.removeAllCursors();
+			}
+			
+			//融合结果
+			protected function fusionResult_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				// Config.midCanvs3.windowManager.add(latestFusionResult);
+				// latestFusionResult.loadData(event.result as ArrayCollection);
+				
+				waitingWin.stopProgress();
+				Config.midCanvs3.windowManager.remove(waitingWin);
+				
+				if((Controller.leftContainer_admin as LeftContainer_Admin).lastFusionresultWin==null){
+					(Controller.leftContainer_admin as LeftContainer_Admin).lastFusionresultWin=new LatestFusionResultWin();
+					(Controller.leftContainer_admin as LeftContainer_Admin).lastFusionresultWin.name="融合结果查看";
+				}
+				(Controller.leftContainer_admin as LeftContainer_Admin).canShow=true;
+				(Controller.leftContainer_admin as LeftContainer_Admin).curWin.label="融合结果查看";
+				setParent((Controller.leftContainer_admin as LeftContainer_Admin).lastFusionresultWin);
+				(Controller.leftContainer_admin as LeftContainer_Admin).lastFusionresultWin.loadResult(event.result as ArrayCollection);
+			}
+			
+			private function setParent(win:Canvas):void{
+				(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi.removeAllChildren();
+				if(win!=null){
+					(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi.title="融合结果查看";
+					(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi.width=win.width+4;
+					(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi.height=win.height+4+22; // 20为headerhight
+					(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi.addChild(win);
+					
+					Tweener.addTween((Controller.leftContainer_admin as LeftContainer_Admin).parentMdi,{x:(Controller.leftContainer_admin as LeftContainer_Admin).width-4,y:50,transition :"linear", time:0.2});
+				}
+			}
+			
+			private function clearResultsListWithPage():void{
+				for(var i:int=0;i<pageCount;i++){
+					if(resultsListWithPage[i]!=null){
+						resultsListWithPage[i]=null;
+						delete resultsListWithPage[i];
+					}
+					   
+				}
+			}
+			
+			/**
+			 * 控件事件
+			 * */
+			
+			//查看融合关系  作废
+			protected function btn_fusionRelation_clickHandler(event:MouseEvent):void{
+				var list:ArrayCollection=new ArrayCollection();
+				for(var i:int=0;i<pageCount;i++){
+					if(resultsListWithPage[i]!=null){
+						for each(var input:RequirementInputObj in resultsListWithPage[i]){
+							if(input.checked==true){
+								list.addItem(input.uuid);
+							}
+						}
+					}
+				}
+				if(list.length==0){
+					mx.controls.Alert.show("没有选择任何项");
+					return;
+				}
+				
+				
+				var fusionRelationWin:FusionRelation=new FusionRelation();
+				fusionRelationWin.init(list);
+				Config.midCanvs2.windowManager.add(fusionRelationWin);
+				
+			}
+			
+			
+			//提交融合请求
+			protected function btnSubmit_clickHandler(event:MouseEvent):void
+			{
+				var list:ArrayCollection=new ArrayCollection();
+				//				for each(var input:RequirementInputObj in inputArray){
+				//					if(input.checked==true){
+				//						list.addItem(input.framework);
+				//					}
+				//				}
+				for(var i:int=0;i<pageCount;i++){
+					if(resultsListWithPage[i]!=null){
+						for each(var input:RequirementInputObj in resultsListWithPage[i]){
+							if(input.checked==true){
+								list.addItem(input.uuid);
+							}
+						}
+					}
+				}
+				if(list==null||list.length==0)
+				{
+					mx.controls.Alert.show("未选择任何项");
+					return;
+				}
+				fusionResult.token=requirementFusionService.fusionInputFromList(list,Config.searchId,null,null,null,null);
+				
+				waitingWin.init();
+				Config.midCanvs3.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+				//				mx.controls.Alert.show("提交成功");
+			}
+			
+			
+			/***************************文件操作*********************************/
+			//			private var  fileList:FileReferenceList=new FileReferenceList();
+			//			private var cout:int;
+			//			private var index:int;
+			//			protected function btnOpen_clickHandler(event:MouseEvent):void
+			//			{
+			//				fileList.browse();				
+			//				fileList.addEventListener(Event.SELECT,onFileSelected);
+			//			}
+			//			private function onFileSelected(e:Event):void{
+			//				cout=fileList.fileList.length;
+			//				index=1;
+			//				for each(var f:FileReference in fileList.fileList){
+			//					f.load();
+			//					f.addEventListener(Event.COMPLETE,onComplete);
+			//				}				
+			//			}
+			//			
+			//			private function onComplete(e:Event):void{
+			//				var bytes:ByteArray = e.target.data;
+			//				var xml:String=bytes.readUTFBytes(bytes.length);
+			//				bindFusion(xml);
+			//				(e.target as FileReference).removeEventListener(Event.COMPLETE,onComplete);
+			//				
+			//			}
+			//			private function bindFusion(xmlStr:String):void{
+			//				var requirementInput:RequirementInputObj=new RequirementInputObj();
+			//				var xml:XML=GetDataFromXml.formatXmlString(xmlStr);
+			//				var tdeepFramework:TDeepframework=new TDeepframework();
+			//				tdeepFramework.deepFrameXml=xmlStr;
+			//				requirementInput.deepFrame=xmlStr;
+			//				requirementInput.checked=false;
+			//				requirementInput.framework=tdeepFramework;
+			//				requirementInput.uuid=GetDataFromXml.getUUID(xml);                 // 设置uuid
+			//				requirementInput.imageArea=GetDataFromXml.getImageRange(xml);
+			//				requirementInput.imageDate=GetDataFromXml.getImageTime(xml);
+			//				requirementInput.spacialResolution=GetDataFromXml.getSpatialResolution(xml);
+			//				requirementInput.spectrumResolution=GetDataFromXml.getSpectralResolution(xml);
+			//				requirementInput.timeResolution=GetDataFromXml.getTemporalResolution(xml);
+			//				inputArray.addItem(requirementInput);
+			//			}
+			
+			protected function rbSelectAll_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbSelectAll.selected==true)
+				{
+					for each(var requirementInput:RequirementInputObj in inputArray){
+						requirementInput.checked=true;
+					}
+					
+				}
+				adg1.dataProvider=inputArray;
+			}
+			
+			
+			
+			protected function rbRemoveAll_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbRemoveAll.selected==true)
+				{
+					for each(var requirementInput:RequirementInputObj in inputArray){
+						if(requirementInput.checked==true)
+							requirementInput.checked=false;
+						else if(requirementInput.checked==false)
+							requirementInput.checked=true;
+					}
+				}
+				adg1.dataProvider=inputArray;
+			}
+			
+			
+			//			protected function dcStartTime_changeHandler(event:CalendarLayoutChangeEvent):void
+			//			{
+			//				// TODO Auto-generated method stub
+			//				dcStartTime.visible=false;
+			//				startTime=dcStartTime.selectedDate.fullYear+"-"+(dcStartTime.selectedDate.month+1)+"-"+dcStartTime.selectedDate.date;
+			//			}
+			//			
+			//			
+			//			protected function dcEndTime_changeHandler(event:CalendarLayoutChangeEvent):void
+			//			{
+			//				// TODO Auto-generated method stub
+			//				dcEndTime.visible=false;
+			//				endTime=dcEndTime.selectedDate.fullYear+"-"+(dcEndTime.selectedDate.month+1)+"-"+dcEndTime.selectedDate.date;
+			//				endTimeReal=dcEndTime.selectedDate.fullYear+"-"+(dcEndTime.selectedDate.month+1)+"-"+(dcEndTime.selectedDate.date+1);
+			//			}
+			
+			//开始筛选
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(dfStartTime.selectedDate==null ||dfEndTime.selectedDate==null){
+					mx.controls.Alert.show("时间范围有误");
+				}
+				
+				curStartTime=dfStartTime.text;
+			
+				var endDate:Date=dfEndTime.selectedDate;
+				curEndTime=endDate.fullYear+"-"+(endDate.month+1)+"-"+(endDate.date+1);
+				
+				pageList.removeAll();
+				clearResultsListWithPage();
+				pageCount=0;
+				curPage=0;
+				// TODO Auto-generated method stub
+				if(dfStartTime.selectedDate>dfEndTime.selectedDate){
+					mx.controls.Alert.show("时间范围有误");
+					return ;
+				}
+				
+				CursorManager.setBusyCursor();
+				clearRadioBtn();
+				fusionInputList.token=requirementFusionService.showDeepFramework(curStartTime,curEndTime,null,20,curPage);
+			}
+			
+			
+			protected function lbLast_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				curPage--;
+				if(resultsListWithPage[curPage]==null){
+					fusionInputList.token=requirementFusionService.showDeepFramework(curStartTime,curEndTime,null,20,curPage);
+					CursorManager.setBusyCursor();
+				}else{
+					inputArray=resultsListWithPage[curPage];
+					lbNext.enabled=true;
+					lbLast.enabled=true;
+					if(curPage==pageCount-1){
+						lbNext.enabled=false;
+					}
+					if(curPage==0){
+						lbLast.enabled=false;
+					}
+				}
+				clearRadioBtn();
+				adg1.dataProvider=inputArray;
+				cbPageList.selectedIndex=curPage-1;
+				
+			}
+			
+			
+			protected function lbNext_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				curPage++;
+				if(resultsListWithPage[curPage]==null){
+					CursorManager.setBusyCursor();
+					fusionInputList.token=requirementFusionService.showDeepFramework(curStartTime,curEndTime,null,20,curPage);	
+				}else{
+					inputArray=resultsListWithPage[curPage];
+					lbNext.enabled=true;
+					lbLast.enabled=true;
+					if(curPage==pageCount-1){
+						lbNext.enabled=false;
+					}
+					if(curPage==0){
+						lbLast.enabled=false;
+					}
+				}
+				clearRadioBtn();
+				adg1.dataProvider=inputArray;
+				cbPageList.selectedIndex=curPage-1;
+				
+			}
+			
+			
+			protected function cbPageList_changeHandler(event:ListEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+				curPage=cbPageList.selectedIndex;
+				if(resultsListWithPage[curPage]==null){
+					fusionInputList.token=requirementFusionService.showDeepFramework(curStartTime,curEndTime,null,20,curPage);
+					CursorManager.setBusyCursor();
+				}else{
+					inputArray=resultsListWithPage[curPage];
+					lbNext.enabled=true;
+					lbLast.enabled=true;
+					if(curPage==pageCount-1){
+						lbNext.enabled=false;
+					}else if(curPage==0){
+						lbLast.enabled=false;
+					}
+				}
+				clearRadioBtn();
+				adg1.dataProvider=inputArray;
+				cbPageList.selectedIndex=curPage;
+			}
+			
+			private function clearRadioBtn():void{
+				rbSelectAll.selected=false;
+				rbRemoveAll.selected=false;
+			}
+		]]>
+	</fx:Script>
+	<mx:Canvas left="0" right="0" top="0" bottom="0">
+		<!--<s:Label x="20" y="20" text="[1] 从文件导入" height="24" width="106"  backgroundAlpha="0" fontFamily="微软雅黑"/>
+		<s:Button label="导入文件" left="133" top="15" click="btnOpen_clickHandler(event)" width="139" fontFamily="微软雅黑"/>-->
+		<s:Label x="19" y="69" text="从列表选择输入" height="15" width="107"  backgroundAlpha="0" fontFamily="微软雅黑" fontSize="14"/>
+		<mx:AdvancedDataGrid sortableColumns="false" id="adg1" dataProvider="{inputArray}" designViewDataType="flat" left="19" right="21" top="90" bottom="92" fontFamily="微软雅黑" fontSize="13">
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="选择" width="70" resizable="false" dataField="checked" itemRenderer="cn.edu.whu.liesmars.renderer.CheckBoxRenderer"/>
+				<mx:AdvancedDataGridColumn headerText="序号" width="70" resizable="false" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer" />
+				<!--<mx:AdvancedDataGridColumn headerText="领域" width="70" minWidth="70" dataField="field"/>
+				<mx:AdvancedDataGridColumn headerText="任务" width="70" minWidth="70" dataField="task"/>
+				<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="70" dataTipField="imageDate" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+				-->
+				<mx:AdvancedDataGridColumn headerText="自然语言描述"  dataField="natureLang"/>
+				<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" resizable="false"  width="160" dataField="imageArea" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+				<mx:AdvancedDataGridColumn headerText="查看详细" width="80" resizable="false" itemRenderer="cn.edu.whu.liesmars.renderer.FusionDetailRenderer" />
+				<!--
+				<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+				<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+				<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="90" width="90" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+				-->
+			</mx:columns>
+		</mx:AdvancedDataGrid>
+		<s:RadioButton id="rbSelectAll" label="全选"  change="rbSelectAll_changeHandler(event)" left="19" bottom="35"/>	
+		<s:RadioButton id="rbRemoveAll" label="反选"  change="rbRemoveAll_changeHandler(event)" left="73" bottom="35"/>	
+		<mx:Button label="提交融合请求" id="btnSubmit" right="59" bottom="16" width="205" click="btnSubmit_clickHandler(event)" />
+		<!--<s:Button id="btn_fusionRelation" right="272" bottom="16" label="查看融合关系图" width="205" click="btn_fusionRelation_clickHandler(event)"/>
+		-->
+		<s:Label text="筛选条件:" fontFamily="微软雅黑" fontSize="14" left="20" top="18"/>
+		<!--<mx:DateChooser id="dcStartTime" visible="false" height="156" width="165"  change="dcStartTime_changeHandler(event)" left="199" top="38"/>
+		<s:TextInput editable="false" text="{startTime}" width="96" left="199" top="15"/>
+		<s:Button id="btnStartTime" label="开始时间" width="68" fontFamily="微软雅黑" click="btnStartTime_clickHandler(event)" left="297" top="15"/>
+		-->
+		<!--<s:TextInput editable="false" text="{endTime}" width="96" left="388" top="15"/>
+		<s:Label text="~~" width="20" left="369" top="20"/>
+		<s:Button id="btnEndTime" label="终止时间" fontFamily="微软雅黑" click="btnEndTime_clickHandler(event)" left="486" top="15"/>
+		-->
+		<s:Label text="~~" width="20" left="389" top="20"/>
+		<!--<mx:DateChooser id="dcEndTime" visible="false" height="156" width="166" change="dcEndTime_changeHandler(event)" left="389" top="38"/>
+		-->
+		<s:Label text="查询时间过滤:" fontFamily="微软雅黑" left="110" top="20"/>
+		<s:Button label="开始查询" fontFamily="微软雅黑" click="button1_clickHandler(event)" left="618" top="15"/>
+		<mx:LinkButton id="lbLast" enabled="false" label="上一页" width="52" fontFamily="微软雅黑" fontSize="11" height="20"  click="lbLast_clickHandler(event)" right="232" bottom="61"/>
+		<mx:LinkButton id="lbNext" enabled="false" label="下一页" width="52" fontSize="11" fontFamily="微软雅黑" height="20"  click="lbNext_clickHandler(event)" right="148" bottom="61"/>
+		<s:Label text="{curPage+1}" id="lbPage" fontSize="11" fontFamily="微软雅黑" width="47" verticalAlign="middle" textAlign="center" right="191" bottom="64"/>
+		<s:Label text="跳转到" fontFamily="微软雅黑" right="103" bottom="63"/>
+		<mx:ComboBox id="cbPageList" text="{curPage+1}" dataProvider="{pageList}" width="69" change="cbPageList_changeHandler(event)" fontFamily="微软雅黑" right="28" bottom="59"></mx:ComboBox>
+		<mx:DateField id="dfStartTime" x="199" y="16" width="185" formatString="YYYY-MM-DD"/>
+		<mx:DateField id="dfEndTime" x="412" y="16" width="186" formatString="YYYY-MM-DD"/>
+		
+	</mx:Canvas>
+</Container:TheCanvas>

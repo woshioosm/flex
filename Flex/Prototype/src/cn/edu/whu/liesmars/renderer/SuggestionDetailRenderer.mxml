@@ -1,0 +1,88 @@
+<mx:HBox xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 horizontalAlign="center" xmlns:services="services.*">
+	
+	<fx:Declarations>
+		<services:UserRecommendationService id="userRecommendationService" destination="UserRecommendationService" fault="userRecommendationService_faultHandler(event)"/>
+		<mx:CallResponder id="recommendationResp" result="recommendationResp_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.ProductPublishObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.components.admin.suggestionAdmin.SuggestionDetailWin;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			
+			
+			private var result:ProductPublishObj;
+			private var prodcutId:String="";
+			private var taskName:String="";
+			private var similarityValues:ArrayCollection; 
+			override public function set data(value:Object):void
+			{   
+				if(value != null)
+				{
+					super.data = value;
+					result=value as ProductPublishObj;
+					prodcutId=result.productID;
+					similarityValues=result.similarityValues;
+					if(similarityValues!=null&&similarityValues.length>=7){
+						if(similarityValues.getItemAt(6)!=null)
+					    	taskName=similarityValues.getItemAt(6).toString();
+					}
+					
+				}
+			}    
+			
+			
+			protected function recommendationResp_resultHandler(event:ResultEvent):void
+			{
+				var arr:ArrayCollection=event.result as ArrayCollection;
+				
+				if(arr==null||arr.length==0){
+					mx.controls.Alert.show("无数据");
+					return;
+				}
+				var pop:SuggestionDetailWin=new SuggestionDetailWin();
+				
+				Controller.container.removeAllChildren();
+				pop.left=0;
+				pop.right=0;
+				pop.top=0;
+				pop.bottom=0;
+				Controller.container.addChild(pop);
+				Controller.container.visible=true;
+				Controller.container.width=pop.width;
+				Controller.container.height=pop.height+15;
+				
+				Controller.container.title="详细信息";
+				
+				pop.loadData(arr,prodcutId,taskName,similarityValues);
+				
+			}
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				recommendationResp.token=userRecommendationService.showResultCompareInfo(prodcutId,taskName);
+			}
+			
+
+			protected function userRecommendationService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.managers.CursorManager.removeAllCursors();
+				mx.controls.Alert.show("网络连接错误");
+			}
+
+		]]>
+	</fx:Script>
+	
+	<mx:Button label="详细" click="button1_clickHandler(event)"  fontFamily="微软雅黑"/>
+</mx:HBox> 

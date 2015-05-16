@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 width="950" height="400"  left="2" right="2" bottom="2" top="2"
+		 creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*" fontFamily="微软雅黑" fontSize="13">
+  
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.UserFeedbackHandleObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.DataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserFeedBackDataHandler;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+
+			[Bindable]
+			private var QueryFeedBackArray:ArrayCollection=new ArrayCollection();
+			public override function loadData():void{
+				feedbackHandleRes.token=naturalLangService.showAdminFeedbackDeepFrame();
+			}
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			//	loadData();
+			}
+			protected function feedbackHandleRes_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:UserFeedBackDataHandler=new UserFeedBackDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(QueryFeedBackArray);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>
+		<s:CallResponder id="feedbackHandleRes" result="feedbackHandleRes_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:AdvancedDataGrid id="adg1" sortableColumns="false" designViewDataType="flat" horizontalScrollPolicy="off"
+						 dataProvider="{QueryFeedBackArray}" left="10" right="10" top="10" bottom="10">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" width="70" minWidth="70"  itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="反馈者" width="70" minWidth="70" dataField="feedbackUser"/>
+			<mx:AdvancedDataGridColumn headerText="领域" width="70" minWidth="70" dataField="field"/>
+			<mx:AdvancedDataGridColumn headerText="任务" width="70" minWidth="70" dataField="task"/>
+			<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="90" width="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围"  width="160" minWidth="160" dataField="imageArea" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="90" width="90" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+			<mx:AdvancedDataGridColumn headerText="操作" width="90" minWidth="90" dataField="id" itemRenderer="cn.edu.whu.liesmars.renderer.Button_FeedbackHandleRenderer" />
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>

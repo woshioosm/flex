@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="534" height="364" title="添加SAR传感器">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.Sensor;
+			import valueObjects.SensorBandInfo;
+			
+			public var returnSensorBandInfo:SensorBandInfo;	
+			var mapTypicalConfPopup;
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				if(t2sensorName.text == null)
+				{
+					Alert.show("必须输入传感器名称!","warning");
+				}
+				else
+				{
+					var item:SensorBandInfo = new SensorBandInfo();
+					item.sensor = new Sensor();
+					item.bands = new Array();
+					
+					item.sensor.name = t2sensorName.text;
+					item.sensor.spectralresolution = new Number(t2spactialResolution.text);
+					item.sensor.timeresolution = new Number(t2TimeResolution.text);
+					item.sensor.imgway = t2imgWay.selectedItem;
+					item.sensor.steroimgway = t2steroimgway.selectedItem;
+					item.sensor.side = new Number(t2side.text);
+					item.sensor.confname = t2confname.text;
+					
+					item.sensor.tracktype = t2tracktype.selectedItem;
+					item.sensor.fabricwidth = new Number(t2fabricWidth.text);
+					item.sensor.snr = new Number(t2snr.text);
+					item.sensor.encounterangle = new Number(t2encounterAngle.text);
+					item.sensor.spectrum = t2spectrum.text;
+					item.sensor.sensortype = 1;
+
+					
+					item.sensor.radioresolution = 0;
+					
+					var polarwayString:String = null;
+					if(t2chkHH.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "HH";
+						}
+						else
+						{
+							polarwayString += ",HH";
+						}
+					}
+					if(t2chkHV.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "HV";
+						}
+						else
+						{
+							polarwayString += ",HV";
+						}
+					}
+					if(t2chkVH.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "VH";
+						}
+						else
+						{
+							polarwayString += ",VH";
+						}
+					}
+					if(t2chkVV.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "VV";
+						}
+						else
+						{
+							polarwayString += ",VV";
+						}
+					}
+					item.sensor.polarway = polarwayString;
+					
+					returnSensorBandInfo = item;
+					var readyEvent:Event = new Event("tab2addSensorBandInfoReadyMessage",false);
+					dispatchEvent(readyEvent);
+					PopUpManager.removePopUp(this);
+				}
+			}				
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+
+			protected function t2btnMapTypicalConfig_clickHandler(event:MouseEvent):void
+			{
+				mapTypicalConfPopup = PopUpManager.createPopUp(this,SensorInfoMapTypicalConfPopup,true);
+				if(t2sensorName.text != null)
+				{
+					mapTypicalConfPopup.sensorname = t2sensorName.text;
+				}
+				mapTypicalConfPopup.addEventListener("mapConfReadyMessage",mapConfReadyMessageHandler);
+				PopUpManager.centerPopUp(mapTypicalConfPopup);
+			}
+			
+			protected function mapConfReadyMessageHandler(event:Event):void
+			{
+				t2confname.text = mapTypicalConfPopup.returnConfName;
+			}
+
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas x="8" y="10" width="518" height="263" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="10" y="20" text="传感器名称" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="50" text="空间分辨率" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="80" text="时间分辨率(次/天)" fontFamily="微软雅黑"/>
+		<s:Label x="277" y="111" text="交会角(rad)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="140" text="立体成像方式" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="170" text="侧摆能力" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="200" text="所属典型配置" fontFamily="微软雅黑"/>
+		<s:Label x="11" y="231" text="极化方式" fontFamily="微软雅黑"/>
+		
+		<s:TextInput x="110" y="15" width="128" id="t2sensorName" tabEnabled="true" tabIndex="1"/>
+		<s:TextInput x="110" y="45" width="128" id="t2spactialResolution" tabEnabled="true" tabIndex="2"/>
+		<s:TextInput x="110" y="75" width="128" id="t2TimeResolution" tabEnabled="true" tabIndex="3"/>
+		<s:DropDownList x="110" y="105" width="128" id="t2imgWay" tabEnabled="true" tabIndex="4">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>推扫式</fx:String>
+					<fx:String>摆扫式</fx:String>
+					<fx:String>框幅相机</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="110" y="135" width="128" id="t2steroimgway" tabEnabled="true" tabIndex="5">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>同轨立体</fx:String>
+					<fx:String>异轨立体</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:TextInput x="110" y="165" width="128" id="t2side" tabEnabled="true" tabIndex="6"/>
+		<s:TextInput x="110" y="195" width="128" id="t2confname" enabled="false" tabEnabled="true" tabIndex="7"/>
+		<s:Label x="277" y="20" text="轨道类型" fontFamily="微软雅黑"/>
+		<s:Label x="277" y="50" text="幅宽(km)" fontFamily="微软雅黑"/>
+		<s:Label x="277" y="80" text="信噪比(dB)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="110" text="成像模式" fontFamily="微软雅黑"/>
+		<s:Label x="277" y="140" text="频段" fontFamily="微软雅黑"/>
+		<s:DropDownList x="373" y="15" width="128" id="t2tracktype" tabEnabled="true" tabIndex="8">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>太阳同步</fx:String>
+					<fx:String>地球同步</fx:String>
+					<fx:String>极地轨道</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:TextInput x="373" y="45" width="128" id="t2fabricWidth" tabEnabled="true" tabIndex="9"/>
+		<s:TextInput x="373" y="75" width="128" id="t2snr" tabEnabled="true" tabIndex="10"/>		
+		<s:TextInput x="373" y="105" width="128" id="t2encounterAngle" tabEnabled="true" tabIndex="11"/>
+		<s:TextInput x="373" y="135" width="128" id="t2spectrum" tabEnabled="true" tabIndex="12"/>
+		<s:CheckBox x="105" y="227" label="HH" fontFamily="微软雅黑" id="t2chkHH" tabEnabled="true" tabIndex="13"/>
+		<s:CheckBox x="183" y="227" label="VH" fontFamily="微软雅黑" id="t2chkVH" tabEnabled="true" tabIndex="14"/>
+		<s:CheckBox x="144" y="227" label="HV" fontFamily="微软雅黑" id="t2chkHV" tabEnabled="true" tabIndex="15"/>
+		<s:CheckBox x="223" y="227" label="VV" fontFamily="微软雅黑" id="t2chkVV" tabEnabled="true" tabIndex="16"/>
+		
+		<s:Button x="273" y="197" label="映射典型配置" width="112" fontFamily="微软雅黑" id="t2btnMapTypicalConfig" click="t2btnMapTypicalConfig_clickHandler(event)"/>
+		
+		
+	</mx:Canvas>
+	<s:Button x="143" y="283" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="298" y="285" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

@@ -1,0 +1,769 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" close="titlewindow1_closeHandler(event)" x="100" y="50"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="516" height="554" chromeColor="0xffffff"
+			   xmlns:services="services.*"
+			   title="需求影像订阅信息录入" creationComplete="panel1_creationCompleteHandler(event)" fontSize="12">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<services:RequireImageRecordService id="requireImageRecordService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+		<s:CallResponder id="loadTaskNameResult" result="loadTaskNameResult_resultHandler(event)"/>
+		<s:CallResponder id="getDepartmentByUsernameResult" result="getDepartmentByUsernameResult_resultHandler(event)"/>
+		
+		<s:ArrayCollection id="bandlist1">
+			<fx:Object bandname="自定义" band="0-0"/>
+			<fx:Object bandname="全色" band="400-700"/>
+			<fx:Object bandname="可见光" band="400-700"/>
+			<fx:Object bandname="红、绿、蓝" band="430-760"/>
+			<fx:Object bandname="近红外" band="700-1000"/>
+			<fx:Object bandname="短波红外" band="1000-1500"/>
+			<fx:Object bandname="中红外" band="3000-6000"/>
+			<fx:Object bandname="热红外" band="3000-15000"/>
+			<fx:Object bandname="远红外" band="6000-15000"/>
+			<fx:Object bandname="红外" band="780-15000"/>
+		</s:ArrayCollection>
+		
+		<s:ArrayCollection id="bandlist2">
+			<fx:Object bandname="全极化"/>
+			<fx:Object bandname="单极化"/>
+			<fx:Object bandname="双极化"/>
+			<fx:Object bandname="多极化"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.components.admin.configTool.myPriorityEditor;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.hamcrest.collection.array;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.TRoutinetask;
+			public var functionFlag:int;//0表示修改，1表示添加
+			[Bindable]
+			public var routineTaskItem:TRoutinetask;
+			public var username:String;
+			[Bindable]
+			public var bandListArray:ArrayCollection = new ArrayCollection();
+			
+			private var choosedBandListCollection:ArrayCollection = new ArrayCollection();
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				if(taskname.selectedIndex == -1 ||  startMonth.selectedIndex== -1 || endMonth.selectedIndex== -1)
+				{
+					Alert.show("标*的项目必须填写！","warning");
+				}
+				else
+				{
+					routineTaskItem.taskName = taskname.selectedItem;
+					
+					
+					/* var startTimeArray:Array = starttime.text.split("-");
+					routineTaskItem.startTime = new Date(startTimeArray[0],startTimeArray[1] - 1,startTimeArray[2]);
+					var endTimeArray:Array = endtime.text.split("-");
+					routineTaskItem.endTime = new Date(endTimeArray[0],endTimeArray[1] - 1,endTimeArray[2]);
+					
+					if(routineTaskItem.startTime.valueOf() > routineTaskItem.endTime.valueOf())
+					{
+					Alert.show("日期输入有误！请检查！");
+					return;
+					}
+					
+					if(startTimeArray[0] == endTimeArray[0])
+					{
+					routineTaskItem.expectTime = startTimeArray[1].toString() + "-" + endTimeArray[1].toString();
+					}
+					else if(startTimeArray[0] == (endTimeArray[0]-1))
+					{
+					if((endTimeArray[1] - startTimeArray[1] + 12) >= 12)
+					{
+					routineTaskItem.expectTime = "01-12";
+					}
+					else
+					{
+					routineTaskItem.expectTime = startTimeArray[1] + "-" + "12,01-" + endTimeArray[1];
+					}
+					}
+					else
+					{
+					routineTaskItem.expectTime = "01-12";
+					} */
+					if(new Number(startMonth.selectedItem) > new Number(endMonth.selectedItem))
+					{
+						Alert.show("日期输入有误！请检查！");
+						return;
+					}
+					
+					var expectTimeString:String = startMonth.selectedItem + "-" + endMonth.selectedItem;
+					routineTaskItem.expectTime = expectTimeString;
+					
+					routineTaskItem.spaceRange = spatialRange.text;
+					routineTaskItem.department = department.text;
+					
+					var spaceResolString:String = null;
+					if(spatialRes1Chk.selected == true)
+					{
+						if(spatialRes1Min.text != null && spatialRes1Max.text != null)
+						{
+							spaceResolString = spatialRes1Min.text + "-" + spatialRes1Max.text + ",";
+						}
+						else
+						{
+							Alert.show("空间分辨率未填写完整！");
+							return;
+						}
+					}
+					
+					if(spatialRes2Chk.selected == true)
+					{
+						if(spatialRes2Min.text != null && spatialRes2Max.text != null)
+						{
+							if(spaceResolString == null)
+							{
+								spaceResolString = spatialRes2Min.text + "-" + spatialRes2Max.text + ",";
+							}
+							else
+							{
+								spaceResolString = spaceResolString + spatialRes2Min.text + "-" + spatialRes2Max.text + ",";
+							}
+							
+						}
+						else
+						{
+							Alert.show("空间分辨率未填写完整！");
+							return;
+						}
+					}
+					
+					if(spatialRes3Chk.selected == true)
+					{
+						if(spatialRes3Min.text != null && spatialRes3Max.text != null)
+						{
+							if(spaceResolString == null)
+							{
+								spaceResolString = spatialRes3Min.text + "-" + spatialRes3Max.text + ",";
+							}
+							else
+							{
+								spaceResolString = spaceResolString + spatialRes3Min.text + "-" + spatialRes3Max.text + ",";
+							}
+							
+						}
+						else
+						{
+							Alert.show("空间分辨率未填写完整！");
+							return;
+						}
+					}
+					routineTaskItem.spaceResol = spaceResolString;
+					routineTaskItem.sensorClassType = sensorclassType.selectedItem;
+					routineTaskItem.sensorType = sensorTypeDropdown.selectedItem;
+					
+					if(sensorclassType.selectedItem == "光学")
+					{
+						if(spaceResolString != null)
+						{
+							spaceResolString += "m";
+						}
+						
+						routineTaskItem.spaceResol = spaceResolString;
+						//routineTaskItem.frequency = spectrumResolution.selectedItem;
+						routineTaskItem.sensorClassType = sensorclassType.selectedItem;
+						routineTaskItem.sensorType = sensorTypeDropdown.selectedItem;
+						
+						var bandnameString:String = "";
+						var bandString:String = "";
+						for each(var item:Object in choosedBandListCollection)
+						{
+							bandnameString += item.bandname;
+							bandnameString += ",";
+							bandString += item.band;
+							bandString += ",";
+						}
+						routineTaskItem.bandName = bandnameString;
+						if(bandnameString != "")
+						{
+							var tempString:String = bandnameString.substring(0,bandnameString.length - 1);
+							bandnameString = tempString;
+						}
+						routineTaskItem.bandName = bandnameString;
+						if(bandString.length > 0)
+						{
+							bandString += "nm";
+						}
+						else
+						{
+							bandString = null;
+						}
+						
+						routineTaskItem.band = bandString;
+					}
+					else if(sensorclassType.selectedItem == "SAR")
+					{
+						var bandnameString:String = "";
+						for each(var item:Object in choosedBandListCollection)
+						{
+							bandnameString += item.bandname;
+							bandnameString += ",";
+							
+						}
+						routineTaskItem.bandName = bandnameString;
+					}
+					
+					
+					
+					var myEvent:Event = new Event("requireImageAddReadyMessage",false);
+					dispatchEvent(myEvent);
+					PopUpManager.removePopUp(this);
+					
+				}
+			}
+			
+			
+			protected function btnAddBand_clickHandler(event:MouseEvent):void
+			{
+				if(sensorclassType.selectedItem == "光学")
+				{
+					if(bandList.selectedIndex != -1 && minBandText.text != "" && maxBandText.text != "")
+					{
+						var newString:String = bandList.selectedItem.bandname + "(" + minBandText.text + "nm-" + maxBandText.text + "nm)";
+						var newBandItem:Object = new Object();
+						newBandItem.bandname = newString;
+						newBandItem.band = minBandText.text + "-" +maxBandText.text;
+						choosedBandListCollection.addItem(newBandItem);
+					}
+					else if(bandList.selectedIndex != -1)
+					{
+						var newBandItem:Object = new Object();
+						newBandItem.bandname = bandList.selectedItem.bandname;
+						newBandItem.band = bandList.selectedItem.band;
+						choosedBandListCollection.addItem(newBandItem);
+					}
+				}
+				else if(sensorclassType.selectedItem == "SAR")
+				{
+					if(bandList.selectedIndex != -1)
+					{
+						var newBandItem:Object = new Object();
+						newBandItem.bandname = bandList.selectedItem.bandname;
+						choosedBandListCollection.addItem(newBandItem);
+					}
+				}
+				
+			}
+			
+			
+			protected function btnDelBand_clickHandler(event:MouseEvent):void
+			{
+				if(choosedBandList.selectedIndex != -1)
+				{
+					choosedBandListCollection.removeItemAt(choosedBandListCollection.getItemIndex(choosedBandList.selectedItem));
+				}
+			}
+			
+			
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//getDepartmentByUsername(Config.userName);
+				getDepartmentByUsername(username);
+				
+			}
+			
+			
+			protected function bandList_changeHandler(event:IndexChangeEvent):void
+			{
+				if(sensorclassType.selectedItem == "光学")
+				{
+						var selectedBandItem:Object = bandList.selectedItem;
+						var bandString:String = selectedBandItem.band;
+						var bandArray:Array = bandString.split("-");
+						
+						if(bandArray.length == 2)
+						{
+							minBandText.text = bandArray[0];
+							maxBandText.text = bandArray[1];
+						}
+						else
+						{
+							minBandText.text = "";
+							maxBandText.text = "";
+						}
+				}
+				
+			}
+			
+			
+			protected function btnDelAllBnd_clickHandler(event:MouseEvent):void
+			{
+				choosedBandListCollection.removeAll();
+			}
+			
+			
+			protected function loadTaskName():void
+			{
+				loadTaskNameResult.token = requireImageRecordService.loadTaskName();
+			}
+			
+			
+			protected function loadTaskNameResult_resultHandler(event:ResultEvent):void
+			{
+				taskname.dataProvider = loadTaskNameResult.lastResult;
+				if(functionFlag == 0)
+				{
+					taskname.selectedItem = routineTaskItem.taskName;
+				}
+			}
+			
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				// TODO Auto-generated method stub
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			protected function getDepartmentByUsername(arg0:String):void
+			{
+				getDepartmentByUsernameResult.token = requireImageRecordService.getDepartmentByUsername(arg0);
+			}
+			
+			
+			protected function getDepartmentByUsernameResult_resultHandler(event:ResultEvent):void
+			{
+				department.text = getDepartmentByUsernameResult.lastResult;
+				if(functionFlag == 0)
+				{
+					//taskname.selectedItem = routineTaskItem.taskName;'
+					taskname.enabled = false;
+					
+					/* if(routineTaskItem.startTime != null)
+					{
+					var timeString = "";
+					var time:Date = routineTaskItem.startTime;
+					timeString = time.getFullYear().toString() + "-" + (time.getMonth() + 1).toString() + "-" + time.getDate().toString();
+					starttime.text = timeString;
+					}
+					if(routineTaskItem.endTime != null)
+					{
+					var timeString = "";
+					var time:Date = routineTaskItem.endTime;
+					timeString = time.getFullYear().toString() + "-" + (time.getMonth() + 1).toString() + "-" + time.getDate().toString();
+					endtime.text = timeString;
+					} */
+					var expectTimeString:String = routineTaskItem.expectTime;
+					var expecttimearray:Array = expectTimeString.split("-");
+					if(expecttimearray.length != 2)
+					{
+						Alert.show("数据库中记录的时间跨度有误！");
+					}
+					else
+					{
+						startMonth.selectedItem = expecttimearray[0];
+						endMonth.selectedItem = expecttimearray[1];
+					}
+					
+					spatialRange.text = routineTaskItem.spaceRange;
+					
+					
+					var spaceResolString:String = routineTaskItem.spaceResol;
+					if(spaceResolString != null)
+					{
+						var spatialResArray:Array = spaceResolString.split(",");
+						if(spatialResArray.length == 4)
+						{
+							spatialRes1Chk.selected = true;
+							spatialRes2Chk.selected = true;
+							spatialRes3Chk.selected = true;
+							
+							spatialRes1Min.enabled = true;
+							spatialRes1Max.enabled = true;
+							
+							spatialRes2Min.enabled = true;
+							spatialRes2Max.enabled = true;
+							
+							spatialRes3Min.enabled = true;
+							spatialRes3Max.enabled = true;
+							
+							var res1array:Array = (spatialResArray[0] as String).split("-");
+							spatialRes1Min.text = res1array[0];
+							spatialRes1Max.text = res1array[1];
+							
+							var res2array:Array = (spatialResArray[1] as String).split("-");
+							spatialRes2Min.text = res2array[0];
+							spatialRes2Max.text = res2array[1];
+							
+							var res3array:Array = (spatialResArray[2] as String).split("-");
+							spatialRes3Min.text = res3array[0];
+							spatialRes3Max.text = res3array[1];
+						}
+						else if(spatialResArray.length == 3)
+						{
+							spatialRes1Chk.selected = true;
+							spatialRes2Chk.selected = true;
+							spatialRes3Chk.selected = false;
+							
+							spatialRes1Min.enabled = true;
+							spatialRes1Max.enabled = true;
+							
+							spatialRes2Min.enabled = true;
+							spatialRes2Max.enabled = true;
+							
+							spatialRes3Min.enabled = false;
+							spatialRes3Max.enabled = false;
+							
+							var res1array:Array = (spatialResArray[0] as String).split("-");
+							spatialRes1Min.text = res1array[0];
+							spatialRes1Max.text = res1array[1];
+							
+							var res2array:Array = (spatialResArray[1] as String).split("-");
+							spatialRes2Min.text = res2array[0];
+							spatialRes2Max.text = res2array[1];
+						}
+						else if(spatialResArray.length == 2)
+						{
+							spatialRes1Chk.selected = true;
+							spatialRes2Chk.selected = false;
+							spatialRes3Chk.selected = false;
+							
+							spatialRes1Min.enabled = true;
+							spatialRes1Max.enabled = true;
+							
+							spatialRes2Min.enabled = false;
+							spatialRes2Max.enabled = false;
+							
+							spatialRes3Min.enabled = false;
+							spatialRes3Max.enabled = false;
+							
+							var res1array:Array = (spatialResArray[0] as String).split("-");
+							spatialRes1Min.text = res1array[0];
+							spatialRes1Max.text = res1array[1];
+						}
+					}
+					
+					
+					//spectrumResolution.selectedItem = routineTaskItem.frequency;
+					sensorTypeDropdown.selectedItem = routineTaskItem.sensorType;
+					sensorclassType.selectedItem = routineTaskItem.sensorClassType;
+					choosedBandListCollection.removeAll();
+					
+					if(sensorclassType.selectedItem == "光学")
+					{
+						labelBand.text = "波段";
+						sensorTypeText.visible = true;
+						sensorTypeDropdown.visible = true;
+						minBandText.visible = true;
+						maxBandText.visible = true;
+						textmin.visible = true;
+						textmax.visible = true;
+						chkboxband.visible = true;
+						nmtxt1.visible = true;
+						nmtxt2.visible = true;
+						bandListArray.removeAll();
+						bandListArray = bandlist1;
+						
+						var itemBand:String = routineTaskItem.band;
+						var itemBandName:String = routineTaskItem.bandName;
+						if(itemBand != null && itemBandName != null)
+						{
+							var itemBandList:Array = itemBand.split(",");
+							var itemBandNameList:Array = itemBandName.split(",");
+							if(itemBandList.length - 1 == itemBandNameList.length)
+							{
+								for(var i:int = 0; i < itemBandNameList.length; i++)
+								{
+									var addBandItem:Object = new Object();
+									addBandItem.band = itemBandList[i];
+									addBandItem.bandname = itemBandNameList[i];
+									choosedBandListCollection.addItem(addBandItem);
+								}
+							}
+						}
+					}
+					else if(sensorclassType.selectedItem == "SAR")
+					{
+						labelBand.text = "极化方式";
+						sensorTypeText.visible = false;
+						sensorTypeDropdown.visible = false;
+						minBandText.visible = false;
+						maxBandText.visible = false;
+						textmin.visible = false;
+						textmax.visible = false;
+						chkboxband.visible = false;
+						nmtxt1.visible = false;
+						nmtxt2.visible = false;
+						bandListArray.removeAll();
+						bandListArray = bandlist2;
+						
+						var itemBandName:String = routineTaskItem.bandName;
+						if(itemBandName != null)
+						{
+							var itemBandNameList:Array = itemBandName.split(",");
+							
+							for(var i:int = 0; i < itemBandNameList.length; i++)
+							{
+								var addBandItem:Object = new Object();
+								addBandItem.bandname = itemBandNameList[i];
+								choosedBandListCollection.addItem(addBandItem);
+							}
+							
+						}
+					}
+					
+				}
+				else if(functionFlag == 1)
+				{
+					routineTaskItem = new TRoutinetask();
+				}
+				loadTaskName();
+			}
+			
+			
+			protected function spatialRes1Chk_clickHandler(event:MouseEvent):void
+			{
+				if(spatialRes1Chk.selected == true)
+				{
+					spatialRes1Min.enabled = true;
+					spatialRes1Max.enabled = true;
+				}
+				else
+				{
+					spatialRes1Min.enabled = false;
+					spatialRes1Max.enabled = false;
+				}
+			}
+			
+			
+			protected function spatialRes2Chk_clickHandler(event:MouseEvent):void
+			{
+				if(spatialRes2Chk.selected == true)
+				{
+					spatialRes2Min.enabled = true;
+					spatialRes2Max.enabled = true;
+				}
+				else
+				{
+					spatialRes2Min.enabled = false;
+					spatialRes2Max.enabled = false;
+				}
+			}
+			
+			
+			protected function spatialRes3Chk_clickHandler(event:MouseEvent):void
+			{
+				if(spatialRes3Chk.selected == true)
+				{
+					spatialRes3Min.enabled = true;
+					spatialRes3Max.enabled = true;
+				}
+				else
+				{
+					spatialRes3Min.enabled = false;
+					spatialRes3Max.enabled = false;
+				}
+			}
+			
+			
+			protected function sensorType_changeHandler(event:IndexChangeEvent):void
+			{
+				if(sensorclassType.selectedItem == "光学")
+				{
+					choosedBandListCollection.removeAll();
+					labelBand.text = "波段";
+					sensorTypeText.visible = true;
+					sensorTypeDropdown.visible = true;
+					minBandText.visible = true;
+					maxBandText.visible = true;
+					textmin.visible = true;
+					textmax.visible = true;
+					chkboxband.visible = true;
+					nmtxt1.visible = true;
+					nmtxt2.visible = true;
+					
+					bandListArray = bandlist1;
+					bandList.dataProvider = bandlist1;
+				}
+				else if(sensorclassType.selectedItem == "SAR")
+				{
+					choosedBandListCollection.removeAll();
+					labelBand.text = "极化方式";
+					sensorTypeText.visible = false;
+					sensorTypeDropdown.visible = false;
+					minBandText.visible = false;
+					maxBandText.visible = false;
+					textmin.visible = false;
+					textmax.visible = false;
+					chkboxband.visible = false;
+					nmtxt1.visible = false;
+					nmtxt2.visible = false;
+					
+					bandListArray = bandlist2;
+					bandList.dataProvider = bandlist2;
+				}
+				else if(sensorclassType.selectedIndex == -1)
+				{
+					choosedBandListCollection.removeAll();
+					labelBand.text = "";
+					sensorTypeText.visible = false;
+					sensorTypeDropdown.visible = false;
+					minBandText.visible = false;
+					maxBandText.visible = false;
+					textmin.visible = false;
+					textmax.visible = false;
+					chkboxband.visible = false;
+					nmtxt1.visible = false;
+					nmtxt2.visible = false;
+					bandList.dataProvider = null;
+				}
+			}
+			
+			
+			protected function checkbox1_clickHandler(event:MouseEvent):void
+			{
+				if(chkboxband.selected ==  true)
+				{
+					minBandText.enabled = true;
+					maxBandText.enabled = true;
+				}
+				else if(chkboxband.selected ==  false)
+				{
+					minBandText.enabled = false;
+					maxBandText.enabled = false;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Label x="13" y="13" text="任务名称" fontSize="12"/>
+	<s:Label x="13" y="45" text="时间范围" fontSize="12"/>
+
+	<s:Label x="14" y="78" text="空间范围" fontSize="12"/>
+	<s:Label x="196" y="42" text="~" fontSize="16"/>
+	<s:Label x="361" y="13" text="部门" fontSize="12"/>
+	<s:Label x="336" y="14" text="*" fontSize="18" color="#FF0000"/>
+	<s:Label x="337" y="46" text="*" fontSize="18" color="#FF0000"/>
+	<s:DropDownList x="93" y="8" width="235" id="taskname"/>
+	<s:TextInput x="389" y="9" width="115" id="department" enabled="false"/>
+	<s:TextInput x="93" y="72" width="323" id="spatialRange"/>
+	<s:BorderContainer x="11" y="116" width="493" height="365" borderStyle="solid" borderVisible="true" borderAlpha="0.5">
+		<s:TextInput id="spatialRes1Min" x="110" y="10" width="42" enabled="false"/>
+		<s:TextInput id="spatialRes1Max" x="173" y="10" width="42" enabled="false"/>
+		
+		
+		<s:ComboBox x="81" y="73" width="145" id="sensorclassType" change="sensorType_changeHandler(event)">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<!--<fx:String>可见光</fx:String>
+					<fx:String>多光谱</fx:String>
+					<fx:String>高光谱</fx:String>
+					<fx:String>红外</fx:String>
+					<fx:String>近红外</fx:String>
+					<fx:String>中红外</fx:String>
+					<fx:String>远红外</fx:String>
+					<fx:String>短波红外</fx:String>
+					<fx:String>微波</fx:String>-->
+					<fx:String>光学</fx:String>
+					<fx:String>SAR</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:ComboBox>
+		<s:Label x="9" y="79" text="传感器类型" fontSize="12"/>
+		<s:Label x="8" y="16" text="空间分辨率" fontSize="12"/>
+		<s:ComboBox x="302" y="73" width="144" id="sensorTypeDropdown" labelField="bandname">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:Object bandname="可见光"/>
+					<fx:Object bandname="多光谱"/>
+					<fx:Object bandname="高光谱"/>
+					<fx:Object bandname="高空间分辨率"/>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:ComboBox>
+		<s:Label x="255" y="79" text="子类型&#xd;" fontSize="12" id="sensorTypeText"/>
+		<s:BorderContainer x="10" y="109" width="473" height="247" borderStyle="solid" borderVisible="true" borderAlpha="0.5">
+			<s:Label x="14" y="4" text="波段" fontSize="14" id="labelBand"/>
+			<s:Label x="12" y="217" text="Min:" fontSize="12" id="textmin"/>
+			<s:Label x="208" y="217" text="nm" fontSize="12" id="nmtxt1"/>
+			<s:Label x="245" y="217" text="Max:" fontSize="12" id="textmax"/>
+			<s:Label x="443" y="217" text="nm" fontSize="12" id="nmtxt2"/>
+			<s:TextInput x="42" y="212" width="162" id="minBandText" enabled="false"/>
+			<s:TextInput x="278" y="212" width="162" id="maxBandText" enabled="false"/>
+			<s:List x="13" y="21" width="197" height="164" id="bandList" labelField="bandname" change="bandList_changeHandler(event)" dataProvider="{bandListArray}"/>
+			<s:List x="272" y="20" width="187" height="167" id="choosedBandList" labelField="bandname" dataProvider="{choosedBandListCollection}"></s:List>
+			<s:Button x="220" y="33" label="&gt;" height="20" id="btnAddBand" click="btnAddBand_clickHandler(event)" width="40"/>
+			<s:Button x="222" y="64" label="&lt;" height="20" id="btnDelBand" click="btnDelBand_clickHandler(event)" width="38"/>
+			<s:Button x="222" y="96" label="&lt;&lt;" height="20" id="btnDelAllBnd" click="btnDelAllBnd_clickHandler(event)" width="40"/>
+			<s:CheckBox x="14" y="191" label="自定义波段范围" click="checkbox1_clickHandler(event)" id="chkboxband"/>
+		</s:BorderContainer>
+		<s:Label x="158" y="12" text="-" fontSize="20"/>
+		<s:CheckBox x="86" y="12" id="spatialRes1Chk" selected="false" click="spatialRes1Chk_clickHandler(event)"/>
+		<s:Label x="220" y="14" text="m" fontSize="15"/>
+		<s:TextInput id="spatialRes3Min" x="110" y="40" width="42" enabled="false"/>
+		<s:TextInput id="spatialRes3Max" x="173" y="40" width="42" enabled="false"/>
+		<s:Label x="158" y="42" text="-" fontSize="20"/>
+		<s:CheckBox x="86" y="42" id="spatialRes3Chk" selected="false" click="spatialRes3Chk_clickHandler(event)"/>
+		<s:Label x="220" y="44" text="m" fontSize="15"/>
+		<s:TextInput id="spatialRes2Min" x="295" y="12" width="42" enabled="false"/>
+		<s:TextInput id="spatialRes2Max" x="358" y="12" width="42" enabled="false"/>
+		<s:Label x="343" y="14" text="-" fontSize="20"/>
+		<s:CheckBox x="271" y="14" id="spatialRes2Chk" selected="false" click="spatialRes2Chk_clickHandler(event)"/>
+		<s:Label x="405" y="16" text="m" fontSize="15"/>
+	</s:BorderContainer>
+	<s:Label x="16" y="106" text="传感器参数限定" fontSize="14" backgroundAlpha="1.0" backgroundColor="#FFFEFE"/>
+	<s:Button x="165" y="488" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="302" y="488" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+	<s:DropDownList x="93" y="40" width="73" id="startMonth">
+		<s:dataProvider>
+			<s:ArrayCollection>
+				<fx:String>1</fx:String>
+				<fx:String>2</fx:String>
+				<fx:String>3</fx:String>
+				<fx:String>4</fx:String>
+				<fx:String>5</fx:String>
+				<fx:String>6</fx:String>
+				<fx:String>7</fx:String>
+				<fx:String>8</fx:String>
+				<fx:String>9</fx:String>
+				<fx:String>10</fx:String>
+				<fx:String>11</fx:String>
+				<fx:String>12</fx:String>
+			</s:ArrayCollection>
+		</s:dataProvider>
+	</s:DropDownList>
+	<s:DropDownList x="220" y="40" width="83" id="endMonth">
+		<s:dataProvider>
+			<s:ArrayCollection>
+				<fx:String>1</fx:String>
+				<fx:String>2</fx:String>
+				<fx:String>3</fx:String>
+				<fx:String>4</fx:String>
+				<fx:String>5</fx:String>
+				<fx:String>6</fx:String>
+				<fx:String>7</fx:String>
+				<fx:String>8</fx:String>
+				<fx:String>9</fx:String>
+				<fx:String>10</fx:String>
+				<fx:String>11</fx:String>
+				<fx:String>12</fx:String>
+			</s:ArrayCollection>
+		</s:dataProvider>
+	</s:DropDownList>
+	<s:Label x="174" y="44" text="月" fontSize="14"/>
+	<s:Label x="311" y="44" text="月" fontSize="14"/>
+</s:TitleWindow>

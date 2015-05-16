@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas   xmlns:mx="library://ns.adobe.com/flex/mx"  width="420" height="200"
+			xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   verticalScrollPolicy="off" horizontalScrollPolicy="off"
+		   initialize="canvas1_initializeHandler(event)"  creationComplete="canvas1_creationCompleteHandler(event)" 
+		   xmlns:services="services.*" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:util="cn.edu.whu.liesmars.asPack.util.*">
+    
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.LoadXMLEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.GenerateAuthcode;
+			import cn.edu.whu.liesmars.asPack.util.ParserType;
+			import cn.edu.whu.liesmars.asPack.util.ServerUrl;
+			import cn.edu.whu.liesmars.asPack.util.XmlParser;
+			
+			import mx.collections.ArrayCollection;
+			import mx.containers.Panel;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.validators.Validator;
+			
+			import spark.primitives.BitmapImage;
+			
+			import valueObjects.LoginResult;
+			
+            private var flag:Boolean=false;
+			public var mainApp:Prototype; // 该控件的主程序
+			private var isAdmin:int=0;  // 是否管理员
+//			private var codeImage:String="assets/GenImg.jpg";
+			
+			private var authCode:String="";
+			[Bindable]
+			private var departmentChooseXml:XMLList=new XMLList();
+				
+			private var serverUrl:String; // 后台服务地址
+			[Bindable]
+			private var departmentChoose:ArrayCollection=new ArrayCollection();
+			protected function canvas1_initializeHandler(event:FlexEvent):void
+			{
+				getUserSearchId.token=naturalLangService.getUserUUID();
+			}
+			protected function canvas1_creationCompleteHandler(event:FlexEvent):void
+			{			
+				authCode=GenerateAuthcode.generate(authCodeImage);
+				departmentChooseXml= Config.depratments.children();
+			  
+			}
+			private function onloadComplete(e:LoadXMLEvent):void{
+				departmentChooseXml=e.xml.children();
+			
+				//EventManager.unregisterEventListener(xmlParser,LoadXMLEvent.LOAD_XML,onloadComplete,"");
+			}
+
+			public function login():void{
+				var validatorArr:Array = new Array();
+				validatorArr.push(log_usernameVt);
+				validatorArr.push(log_passwordVt);
+			
+				var validatorErrorArray:Array = Validator.validateAll(validatorArr);
+				var isValidForm:Boolean = validatorErrorArray.length == 0;
+				
+				if (!isValidForm) {
+					mx.controls.Alert.show("用户名 密码填写有误");
+					authCode=GenerateAuthcode.generate(authCodeImage);
+					return;
+				} 
+				/* if(authCode.toLowerCase()!=log_VerificationCode.text.toLowerCase()){
+					mx.controls.Alert.show("验证码错误");
+					authCode=GenerateAuthcode.generate(authCodeImage);
+					return;
+				} */
+				CursorManager.removeAllCursors();
+				CursorManager.setBusyCursor();
+				Config.userName=log_username.text;
+				if(rbAdmin.selected==true)
+					loginResponse.token=registerAndLoginService.login2(1,log_username.text,log_password.text);
+				else
+					loginResponse.token=registerAndLoginService.login2(0,log_username.text,log_password.text);
+			} 
+			public function register():void{
+				var validatorArr:Array = new Array();
+				
+				validatorArr.push(reg_userNameVt);
+				validatorArr.push(reg_passwordVt);
+				validatorArr.push(reg_password2Vt);
+				validatorArr.push(reg_emailVt);
+				validatorArr.push(reg_realNameVt);
+		
+				
+				var validatorErrorArray:Array = Validator.validateAll(validatorArr);
+				var isValidForm:Boolean = validatorErrorArray.length == 0;
+				
+				if(isValidForm==false){
+					mx.controls.Alert.show("输入有误");
+					return;
+				}
+					
+				
+				CursorManager.setBusyCursor();
+				if(rbUser.selected==true)
+					isAdmin=0;
+				else
+					isAdmin=1;
+				
+				registerResponse.token=registerAndLoginService.userRegister(reg_userName.text,reg_realName.text,reg_department.text,reg_password.text,reg_email.text,reg_tel.text,isAdmin);
+			}
+			
+			public function changeToRegister():void{		
+				loginForm.visible=false;
+				this.parent.height=340;
+				registerForm.visible=true;
+				(this.parent as Panel).title="注册";
+			}
+			public function resetFun():void{
+				reg_userName.text="";
+				reg_password.text="";
+				reg_password2.text="";
+				reg_email.text="";
+				reg_realName.text="";
+				reg_tel.text="";
+			}
+			
+			public function back():void{
+				this.parent.height=220;
+				registerForm.visible=false;
+				loginForm.visible=true;	
+				(this.parent as Panel).title="登陆";
+			}
+
+
+			
+
+			protected function registerResponse_resultHandler(event:ResultEvent):void
+			{	
+				CursorManager.removeAllCursors();
+				if((event.result as int)==0){
+					mx.controls.Alert.show("注册失败 用户名被使用");
+					
+					return;
+				}
+				Config.userName=reg_userName.text;
+				Config.departmentName=reg_department.text;
+				if(rbUser.selected==true)
+					mainApp.setLogined("user");
+				else
+					mainApp.setLogined("admin");
+				clearLogin();
+				resetFun();
+				
+			}
+
+
+			protected function loginResponse_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.removeAllCursors();
+				var result:LoginResult=event.result as LoginResult;
+				if(result.success==false){
+					mx.controls.Alert.show("账号或密码错误");
+					authCode=GenerateAuthcode.generate(authCodeImage);
+					return;
+				}
+				Config.departmentName=result.department;
+				if(rbUser.selected==true)
+					
+					mainApp.setLogined("user");
+				else
+					mainApp.setLogined("admin");
+				clearLogin();
+				resetFun();
+				
+			}
+
+			private function clearLogin():void{
+				log_username.text="";
+				log_password.text="";
+				log_VerificationCode.text="";
+			}
+           
+
+			protected function authCodeImage_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				authCode=GenerateAuthcode.generate(authCodeImage);
+			}
+
+
+			protected function getUserSearchId_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				Config.searchId=event.result as String;
+			}
+
+
+			protected function registerAndLoginService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.controls.Alert.show("连接错误");
+				CursorManager.removeAllCursors();
+			}
+
+
+			protected function naturalLangService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.controls.Alert.show("连接错误");
+				CursorManager.removeAllCursors();
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		
+		<services:RegisterAndLoginService id="registerAndLoginService" destination="RegisterAndLoginService" fault="registerAndLoginService_faultHandler(event)"/>
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService" fault="naturalLangService_faultHandler(event)"/>
+		
+		<mx:CallResponder id="registerResponse" result="registerResponse_resultHandler(event)"/>
+		<mx:CallResponder id="loginResponse" result="loginResponse_resultHandler(event)"/>
+		<mx:CallResponder id="getUserSearchId" result="getUserSearchId_resultHandler(event)"/>	
+		
+		
+		
+		
+		
+		<mx:StringValidator id="log_usernameVt" source="{this.log_username}" minLength="1" maxLength="10" property="text">
+		</mx:StringValidator>
+		<mx:StringValidator id="log_passwordVt" source="{this.log_password}" minLength="1" maxLength="12" property="text">
+		</mx:StringValidator>
+		
+		
+		<mx:StringValidator id="reg_userNameVt" source="{this.reg_userName}" minLength="1" maxLength="10" property="text"  required="true">
+		</mx:StringValidator>
+		<mx:StringValidator id="reg_passwordVt" source="{this.reg_password}" minLength="1" maxLength="12" property="text"  required="true">
+		</mx:StringValidator>
+		<util:MyPasswordValidator id="reg_password2Vt"  source="{this.reg_password2}" pass="{this.reg_password.text}" required="true"  property="text">
+		</util:MyPasswordValidator>
+		
+		
+		<mx:EmailValidator id="reg_emailVt" source="{this.reg_email}"  property="text"  required="true">
+		</mx:EmailValidator>
+		
+		<mx:StringValidator id="reg_realNameVt" required="true"  source="{this.reg_realName}" property="text"  >
+		</mx:StringValidator>
+	</fx:Declarations>
+	
+	
+
+	<mx:Form  y="0" x="115" width="194" height="51" >
+		<mx:FormItem direction="horizontal" >
+			<mx:RadioButton x="1" y="3" selected="true" id="rbUser" label="用户" />
+			<mx:RadioButton x="1" y="3" id="rbAdmin" label="管理员"  />
+		</mx:FormItem>
+	</mx:Form>
+	<mx:Form visible="true" id="loginForm" y="36" x="45" height="151" width="350">
+		
+		<mx:FormItem label="用户名:" fontSize="12">
+			<mx:TextInput id="log_username" width="193"/>
+		</mx:FormItem>
+		<mx:FormItem label="密码:" fontSize="12">
+			<mx:TextInput id="log_password" displayAsPassword="true"  width="193"/>
+		</mx:FormItem>
+		<mx:FormItem label="验证码:" fontSize="12" direction="horizontal" width="250">
+			<mx:TextInput id="log_VerificationCode"   width="101"/>
+		    <mx:Canvas width="82" height="22" backgroundColor="0xffffff" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+				<s:Label toolTip="看不清？单击换一张" width="82" height="22" id="authCodeImage"  fontSize="27" fontWeight="bold" color="#FB0707" click="authCodeImage_clickHandler(event)"/>
+			</mx:Canvas>
+		</mx:FormItem>
+		<mx:FormItem direction="horizontal">
+			<mx:Button id="btnLogin" enabled="true" label="登录" click="login();" fontSize="12"/>
+			<mx:Button label="注册" click="changeToRegister()" width="52" fontSize="12"/>
+		</mx:FormItem>
+	</mx:Form>
+	
+	<mx:Form visible="false" id="registerForm" x="23" y="36" width="367" height="275" >
+		<mx:FormItem label="用户名:" fontSize="12" width="287" direction="horizontal">
+			<mx:Label text="*" color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_userName" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem label="真实姓名" fontSize="12" width="287" direction="horizontal">
+			<mx:Label visible="false" text="*" color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_realName" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem label="部门" fontSize="12" width="287" height="26" direction="horizontal">
+			<mx:Label text="*" color="#FF0000" width="14"/>
+			<mx:ComboBox id="reg_department" x="95" y="0" editable="false" width="115" dataProvider="{departmentChooseXml}" labelField="@name" height="25" fontSize="10">
+			</mx:ComboBox>
+		</mx:FormItem>
+		<mx:FormItem label="密码" fontSize="12" width="287" direction="horizontal">
+			<mx:Label text="*" color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_password" displayAsPassword="true" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem label="密码确认" fontSize="12" width="287" direction="horizontal">
+			<mx:Label text="*" color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_password2" displayAsPassword="true" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem label="电话" fontSize="12" width="287" direction="horizontal">
+			<mx:Label text="*"  color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_tel" width="100%"/>
+		</mx:FormItem>
+		<mx:FormItem label="e-mail" fontSize="12" width="287" direction="horizontal">
+			<mx:Label text="*"  color="#FF0000" width="14"/>
+			<mx:TextInput id="reg_email" width="100%"/>
+		</mx:FormItem>
+		
+		<mx:FormItem direction="horizontal"   height="36" width="316">
+			<mx:Button id="reset" label="重置" click="resetFun()" width="63"/>
+			<mx:Button id="submit" label="提交" click="register()" width="60" x="263"/>
+			<mx:Button label="返回登陆" click="back()"/>
+		</mx:FormItem>
+	</mx:Form>
+</mx:Canvas>

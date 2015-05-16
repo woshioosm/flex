@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="670" height="462" 
+			   chromeColor="0xffffff"
+			   title="映射典型配置" creationComplete="titlewindow1_creationCompleteHandler(event)" xmlns:services="services.*">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.ConfBandInfoModel;
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.SensorBandInfoModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.effects.AddItemAction;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.ConfBandInfo;
+			
+			public var sensorname:String;
+			
+			var allResult:ArrayCollection = new ArrayCollection();
+			var partResult:ArrayCollection = new ArrayCollection();
+			public var returnConfName:String;
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				sensernametext.text = sensorname;
+				loadAllConfBandResult.token = fusionService.loadAllConfBand();
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			protected function loadAllConfBandResult_resultHandler(event:ResultEvent):void
+			{
+				var tempallResult = loadAllConfBandResult.lastResult;
+				
+				for each(var item:ConfBandInfo in tempallResult)
+				{
+					var newitem:ConfBandInfoModel = new ConfBandInfoModel();
+					newitem.name = item.conf.name;
+					newitem.confBandInfo = item;
+					allResult.addItem(newitem);
+				}
+				
+				mylist.dataProvider = allResult;
+			}
+
+			protected function btnQuery_clickHandler(event:MouseEvent):void
+			{
+				//loadAllConfBandResult.token = fusionService.loadAllConfBand();
+				if(mydropdown.selectedIndex == -1)
+				{
+					mylist.dataProvider = allResult;
+				}
+				else if(minvaluetext.text != null && maxvaluetext.text != null)
+				{
+					var showResult:ArrayCollection = new ArrayCollection();
+					switch(mydropdown.selectedIndex)
+					{
+						case 0:
+						for each(var item:ConfBandInfoModel in allResult)
+						{
+							if(item.confBandInfo.conf.spatialmin <= new Number(minvaluetext.text) && item.confBandInfo.conf.spatialmax >= new Number(maxvaluetext.text))
+							{
+								showResult.addItem(item);
+							}
+						}
+						
+						case 1:
+						for each(var item:ConfBandInfoModel in allResult)
+						{
+							if(item.confBandInfo.conf.timemin <= new Number(minvaluetext.text) && item.confBandInfo.conf.timemax >= new Number(maxvaluetext.text))
+							{
+								showResult.addItem(item);
+							}
+						}
+						
+						default:
+						for each(var item:ConfBandInfoModel in allResult)
+						{
+							if(item.confBandInfo.conf.bandmin <= new Number(minvaluetext.text) && item.confBandInfo.conf.bandmax >= new Number(maxvaluetext.text))
+							{
+								showResult.addItem(item);
+							}
+						}
+					}
+					mylist.dataProvider = showResult;
+				}
+			}
+
+
+			
+
+
+			protected function btnReset_clickHandler(event:MouseEvent):void
+			{
+				mydropdown.selectedIndex = -1;
+				minvaluetext.text = null;
+				maxvaluetext.text = null;
+			}
+
+
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				if(mylist.selectedIndex != -1)
+				{
+					returnConfName = mylist.selectedItem.name;
+					var outgoingEvent:Event = new Event("mapConfReadyMessage",false);
+					dispatchEvent(outgoingEvent);
+					PopUpManager.removePopUp(this);
+				}
+			}
+
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="loadAllConfBandResult" result="loadAllConfBandResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<s:Label x="24" y="19" text="传感器名称" fontSize="12"/>
+	<s:TextInput x="100" y="13" width="534" id="sensernametext" editable="false"/>
+	<s:Label x="57" y="54" text="查询" fontSize="12"/>
+	<s:Label x="343" y="52" text="~" height="11" fontSize="15"/>
+	<s:TextInput x="234" y="48" width="103" id="minvaluetext"/>
+	<s:TextInput x="357" y="47" width="103" id="maxvaluetext"/>
+	<s:DropDownList x="100" y="49" width="121" id="mydropdown">
+		<s:dataProvider>
+			<s:ArrayCollection>
+				<fx:String>空间分辨率</fx:String>
+				<fx:String>时间分辨率</fx:String>
+				<fx:String>幅宽</fx:String>
+			</s:ArrayCollection>
+		</s:dataProvider>
+	</s:DropDownList>
+	<s:Button x="486" y="48" label="查询" id="btnQuery" click="btnQuery_clickHandler(event)"/>
+	<s:Button x="564" y="48" label="重置" id="btnReset" click="btnReset_clickHandler(event)"/>
+	<s:Button x="186" y="398" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="404" y="397" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+	<s:List x="24" y="102" width="610" height="287" id="mylist" labelField="name"></s:List>
+	<s:Label x="26" y="86" text="典型配置"/>
+</s:TitleWindow>

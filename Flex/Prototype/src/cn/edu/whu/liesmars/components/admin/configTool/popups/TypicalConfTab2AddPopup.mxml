@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="384" height="300" title="添加SAR传感器典型配置">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			
+			
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.Conf;
+			import valueObjects.ConfBandInfo;
+			public var newItem:ConfBandInfo;
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				var item:ConfBandInfo = new ConfBandInfo();
+				
+				item.conf = new Conf();
+				item.bands = new ArrayCollection();
+				
+				item.conf.name = confname.text;
+				item.conf.spatialmin = new Number(spatial2Min.text);
+				item.conf.spatialmax = new Number(spatial2Max.text);
+				item.conf.polarway = polarway.selectedItem;
+				
+				var imgString:String = null;
+				if(chkImg1.selected == true)
+				{
+					if(imgString == null)
+					{
+						imgString = "聚束模式";
+					}
+					else
+					{
+						imgString += ",聚束模式";
+					}
+				}
+				if(chkImg2.selected == true)
+				{
+					if(imgString == null)
+					{
+						imgString = "条带模式";
+					}
+					else
+					{
+						imgString += ",条带模式";
+					}
+				}
+				if(chkImg3.selected == true)
+				{
+					if(imgString == null)
+					{
+						imgString = "扫描模式";
+					}
+					else
+					{
+						imgString += ",扫描模式";
+					}
+				}
+				item.conf.imagemode = imgString;
+				//item.conf.imagemode = imagemode.selectedItem;
+				
+				item.conf.spectrum = spectrum.selectedItem;
+				
+				item.conf.bandmin = 0;
+				item.conf.bandmax = 0;
+				item.conf.timemax = 0;
+				item.conf.timemin = 0;
+				
+				newItem = item;
+				var outgoingMessage = new Event("t2addConfReadyMessage", false);
+				dispatchEvent(outgoingMessage);
+				PopUpManager.removePopUp(this);
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas x="13" y="51" width="358" height="172" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="10" y="29" text="空间分辨率(m)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="67" text="极化方式" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="148" text="频段" fontFamily="微软雅黑"/>
+		
+		<s:TextInput x="100" y="24" width="64" id="spatial2Min" tabEnabled="true" tabIndex="2"/>
+		<s:TextInput x="181" y="23" width="64" id="spatial2Max" tabEnabled="true" tabIndex="3"/>
+		<s:DropDownList x="101" y="62" width="144" id="polarway" tabEnabled="true" tabIndex="4">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>单极化</fx:String>
+					<fx:String>双极化</fx:String>
+					<fx:String>多极化</fx:String>
+					<fx:String>全极化</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="101" y="144" width="144" id="spectrum" tabEnabled="true" tabIndex="8">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>X</fx:String>
+					<fx:String>L</fx:String>
+					<fx:String>C</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:Label x="10" y="106" text="成像模式" fontFamily="微软雅黑"/>
+		<s:Label x="168" y="30" text="~"/>
+		<s:Label x="23" y="5" text="详细信息" fontFamily="微软雅黑" fontSize="13" backgroundColor="#FCFCFC"/>
+		<s:CheckBox x="101" y="101" label="聚束模式" id="chkImg1" tabEnabled="true" tabIndex="5"/>
+		<s:CheckBox x="177" y="101" label="条带模式" id="chkImg2" tabEnabled="true" tabIndex="6"/>
+		<s:CheckBox x="254" y="101" label="扫描模式" id="chkImg3" tabEnabled="true" tabIndex="7"/>
+		
+		
+	</mx:Canvas>
+	<s:BorderContainer width="358" height="37" x="13" y="6" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="12" y="12" text="传感器典型配置名称" fontSize="13"/>
+		<s:TextInput x="136" y="6" width="207" id="confname" tabEnabled="true" tabIndex="1"/>
+	</s:BorderContainer>
+	<s:Button x="86" y="236" label="确定" click="button1_clickHandler(event)" tabEnabled="true" tabIndex="9"/>
+	<s:Button x="220" y="237" label="取消" click="button2_clickHandler(event)" tabEnabled="true" tabIndex="10"/>
+</s:TitleWindow>

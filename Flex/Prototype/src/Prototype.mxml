@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="application1_creationCompleteHandler(event)"
+			   initialize="application1_initializeHandler(event)"
+			  resize="application1_resizeHandler(event)"
+	          width="100%" height="100%"  left="0" right="0" top="0" bottom="0"
+			   xmlns:Container="cn.edu.whu.liesmars.Container.*" xmlns:services="services.*" xmlns:fusion="cn.edu.whu.liesmars.directlyEmbedView.fusion.*" xmlns:kbManage="cn.edu.whu.liesmars.directlyEmbedView.kbManage.*">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			import cn.edu.whu.liesmars.asPack.util.ParserType;
+			import cn.edu.whu.liesmars.asPack.util.UrlParamUtil;
+			import cn.edu.whu.liesmars.asPack.util.XmlParser;
+			import cn.edu.whu.liesmars.directlyEmbedView.fusion.ShowFusionResultEmbedView;
+			import cn.edu.whu.liesmars.directlyEmbedView.nlResult.FeedbackWinEmbed;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.TNaturallang;
+			
+			public var kbManageEmbedView:Boolean = false;
+		
+			private var resultWin;  // fusion result
+			
+			public function setLogined(type:String):void
+			{	
+				Security.allowDomain("*");
+				Security.loadPolicyFile(Config.crossDomainUrl);
+			
+				trace(Config.crossDomainUrl);
+				if(type=="user"){
+					vsMain.selectedIndex=1;
+					Config.isAdmin=false;
+				}
+				else if(type=="admin"){
+					vsMain.selectedIndex=2;
+					Config.isAdmin=true;
+				}else{
+					Config.userName="";
+					vsMain.selectedIndex=0;
+				}
+			}
+			
+			public function afterLogin():void
+			{
+				//this.vsMain.selectedIndex = 1;
+			}
+			
+			protected function application1_initializeHandler(event:FlexEvent):void
+			{
+				
+				//TODO Auto-generated method stub
+				var xmlParser1:XmlParser=new XmlParser();
+				var xmlParser2:XmlParser=new XmlParser();
+				xmlParser1.parse(ParserType.URL_PARSER,"configs/URLconfig.xml"+"?random"+Math.random()+"="+Math.random());   // 读取配置文件
+				xmlParser2.parse(ParserType.DEPARTMENT_PARSER,"configs/Department.xml"+"?random"+Math.random()+"="+Math.random());
+				vsMain.selectedIndex=0;			
+				//mainServices.init();
+			}
+			
+			
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				this.loginCtrl.mainApp = this;
+				Config.mainApp=this;
+				
+				var urlParamUtilInstance:UrlParamUtil = new UrlParamUtil();
+				var urlParams:Object = urlParamUtilInstance.parameters;
+				trace(1);
+				
+				if(urlParams.action != null)
+				{
+					this.width = 1000;
+//					this.height = 600;
+					
+					
+					var actionString = urlParams.action.toString().toLowerCase();
+					if(actionString == "showfusionRslt".toLowerCase()){
+					
+						vsMain.selectedChild = urlEmbedFusionAdminView;
+						var uuid:String = urlParams.xqbh;
+					    resultWin = PopUpManager.createPopUp(urlEmbedFusionAdminView, ShowFusionResultEmbedView, true, null, null);
+						resultWin.height=this.height-20;
+						
+						urlEmbedFusionAdminView.popupWin = resultWin;
+						
+						(resultWin as ShowFusionResultEmbedView).xqbh = uuid;
+						(resultWin as ShowFusionResultEmbedView).name="查看融合结果";
+						(resultWin as ShowFusionResultEmbedView).loadData();
+						(resultWin as ShowFusionResultEmbedView).adminView = urlEmbedFusionAdminView;
+						
+					}else if(actionString == "showNLRslt".toLowerCase()){
+						vsMain.selectedChild = urlEmbedFusionAdminView;
+						var uuid:String = urlParams.xqbh;
+						var feedbackWin = PopUpManager.createPopUp(urlEmbedFusionAdminView, FeedbackWinEmbed, true, null, null);
+						Controller.feedBackWinEmbed = feedbackWin;
+						(feedbackWin as FeedbackWinEmbed).uuid = uuid;
+						
+						//PopUpManager.centerPopUp(feedbackWin);
+						
+					}else if(actionString == "showKBMange".toLowerCase()){
+						kbManageEmbedView = true;
+						vsMain.selectedChild = adminView;
+					}
+				}
+			}
+			
+			
+
+
+			protected function application1_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				resultWin.height=this.height-20;
+			}
+
+		]]>
+	</fx:Script>
+	<mx:ViewStack  id="vsMain" width="100%" height="100%">
+		<mx:Canvas width="100%" height="100%" backgroundColor="0xffffff" id="loginAndRegister">
+			<mx:Panel id="loginPanel"  title="登录" horizontalCenter="0" verticalCenter="0" backgroundAlpha="0.5" 
+					  width="420"  height="220" fontSize="12">
+				<Container:Login_RegisterWin id="loginCtrl" width="100%" height="100%">
+				</Container:Login_RegisterWin>
+			</mx:Panel>
+		</mx:Canvas>
+		<Container:UserView id="userView"  width="100%" height="100%"  verticalScrollPolicy="auto">
+		</Container:UserView>
+		<Container:AdminView id="adminView"  width="100%" height="100%" verticalScrollPolicy="auto">
+		</Container:AdminView>
+		<fusion:AdminViewFusionEmbed id="urlEmbedFusionAdminView" width="100%" height="100%" verticalScrollPolicy="auto">
+			
+		</fusion:AdminViewFusionEmbed>
+		<!--<kbManage:AdminViewKbManageEmbed id="urlEmbedKbManageAdminView"  width="100%" height="100%" verticalScrollPolicy="auto">
+			
+		</kbManage:AdminViewKbManageEmbed>-->
+	</mx:ViewStack>
+</s:Application>

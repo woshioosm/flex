@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 verticalScrollPolicy="off"    horizontalScrollPolicy="off"
+					 left="2" right="2" top="2" bottom="8"
+					 cornerRadius="10" width="900" height="420" creationComplete="group1_creationCompleteHandler(event)" fontSize="13"
+					 fontFamily="微软雅黑">
+	<!--<s:layout>
+	<s:BasicLayout/>
+	</s:layout>-->
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.QueryResultObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.renderer.*;
+			import cn.edu.whu.liesmars.renderer.Button_CheckAndFeedBackRenderer;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import valueObjects.NLSearchResultWithTime;
+			[Bindable]
+			private var queryResult:ArrayCollection=new ArrayCollection();
+			
+			
+			public override function clearDate():void{
+				queryResult.removeAll();
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{	
+			}
+			public function queryCompleteFun(result:NLSearchResultWithTime):void{
+				if(result==null){
+					mx.controls.Alert.show("返回为空");
+					return;
+				}
+				var handler:QueryResultWinDataHandler=new QueryResultWinDataHandler(result.searchResultList);
+				handler.bindData(queryResult);
+				
+				Config.endTime=(new Date()).time;
+				mx.controls.Alert.show("共"+Config.totleSearchNum+
+					"条查询"+"\n浅层解析耗时"+result.pTime/1000+"秒\n"+
+					"深层解析耗时:"+result.aTime/1000+"秒\n"+
+					"总时间(含数据库):"+((Config.endTime-Config.startTime)/1000).toFixed(4)+"秒\n"+
+					"浅层平均时间"+(result.pTime/1000/Config.totleSearchNum).toFixed(4)+"秒\n"+
+					"深层平均时间"+(result.aTime/1000/Config.totleSearchNum).toFixed(4)+"秒\n"+
+					"总平均时间(含数据库)"+((Config.endTime-Config.startTime)/1000/Config.totleSearchNum).toFixed(4)+"秒\n"
+					
+				);
+			}
+			//			protected function queryComplete(event:QueryEvent):void{
+			//				var result:NLSearchResultWithTime=event.result as NLSearchResultWithTime;
+			//				var handler:QueryResultWinDataHandler=new QueryResultWinDataHandler(result.searchResultList);
+			//				handler.bindData(queryResult);
+			//				
+			//				Config.endTime=(new Date()).time;
+			//				mx.controls.Alert.show("共"+Config.totleSearchNum+
+			//					"条查询"+"\n浅层解析耗时"+result.pTime/1000+"秒\n"+
+			//					"深层解析耗时:"+result.aTime/1000+"秒\n"+
+			//					"总时间(含数据库):"+((Config.endTime-Config.startTime)/1000).toFixed(4)+"秒\n"+
+			//					"浅层平均时间"+(result.pTime/1000/Config.totleSearchNum).toFixed(4)+"秒\n"+
+			//					"深层平均时间"+(result.aTime/1000/Config.totleSearchNum).toFixed(4)+"秒\n"+
+			//					"总平均时间(含数据库)"+((Config.endTime-Config.startTime)/1000/Config.totleSearchNum).toFixed(4)+"秒\n"
+			//					
+			//				);
+			//			}
+			
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid  id="adg1" verticalScrollPolicy="auto" horizontalScrollPolicy="off" 
+						  designViewDataType="flat" dataProvider="{queryResult}" left="10" right="10" top="10" bottom="10" sortableColumns="false">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" minWidth="56" width="56"  itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="查询时间"  minWidth="150" width="150"  dataField="queryTime"/>
+			<!--<mx:AdvancedDataGridColumn headerText="领域" minWidth="52" width="52"  dataField="field"/>-->
+			<mx:AdvancedDataGridColumn headerText="自然语言描述" minWidth="100"  dataField="inputStr"  itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_inputStr"/>
+			<!--<mx:AdvancedDataGridColumn wordWrap="true" headerText="影像时间"  minWidth="70" dataTipField="imageDate" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="110" width="110" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+			-->
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" width="160"  minWidth="160" resizable="false" dataField="imageArea" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="操作" resizable="false" width="100"  minWidth="100" dataField="id" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckAndFeedBackRenderer" />
+			<mx:AdvancedDataGridColumn headerText="表单" resizable="false" width="100"  minWidth="100" dataField="id" itemRenderer="cn.edu.whu.liesmars.renderer.OrderFormRenderer" />
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>

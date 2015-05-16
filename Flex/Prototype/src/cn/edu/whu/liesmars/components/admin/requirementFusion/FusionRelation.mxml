@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"  title="融合关系图"
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*" layout="absolute" width="750" height="400"
+				     creationComplete="parentmdi1_creationCompleteHandler(event)" xmlns:services="services.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.fusionSpirit.FusionSpirte;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.PriRelatedModel;
+			import valueObjects.TDeepframework;
+			
+		
+			
+
+			
+			private var fusionSpirt:FusionSpirte=new FusionSpirte(null,null); 
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//loadRelation.token=fusionService.createRelatedModel(null);
+				
+              //var ui:UIComponent=new UIComponent();
+              //ui.addChild(fusionSpirt);
+			  //canvas.addChild(ui);
+			}
+
+			public function init(frames:ArrayCollection):void{
+				CursorManager.setBusyCursor();
+				loadRelation.token=fusionService.createRelatedModel(frames);
+			}
+			protected function loadRelation_resultHandler(event:ResultEvent):void
+			{
+			    var relationModel:PriRelatedModel=event.result as PriRelatedModel;
+				fusionSpirt=new FusionSpirte(relationModel,fusionSpirtContainer); 
+				CursorManager.removeAllCursors();
+				lbLoading.visible=false;
+			}
+
+			public override function close(event:MouseEvent=null):void{
+				lbLoading.visible=true;
+				fusionSpirt.stop();
+				this.removeAllChildren();
+				Config.midCanvs2.removeChild(this);
+				
+			}
+
+			
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="loadRelation" result="loadRelation_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:Canvas id="canvas" width="100%" height="100%" verticalScrollPolicy="auto" horizontalScrollPolicy="auto">
+		<mx:Label id="fusionSpirtContainer" width="100%" height="100%" horizontalCenter="0" verticalCenter="0"/>
+		<s:Label id="lbLoading" x="342" y="150" text="处理中......" width="64" fontFamily="微软雅黑" fontSize="14"/>
+	</mx:Canvas>
+</Container:ParentMDI>

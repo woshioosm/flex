@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 verticalScrollPolicy="off" horizontalScrollPolicy="off"
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 left="2" right="2" top="2" bottom="2" fontFamily="微软雅黑"
+					width="900" height="420" xmlns:services="services.*">
+	
+	
+	<fx:Declarations>
+		<services:UserRecommendationService  id="userRecommendationService" destination="UserRecommendationService" fault="userRecommendationService_faultHandler(event)"/>
+		<s:CallResponder id="userSuggestion" result="userSuggestion_resultHandler(event)"/>
+		<s:CallResponder id="acceptResp" result="acceptResp_resultHandler(event)"/>
+		<s:RadioButtonGroup id="radiogroup1"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.componentsData.UserSuggestionDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.SuggestionObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.TSimulateproduct;
+			
+			[Bindable]
+			private var suggestionArray:ArrayCollection=new ArrayCollection();
+			
+			public override function clearDate():void{
+				clearRadioBtn();
+				suggestionArray.removeAll();
+			}
+			
+			public override function loadData():void{
+				clearRadioBtn();
+				CursorManager.setBusyCursor();
+				userSuggestion.token=userRecommendationService.showUserRecommendation(Config.userName);
+			}
+			
+			
+			
+			protected function userSuggestion_resultHandler(event:ResultEvent):void
+			{
+				CursorManager.removeAllCursors();
+			    if(event.result==null){
+					return;
+				}	
+				var handler:UserSuggestionDataHandler=new UserSuggestionDataHandler(event.result as ArrayCollection);
+				handler.bindData(suggestionArray);
+			
+			}
+			
+			protected function btnOK_handle(event:Event):void{
+				var checkList:ArrayCollection=new ArrayCollection();
+				for each(var suggestion:SuggestionObj in suggestionArray ){
+					if(suggestion.checked==true){
+						var simulatePro:TSimulateproduct=new TSimulateproduct();
+						simulatePro.simulateUuid=suggestion.uuid;
+						simulatePro.simulateXml=suggestion.deepFrame;
+						checkList.addItem(simulatePro);
+					}
+				}
+				acceptResp.token=userRecommendationService.recommendationFeedback(checkList,Config.userName);
+				CursorManager.setBusyCursor();
+			}
+			
+			protected function radiobutton1_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbSelectAll.selected==true){
+					for each(var suggestion:SuggestionObj in suggestionArray )
+					{
+						suggestion.checked=true;
+					}
+				}
+				adg1.dataProvider=suggestionArray;
+				
+			}
+			
+			
+			protected function radiobutton2_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbRemoveAll.selected==true)
+					for each(var suggestion:SuggestionObj in suggestionArray ){
+					if(suggestion.checked==true)
+						suggestion.checked=false;
+					else if(suggestion.checked==false)
+						suggestion.checked=true;
+				}
+				adg1.dataProvider=suggestionArray;
+			}
+			
+
+			protected function userRecommendationService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				mx.controls.Alert.show("连接超时");
+				CursorManager.removeAllCursors();
+			}
+
+
+			protected function acceptResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.removeAllCursors();
+				if(event.result==null)
+				{
+					mx.controls.Alert.show("提交失败");
+				}
+				var result:int =event.result as int;
+				if(result==1){
+					mx.controls.Alert.show("提交成功");
+				}else if(result==0){
+					mx.controls.Alert.show("提交失败");
+				}
+			}
+			private function clearRadioBtn():void{
+				rbSelectAll.selected=false;
+				rbRemoveAll.selected=false;
+			}
+
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid id="adg1" sortableColumns="false" verticalScrollPolicy="auto" horizontalScrollPolicy="auto" designViewDataType="flat" dataProvider="{suggestionArray}" left="10" right="10" top="10" bottom="35" fontFamily="微软雅黑" fontSize="13">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="接受的推荐" width="90" minWidth="90" dataField="accept" itemRenderer="cn.edu.whu.liesmars.renderer.CheckBoxRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="序号" width="70" minWidth="70" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="70" dataTipField="imageDate" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" width="160" minWidth="160" dataField="imageArea" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="110" width="110" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	<s:Button id="btnOK" label="确定" width="187" cornerRadius="10" bottom="6" horizontalCenter="40" click="btnOK_handle(event)"/>
+	<s:RadioButton id="rbSelectAll" label="全选" groupName="radiogroup1" width="63" change="radiobutton1_changeHandler(event)" bottom="11" left="23"/>
+	<s:RadioButton id="rbRemoveAll" label="反选" groupName="radiogroup1" width="73" change="radiobutton2_changeHandler(event)" bottom="11" left="82"/>
+</Container:TheCanvas>

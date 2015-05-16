@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="372" height="268" title="修改表达规则结论" creationComplete="titlewindow1_creationCompleteHandler(event)" xmlns:services="services.*" close="titlewindow1_closeHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.RuleCodeAndName;
+			public var fullString:String;
+			[Bindable]
+			public var inferenceRuleClassCodeDropdownData:ArrayCollection;
+			var string3:String;
+				
+
+			protected function btnSubmit_clickHandler(event:MouseEvent):void
+			{
+				if(unitInferenceRuleClassCodeDropdown.selectedIndex != -1)
+				{
+					fullString = calculateTypeDropdown.selectedItem.ename + ";" + argText.text + ";" + inferenceRuleClassCodeDropdown.selectedItem.rulecode + ";" + unitInferenceRuleClassCodeDropdown.selectedItem;
+				}
+				else
+				{
+					fullString = calculateTypeDropdown.selectedItem.ename + ";" + argText.text + ";" + inferenceRuleClassCodeDropdown.selectedItem.rulecode;
+				}
+				
+				
+				var outgoingEvent:Event = new Event("expressRuleModifyThenPopupReadyMessage",false);
+				dispatchEvent(outgoingEvent);
+				PopUpManager.removePopUp(this);
+			}
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(fullString != null)
+				{
+					var valueitems:Array = fullString.split(";");
+					string3 = valueitems[2];
+					if(valueitems.length < 3)
+					{
+						Alert.show("传入的规则结论字符串有错误！！");
+					}
+					
+					var temptypeitem:Object = null;
+					for each(var item:Object in calculateTypeArrayCollection)
+					{
+						if(item.ename == valueitems[0])
+						{
+							temptypeitem = item;
+							break;
+						}
+					}
+					if(temptypeitem == null)
+					{
+						Alert.show("无法匹配计算类型！！");
+					}
+					else
+					{
+						calculateTypeDropdown.selectedItem = temptypeitem;
+					}
+					
+					if(valueitems.length >= 4)
+					{
+						for each(var stringItem2:String in unitInferenceRuleClassCodeDropdownData)
+						{
+							if(stringItem2 == valueitems[3])
+							{
+								unitInferenceRuleClassCodeDropdown.selectedItem = stringItem2;
+								break;
+							}
+						}
+					}
+					loadAllR2302Rules();
+				}
+			}
+
+			
+			protected function loadAllR2302Rules():void
+			{
+				loadAllR2302RulesResult.token = ruleManagerService.loadAllR2302Rules();
+			}
+			
+
+			protected function loadAllR2302RulesResult_resultHandler(event:ResultEvent):void
+			{
+				var R2302rules = loadAllR2302RulesResult.lastResult;
+				var dropdownData:ArrayCollection = new ArrayCollection();
+				for each(var ruleitem:RuleCodeAndName in R2302rules)
+				{
+					var newobject:Object = new Object();
+					newobject.label = ruleitem.ruleCName + "-" + ruleitem.rulecode;
+					newobject.rulecode = ruleitem.rulecode;
+					dropdownData.addItem(newobject);
+				}				
+				inferenceRuleClassCodeDropdownData = dropdownData;
+				inferenceRuleClassCodeDropdown.dataProvider = inferenceRuleClassCodeDropdownData;
+				inferenceRuleClassCodeDropdown.labelField = "label";
+				for each(var tempitem:Object in inferenceRuleClassCodeDropdownData)
+				{
+					if(tempitem.rulecode == string3)
+					{
+						inferenceRuleClassCodeDropdown.selectedItem = tempitem;
+					}
+				}
+				//inferenceRuleClassCodeDropdown.selectedItem = string3;
+			}
+
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	<s:ArrayCollection id="calculateTypeArrayCollection">
+		<fx:Object cname="单值计算" ename="SingleVal"/>
+		<fx:Object cname="级别计算" ename="LevelValue"/>
+		<fx:Object cname="时间频度计算" ename="TimeFreqValue"/>
+		<fx:Object cname="波段计算" ename="BandValue"/>
+		<fx:Object cname="连接波段计算" ename="BandConnectValue"/>
+		<fx:Object cname="中心波段计算" ename="BandCenterValue"/>
+		<fx:Object cname="交汇角计算" ename="IntersectAngelValue"/>
+		<fx:Object cname="指示计算" ename="RuleValue"/>
+	</s:ArrayCollection>
+		
+		<s:ArrayCollection id="unitInferenceRuleClassCodeDropdownData">
+			<fx:String>R230213</fx:String>
+			<fx:String>R230214</fx:String>
+		</s:ArrayCollection>
+		
+	<services:RuleManagerService id="ruleManagerService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+	<s:CallResponder id="loadAllR2302RulesResult" result="loadAllR2302RulesResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:Form x="13" y="12">
+		<mx:FormItem label="计算类型">
+			<s:DropDownList id="calculateTypeDropdown" dataProvider="{calculateTypeArrayCollection}" labelField="cname" x="150" y="39" width="185"/>
+		</mx:FormItem>
+		<mx:FormItem label="参数">
+			<s:TextInput id="argText" width="185" text="Sdec,sval,sunit"/>
+		</mx:FormItem>
+		<mx:FormItem label="推理规则分类号">
+			<s:DropDownList id="inferenceRuleClassCodeDropdown" width="185"/>
+		</mx:FormItem>
+		<mx:FormItem label="单位推理规则分类号">
+			<s:DropDownList dataProvider="{unitInferenceRuleClassCodeDropdownData}" id="unitInferenceRuleClassCodeDropdown" width="185"/>
+		</mx:FormItem>
+	</mx:Form>
+	<s:Button x="78" y="179" label="提交" id="btnSubmit" click="btnSubmit_clickHandler(event)"/>
+	<s:Button x="232" y="179" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+	
+</s:TitleWindow>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" chromeColor="0xffffff"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="330" height="272" creationComplete="titlewindow1_creationCompleteHandler(event)" xmlns:services="services.*">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="loadAllConfBandResult" result="loadAllConfBandResult_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.TaskAndSensorConfig;
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.ConfBandInfoModel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.ConfBandInfo;
+			import valueObjects.TaskSensorconf;
+			
+			//public var addArray:ArrayCollection = new ArrayCollection();
+			//public var showAdg:ArrayCollection = new ArrayCollection;
+			public var scaleValue:int;
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				if(confname.selectedIndex != -1 && priorityDropdown.selectedIndex != -1)
+				{
+					var newitem:TaskSensorconf = new TaskSensorconf();
+					newitem.taskid = taskid.text;
+					newitem.confname = confname.selectedItem.name;
+					newitem.priority = priorityDropdown.selectedItem;
+					newitem.scale = scaleValue;
+					(this.parentDocument as TaskAndSensorConfig).addArray.addItem(newitem);
+					(this.parentDocument as TaskAndSensorConfig).showAdg.addItem(newitem);
+					(this.parentDocument as TaskAndSensorConfig).globalQueryResult.addItem(newitem);
+					
+					fusionService.addTaskSensorconf(newitem);
+					PopUpManager.removePopUp(this);
+					var okevent:Event = new Event("addokmessage",false);
+					dispatchEvent(okevent);
+				}
+				else
+				{
+					Alert.show("必须选择典型配置和优先级！");
+				}
+				
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				taskid.text = (this.parentDocument as TaskAndSensorConfig).selectedTaskId;
+				taskname.text = (this.parentDocument as Object).selectedTaskName;
+				priorityDropdown.selectedIndex = 0; 
+				loadAllConfBandResult.token = fusionService.loadAllConfBand();
+				
+			}
+
+
+			protected function loadAllConfBandResult_resultHandler(event:ResultEvent):void
+			{
+				var tempconfBandResult = loadAllConfBandResult.lastResult;
+				var confBandResult:ArrayCollection = new ArrayCollection();
+				for each(var item:ConfBandInfo in tempconfBandResult)
+				{
+					var newitem:ConfBandInfoModel = new ConfBandInfoModel();
+					newitem.name = item.conf.name;
+					newitem.confBandInfo = item;
+					confBandResult.addItem(newitem);
+				}
+				
+				confname.dataProvider = confBandResult;
+			}
+
+
+			protected function confname_changeHandler(event:IndexChangeEvent):void
+			{
+				if(confname.selectedIndex != -1)
+				{
+					btnOk.enabled = true;
+				}
+			}
+
+		]]>
+	</fx:Script>
+
+	<mx:Form width="318" height="191" x="10" y="0">
+		<mx:FormHeading label="添加新项目"/>
+		<mx:FormItem label="任务id">
+			<s:TextInput id="taskid" width="186" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="任务名称">
+		<s:TextInput id="taskname" width="186" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="典型配置">
+			<s:DropDownList id="confname" labelField="name" width="185" change="confname_changeHandler(event)"/>
+		</mx:FormItem>
+		<mx:FormItem label="优先级">
+			<s:DropDownList id="priorityDropdown">
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:String>1</fx:String>
+						<fx:String>2</fx:String>
+						<fx:String>3</fx:String>
+						<fx:String>4</fx:String>
+						<fx:String>5</fx:String>
+						<fx:String>6</fx:String>
+						<fx:String>7</fx:String>
+						<fx:String>8</fx:String>
+						<fx:String>9</fx:String>
+						<fx:String>10</fx:String>
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:DropDownList>
+		</mx:FormItem>
+	</mx:Form>
+	<s:Button id="btnOk" label="确定" click="btnOk_clickHandler(event)" x="73" y="199" enabled="false"/>
+	<s:Button id="btnCancel" label="取消" click="btnCancel_clickHandler(event)" x="186" y="199"/>
+</s:TitleWindow>

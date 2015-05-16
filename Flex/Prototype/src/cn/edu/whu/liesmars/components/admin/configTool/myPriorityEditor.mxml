@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 fontFamily="微软雅黑"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" creationComplete="hbox1_creationCompleteHandler(event)" >
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			public var itemPriority:Number;
+			
+			[Bindable]
+			private var priorityList:ArrayCollection = new ArrayCollection([{priority:1},
+				{priority:2},
+				{priority:3},
+				{priority:4},
+				{priority:5},
+				{priority:6},
+				{priority:7},
+				{priority:8},
+				{priority:9},
+				{priority:10}]);
+			
+			protected function hbox1_creationCompleteHandler(event:FlexEvent):void
+			{
+				itemPriority = data.priority;
+				
+				
+			}
+
+
+			protected function mycb_changeHandler(event:IndexChangeEvent):void
+			{
+				itemPriority = mycb.selectedItem.priority;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:ComboBox id="mycb" dataProvider="{priorityList}" labelField="priority" change="mycb_changeHandler(event)"/>
+</mx:HBox>

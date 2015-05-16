@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 left="2" right="2" bottom="2" top="2" width="770" height="300" creationComplete="group1_creationCompleteHandler(event)" fontFamily="微软雅黑" fontSize="13">
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			private var requestHandle:ArrayCollection=new ArrayCollection();
+			private function testInit():void{
+				
+			}
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+			}
+
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid id="adg1" sortableColumns="false" designViewDataType="flat" left="10" right="10" top="10" bottom="10">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号" width="70" dataField="col1" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="用户名" dataField="col2"/>
+			<mx:AdvancedDataGridColumn headerText="真实姓名" dataField="col3"/>
+			<mx:AdvancedDataGridColumn headerText="部门" dataField="col1"/>
+			<mx:AdvancedDataGridColumn headerText="E-mail" dataField="col2"/>
+			<mx:AdvancedDataGridColumn headerText="操作" dataField="col3"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>

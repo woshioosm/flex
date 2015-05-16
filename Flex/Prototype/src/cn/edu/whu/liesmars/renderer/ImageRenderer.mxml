@@ -1,0 +1,44 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+	
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			private var obj:Object;
+			private var loader:Loader;
+			private var url:URLRequest;
+			private var imageUrl:String;
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					obj=value;
+					if(value.imageUrl!=null&&value.imageUrl!=""){
+						imageUrl=value.imageUrl;
+					}else{
+						return;
+					}
+					url = new URLRequest(imageUrl);
+					loader = new Loader();
+					loader.load(url);    
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE,loaderHander);
+					loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR,error);
+					
+				}
+			}    
+			 function loaderHander(evt:Event):void{
+				image.source=evt.currentTarget.content;
+			
+				
+			}
+			 function error(evt:Event):void{
+
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Image height="90" width="140"  id="image" source="{}" left="4" right="4" top="4" bottom="4"/>
+</mx:HBox> 

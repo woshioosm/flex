@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%"  fontFamily="微软雅黑"
+		   xmlns:natureLanguageQuery="cn.edu.whu.liesmars.components.user.natureLanguageQuery.*"
+		   verticalScrollPolicy="off"
+		   horizontalScrollPolicy="off"
+		   resize="application1_resizeHandler(event)"
+		   initialize="canvas1_initializeHandler(event)"
+		   creationComplete="application1_creationCompleteHandler(event)"
+		   xmlns:code="http://code.google.com/p/flexlib/" xmlns:map="cn.edu.whu.liesmars.map.*" xmlns:Container="cn.edu.whu.liesmars.Container.*">
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.LogoAsset;
+			
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.QueryResultHistoryWin;
+			import cn.edu.whu.liesmars.components.user.natureLanguageQuery.QueryResultWin;
+			import cn.edu.whu.liesmars.components.user.requireImageRecord.RequireImageMainWin;
+			import cn.edu.whu.liesmars.components.user.requireImageRecord.RequireImageMainWin;
+			import cn.edu.whu.liesmars.components.user.suggestion.SuggestionWin;
+			
+			import fl.transitions.Tween;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			import mx.managers.CursorManager;
+			
+			import org.liesmars.flashwebclient.Control;
+			
+			import valueObjects.NLSearchResultWithTime;
+			internal static const LogoAssert:Class=assets.LogoAsset;
+			[Bindable]
+			private var curUser:String;
+			
+			
+			internal static const HideAsset:Class=assets.HideAsset;
+			internal static const ShowAsset:Class=assets.ShowAsset;
+			
+			
+			
+			public var parentMdi:MdiUser=new MdiUser();  //用于盛放子容器
+			private var canLoadData:Boolean=true; // 判断 加载的组件 是否是直接从后台取数据的类型
+			private  var curX:Number=0;  //打开窗口的当前位置 x
+			private  var curY:Number=0;   //打开窗口的当前位置 y
+			[Bindable]
+			public var canShow:Boolean=false;  // 绑定右下button是否可将
+			
+			private var curId:int;
+			private var queryResultWin:QueryResultWin;
+			private var queryHistoryResultWin:QueryResultHistoryWin;
+			private var suggestionWin:SuggestionWin;
+			private var requireImageMainWin:RequireImageMainWin;
+			
+			private function openParentMdi(id:int):void{
+				
+				if(parentMdi==null || parentMdi.isOpen==false){
+					parentMdi=new MdiUser();
+					parentMdi.mdiCanvas=Config.midCanvs1;
+					parentMdi.verticalScrollPolicy="off";
+					parentMdi.horizontalScrollPolicy="off";
+					parentMdi.mdiCanvas=Config.midCanvs1;
+					Config.midCanvs1.windowManager.add(parentMdi);
+				}
+				openWinById(id);
+			}
+			
+			//1 为 上次查询 2为历史记录 3 为用户推荐  4 为背景知识
+			private function openWinById(id:int):void{
+				
+				canLoadData=true;
+				if(parentMdi!=null &&curId==id && parentMdi.isOpen==true){
+					if(parentMdi.isMinlize==true){
+						parentMdi.backToSize();		
+						parentMdi.isMinlize=false;
+					}
+					CursorManager.removeAllCursors();
+					return;
+				}
+				else
+					parentMdi.removeAllChildren();
+				
+				
+				
+				var win:TheCanvas=new TheCanvas();
+				
+				curId=id;
+				switch(id){
+					case 1:
+						parentMdi.title="最新查询处理结果";
+						canLoadData=false;
+						if(queryResultWin==null){
+							queryResultWin=new QueryResultWin();
+							win=queryResultWin;
+						}else{
+							win=queryResultWin;	
+						}						
+						break;
+					case 2:
+						parentMdi.title="历史查询结果";
+						if(queryHistoryResultWin==null){
+							queryHistoryResultWin=new QueryResultHistoryWin();
+							
+							win=queryHistoryResultWin;
+						}else{
+							win=queryHistoryResultWin;
+						}
+						break;
+					case 3:
+						parentMdi.title="查看用户推荐";
+						if(suggestionWin==null){
+							suggestionWin=new SuggestionWin();
+							
+							win=suggestionWin;
+						}else{
+							win=suggestionWin;
+						}
+						break;
+					case 4:
+						parentMdi.title="用户背景知识录入";
+						canLoadData=false;
+						if(requireImageMainWin==null){
+							requireImageMainWin=new RequireImageMainWin();
+							
+							win=requireImageMainWin;
+						}else{
+							win=requireImageMainWin;
+						}
+						break;
+				}
+				curWin.label=parentMdi.title;
+				canShow=true;
+				setParent(parentMdi,win);
+				if(canLoadData)
+					win.loadData();
+				
+				if(parentMdi.isMinlize==true){
+					parentMdi.visible=true;
+					parentMdi.isMinlize=false;	
+				}
+			}
+			
+			private function setParent(parent:ParentMDI,win:Canvas):void{
+				if(win!=null){
+					parent.width=win.width+4;
+					parent.height=win.height+4+22; // 20为headerhight
+					parent.addChild(win);
+					
+					Tweener.addTween(parent,{x:this.width/2-win.width/2,y:120,transition :"linear", time:0.4});
+				}
+				parentMdi.isOpen=true;
+			}
+			
+			public function winOpenEffect():void{  // 讲打开窗口恢复的效果
+				
+				Tweener.addTween(parentMdi,{x:curX,y:curY,transition :"linear",alpha:1, time:0.4});
+			}
+			
+			public function winCloseEffect():void{  //将打开窗口最小化的效果
+				this.curX=parentMdi.x;
+				this.curY=parentMdi.y;
+				Tweener.addTween(parentMdi,{x:-400,y:144,transition :"linear",visible:false, time:0.4});
+			}
+			
+			
+			/**
+			 * 
+			 * 控件事件
+			 * 
+			 * */
+			
+			protected function application1_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(banner!=null){                       // 控制banner长度
+					if(this.width>1280 ){
+						banner.width=this.width-30;
+						searchPanel.width=750;
+					}else{
+						banner.width=1250;
+						searchPanel.width=this.width-500<450?450:this.width-500;
+					}	
+				}
+			}
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{	
+				map.init();
+				Controller.container.visible=false;
+			
+				Controller.container.left=Config.midCanvs3.width/2-50;
+				Config.midCanvs3.windowManager.add(Controller.container);
+				Controller.container.left=100;
+				
+				Controller.feedBackWin.visible=false;
+				Controller.feedBackWin.left=Config.midCanvs3.width/2-Controller.feedBackWin.width/2;
+				Controller.feedBackWin.top=120;
+				Config.midCanvs2.windowManager.add(Controller.feedBackWin);
+				Controller.userView=this;
+				
+				parentMdi.mdiCanvas=Config.midCanvs1;
+				
+				Controller.mapContainer=map;
+
+				searchPanel.addEventListener(QueryEvent.COMPLETE,queryComplete);
+			}
+			//查询结果
+			public function queryComplete(event:QueryEvent):void{
+				openParentMdi(1);
+				queryResultWin.queryCompleteFun(event.result as NLSearchResultWithTime);
+			}
+			
+			protected function lbQuery_clickHandler(event:MouseEvent):void
+			{
+				openParentMdi(1);
+			}
+			protected function lbHistory_clickHandler(event:MouseEvent):void
+			{	
+				CursorManager.setBusyCursor();
+				openParentMdi(2);
+				
+				
+			}
+			protected function lbSuggestion_clickHandler(event:MouseEvent):void
+			{
+				openParentMdi(3);
+			}
+			protected function lbRss_clickHandler(event:MouseEvent):void
+			{
+				openParentMdi(4);
+			}
+			
+			
+			
+			protected function canvas1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				Config.midCanvs=this.mdiCanvas;
+				Config.midCanvs1=this.mdiCanvas1;
+				Config.midCanvs2=this.mdiCanvas2;
+				Config.midCanvs3=this.mdiCanvas3;
+				
+				var point:Point=map.globalToContent(new Point(0,0)); // 应用程序窗口距 map的相对位置
+				Config.stageOffsetX=point.x;
+				Config.stageOffsetY=point.y;
+			}
+			
+			public function minWin():void{
+				if(parentMdi!=null && parentMdi.isOpen==true ){
+					if(parentMdi.isMinlize==false){
+						parentMdi.minLize();
+						
+					}
+				}
+			}
+			
+			protected function curWin_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(parentMdi!=null && parentMdi.isOpen==true ){
+					if(parentMdi.isMinlize==true){
+						parentMdi.backToSize();					
+					}
+					else{
+						parentMdi.minLize();
+					}
+				}
+			}
+			
+			
+			protected function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				ExternalInterface.call("myrefresh");
+	
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:Canvas  x="0" y="0" height="25" width="100%">
+		<mx:Label  right="60" top="2" text="当前登录:{Config.userName}"  height="24" />
+		
+	
+		<mx:LinkButton right="16" top="2" label="退出" color="0x017189" click="linkbutton1_clickHandler(event)"/>
+		<mx:LinkButton id="lbQuery" x="10" y="2" label="最新查询处理结果"  color="0x017189" click="lbQuery_clickHandler(event)"  fontSize="12"/>
+		<mx:LinkButton id="lbHistory" x="126" y="2" label="历史查询结果"  color="0x017189" click="lbHistory_clickHandler(event)" fontSize="12"/>
+		<mx:LinkButton id="lbSuggestion" x="217" y="2" label="查看用户推荐"  color="0x017189" click="lbSuggestion_clickHandler(event)" fontSize="12"/>
+		<mx:LinkButton id="lbRss" x="310" y="2" label="用户背景知识录入" color="0x017189" click="lbRss_clickHandler(event)" fontSize="12" />
+		<!--<mx:LinkButton id="lbProduct" x="113" y="2" label="查看产品分解" color="0x017189" click="lbProduct_clickHandler(event)"/>
+		-->
+		
+	</mx:Canvas>
+	
+	<mx:Panel id="banner" x="12" y="26" width="1250" headerHeight="0" backgroundColor="0x017189"  height="110" >
+		<mx:Image y="2" width="100%" height="98%" source="{LogoAssert}" />
+	</mx:Panel>
+	
+	
+	<code:MDICanvas id="mdiCanvas" x="0" y="144" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<map:MapContainer  id="map" left="8" right="8" width="100%" height="100%"></map:MapContainer>
+		<mx:Canvas id="lbCan" cornerRadius="10" visible="{canShow}" height="27" width="157"  backgroundAlpha="0.7" backgroundColor="0xffffff" x="5" y="1">
+			<mx:LinkButton cornerRadius="10" id="curWin" x="0"  y="0"  click="curWin_clickHandler(event)" width="100%" height="100%"   fontSize="13" />
+		</mx:Canvas>
+	</code:MDICanvas>	
+	
+	
+	<natureLanguageQuery:SearchInputPanel id="searchPanel" left="350" y="55">
+		
+	</natureLanguageQuery:SearchInputPanel>
+	
+	<code:MDICanvas id="mdiCanvas1" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+	</code:MDICanvas>
+	
+	<code:MDICanvas id="mdiCanvas2" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">		
+	</code:MDICanvas>
+	
+	<code:MDICanvas id="mdiCanvas3" x="0" y="0" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">		
+	</code:MDICanvas>
+</mx:Canvas>

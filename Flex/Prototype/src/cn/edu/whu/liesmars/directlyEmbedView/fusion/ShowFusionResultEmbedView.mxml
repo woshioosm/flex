@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 fontFamily="微软雅黑" initialize="thecanvas1_initializeHandler(event)"
+					 verticalScrollPolicy="off" horizontalScrollPolicy="off" 
+					 left="0" right="0" bottom="0" top="0" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 width="980" height="100%" xmlns:services="services.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.FusionResultObj;
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.FusionSourceDataObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionResultDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionSourceGraphicDataHandler;
+			import cn.edu.whu.liesmars.directlyEmbedView.fusion.render.FusionResultCanvasEmbed;
+			import cn.edu.whu.liesmars.directlyEmbedView.fusion.render.FusionSourceCanvasEmbed;
+			import cn.edu.whu.liesmars.renderer.FusionResultCanvas;
+			import cn.edu.whu.liesmars.renderer.FusionSourceCanvas;
+			
+			import flexunit.utils.ArrayList;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.components.ComboBox;
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.FusionMapResultFlex;
+			import valueObjects.FusionResultMap;
+			import valueObjects.FusionResultMapWithTotlePage;
+			import valueObjects.TFusionresult;
+			
+			private var sourceList:ArrayCollection=new ArrayCollection();  //所有的融合结果
+			private var resultList:ArrayCollection=new ArrayCollection();  //所有融合结果的数据集
+			
+			private var startCanvasPoint:Point=new Point();
+			private var startResultPoint:Point=new Point();
+			
+			private var curSourceY:int;
+			private var curResultY:int;
+			private var container:Label;
+			private var record:ArrayCollection=new ArrayCollection(); // 记录当前添加的绘制内容
+			
+			private var fusionResultCount:int=0;
+			private var fusionResultIdMap:Dictionary = new Dictionary();
+			private var fusionChangeMap:ArrayCollection = new ArrayCollection();
+			/********
+			 * 分页变量和相关函数
+			 **/
+			[Bindable]
+			private var curPage:int=0;
+			private var totlePage:int;
+			[Bindable]
+			private var pageList:ArrayCollection=new ArrayCollection;
+			private var recordMap:Dictionary=new Dictionary();// 存储已经访问过的值 当做缓存 不在去后台取
+			private var curFusion:ArrayCollection;
+			
+			public var adminView:AdminViewFusionEmbed;
+			
+			
+	        public function init():void{
+				sourceList.removeAll();
+				resultList.removeAll();
+			}
+			
+			public override function clearDate():void{
+				clearRecordMap();
+				pageList.removeAll();
+			}
+			
+			private function clearRecordMap():void{
+				for(var i:int=1;i<=totlePage;i++){
+					if(recordMap[i]!=null){
+					    recordMap[i]=null;
+					    delete  recordMap[i];
+					}
+				}
+			}
+			
+			protected function resultResp_resultHandler(event:ResultEvent):void
+			{
+	
+				var result:FusionResultMapWithTotlePage=event.result as FusionResultMapWithTotlePage;
+				if(result==null){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				totlePage=result.totlePages;
+				if(totlePage==0){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				
+				curFusion=result.fusions;
+				recordMap[curPage]=curFusion;
+				
+				lbtnNext.enabled=true;
+				lbtnLast.enabled=true;
+				if(curPage==totlePage-1){
+					lbtnNext.enabled=false;
+				}
+				if(curPage==0){
+					lbtnLast.enabled=false;
+				}
+				pageList.removeAll();
+				for(var i:int=1;i<=totlePage;i++){
+					pageList.addItem(i.toString());
+				}
+				cbPage.selectedIndex=curPage;
+				draw(curFusion);
+			}
+			//上一页
+			protected function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.setBusyCursor();
+				curPage--;
+				if(recordMap[curPage]==null){
+					resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}	
+				cbPage.selectedIndex=curPage;
+				
+			}
+			
+			//下一页
+			protected function linkbutton2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.setBusyCursor();
+				curPage++;
+				if(recordMap[curPage]==null){
+				resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}	
+				cbPage.selectedIndex=curPage;
+			}
+			protected function combobox1_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				curPage=Number(cbPage.selectedItem);
+				curPage--;
+				if(recordMap[curPage]==null){
+					resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}
+				cbPage.selectedIndex=curPage;
+				
+			}
+			
+			
+		
+			protected function thecanvas1_initializeHandler(event:FlexEvent):void
+			{
+				pageList.removeAll();
+				initDraw();
+			}
+			
+			
+			public var xqbh:String;
+			public override function loadData():void{
+				init();
+				CursorManager.setBusyCursor();
+				pageCanvas.enabled=true;
+				clearRecordMap();
+				curPage=0;
+				totlePage=0;
+				pageList.removeAll();
+			//	resultResp.token=requirementFusionService.getFusionResultWithSource(10,0,null);
+				
+				getFusionRsltByPrjIDFlexResult.token = requirementFusionService.getFusionRsltByPrjIDFlex(xqbh);
+				
+				pageCanvas.enabled=true;
+			}
+			public  function loadResult(result:ArrayCollection):void{
+				pageCanvas.enabled=false;
+				draw(result);
+			
+			}
+			private function getResultByUUID(uuid:String):FusionResultObj{
+				for each(var t:FusionResultObj in resultList){
+					if(t.uuid==uuid)
+						return t;
+				}
+				return null;
+			}
+			
+			
+			
+			
+			
+			private function initDraw():void{
+				startCanvasPoint.x=20;
+				startCanvasPoint.y=10;
+				
+				startResultPoint.x=490;
+				startResultPoint.y=10;
+				
+				curSourceY=startCanvasPoint.y;
+				curResultY=startResultPoint.y;
+				can.removeAllChildren();
+				
+				container=new Label();
+				can.addChild(container);
+				container.percentWidth=100;
+				container.percentHeight=100;
+				container.x=0;
+				container.y=0;
+			}
+			private function clear():void{
+				for each(var canvas:FusionSourceCanvas in record){
+					this.removeChild(canvas);
+				}
+				container.graphics.clear();
+			}
+			
+			private function draw(result:ArrayCollection):void{
+				lbtip.visible=true;
+				var fusionResult:ArrayCollection=result;  // 为FusionResultMap 的list
+				
+				var dataHandler:FusionResultDataHandlerEmbed=new FusionResultDataHandlerEmbed(null);
+				
+				fusionResultIdMap = null;
+				fusionResultIdMap = new Dictionary();
+				fusionChangeMap = null;
+				fusionChangeMap = new ArrayCollection();
+				var index:int=0;
+				var count:int=fusionResult.length;
+				initDraw();
+				for each(var source:FusionMapResultFlex in fusionResult){
+					index++;
+					this.fusionResultIdMap[index]=source._Frslt._fusionUUID;
+					var uuid:String=source._prjUUID;
+					var fusionResultobj:FusionResultObjEmbed=dataHandler.bindSingleData(source._Frslt);
+					
+					var sourceList:ArrayCollection=new ArrayCollection();
+					var dataBinder:FusionSourceGraphicDataHandlerEmbed=new FusionSourceGraphicDataHandlerEmbed(source._srclst);
+					dataBinder.bindData(sourceList);
+					drawMethod(sourceList,fusionResultobj,index,count);					
+				}	
+				
+				CursorManager.removeAllCursors();
+				lbtip.visible=false;
+			}
+			//绘制融合结果的方法
+			private function drawMethod(sourceList:ArrayCollection,result:FusionResultObjEmbed,index:int,count:int):void{
+				
+				var graphic:Graphics=container.graphics;
+				graphic.lineStyle(3,0x000000,1);
+				var startP:Point=new Point();
+				var endP:Point=new Point();
+				var midP:Point=new Point();
+				for(var i:int=0;i<sourceList.length;i++){
+					var fusionSourcecanvas:FusionSourceCanvasEmbed=new FusionSourceCanvasEmbed();
+					var fusionSouce:FusionSourceDataObjEmbed=sourceList.getItemAt(i) as FusionSourceDataObjEmbed;
+					//fusionSourcecanvas.loadData(fusionSouce.naturalLang,fusionSouce.imageDate,fusionSouce.sensorType,fusionSouce.task,"需求"+(i+1),fusionSouce.imageArea,fusionSouce.spacialResolution, fusionSouce.sensorName);
+					fusionSourcecanvas.loadData(fusionSouce.naturalLang,fusionSouce.imageDate,fusionSouce.sensorType,fusionSouce.task,"需求"+fusionSouce.srcUUID,fusionSouce.imageArea,fusionSouce.spacialResolution, fusionSouce.sensorName);
+					can.addChild(fusionSourcecanvas);
+					record.addItem(fusionSourcecanvas);
+					
+					fusionSourcecanvas.x=startCanvasPoint.x;
+					fusionSourcecanvas.y=curSourceY;	
+					
+					curSourceY=curSourceY+120;
+					
+					graphic.moveTo(fusionSourcecanvas.getPosition().x,fusionSourcecanvas.getPosition().y);
+					var arr:ArrayCollection=new ArrayCollection();
+					for(var j:int=1; j<=count;j++){
+						arr.addItem(j);
+					}
+					var combox:spark.components.ComboBox=new spark.components.ComboBox();
+					combox.addEventListener(IndexChangeEvent.CHANGE,changeRelation);
+					combox.id="cb_"+fusionSouce.srcUUID;
+					
+					combox.x=fusionSourcecanvas.getPosition().x;
+					combox.y=fusionSourcecanvas.getPosition().y-25;
+					combox.width=45;
+					combox.dataProvider=arr;
+					combox.setStyle("borderVisible",false);
+					combox.setStyle("contentBackgroundAlpha",50);
+					combox.selectedIndex=index-1;
+					can.addChild(combox);
+					graphic.lineTo(fusionSourcecanvas.getPosition().x+50,fusionSourcecanvas.getPosition().y);
+					
+					if(i==0){
+						startP.x=fusionSourcecanvas.getPosition().x+50;
+						startP.y=fusionSourcecanvas.getPosition().y;
+					}
+					if(i==sourceList.length-1){
+						endP.x=fusionSourcecanvas.getPosition().x+50;
+						endP.y=fusionSourcecanvas.getPosition().y;
+					}
+					
+				}
+				graphic.moveTo(startP.x,startP.y);
+				graphic.lineTo(endP.x,endP.y);
+				midP.x=startP.x+(endP.x-startP.x)/2;
+				midP.y=startP.y+(endP.y-startP.y)/2;
+				
+				var fusionResultCanvas:FusionResultCanvasEmbed=new FusionResultCanvasEmbed();
+				fusionResultCanvas.loadData(result.imageDate,result.sensorName,result.task,"融合结果",result.imageArea,result.spacialResolution);
+				can.addChild(fusionResultCanvas);
+				record.addItem(fusionResultCanvas);
+				
+				
+				var lb:Label = new Label();
+				lb.text=index.toString();
+				lb.width=14;
+				lb.y=midP.y-14;
+				lb.x=startResultPoint.x-16;
+				lb.setStyle("fontSize",15);
+				can.addChild(lb);
+				fusionResultCanvas.x=startResultPoint.x;
+				fusionResultCanvas.y=midP.y-(fusionResultCanvas.height/2+3);	
+				
+				graphic.moveTo(midP.x,midP.y);
+				graphic.lineTo(startResultPoint.x,midP.y);
+				
+				
+			}
+			
+
+			
+           private function changeRelation(evt:Event):void{
+			   var tt:spark.components.ComboBox=evt.target as spark.components.ComboBox;
+			   //mx.controls.Alert.show(tt.id);
+			   fusionChangeMap.addItem(tt.id.split("_")[1]+"|"+fusionResultIdMap[tt.selectedItem]);
+			  
+			   
+		   }
+
+			
+
+
+			protected function can_mouseWheelHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				event.preventDefault();
+				event.stopPropagation();
+				
+			}
+
+			protected function getFusionRsltByPrjIDFlexResult_resultHandler(event:ResultEvent):void
+			{
+				var result:ArrayCollection = event.result as ArrayCollection;
+				
+				//var result:FusionResultMapWithTotlePage=event.result as FusionResultMapWithTotlePage;
+				if(result==null){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				//totlePage=result.totlePages;
+				totlePage=1;
+				if(totlePage==0){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				
+				//curFusion=result.fusions;
+				curFusion=result;
+				recordMap[curPage]=curFusion;
+				
+				lbtnNext.enabled=true;
+				lbtnLast.enabled=true;
+				if(curPage==totlePage-1){
+					lbtnNext.enabled=false;
+				}
+				if(curPage==0){
+					lbtnLast.enabled=false;
+				}
+				pageList.removeAll();
+				for(var i:int=1;i<=totlePage;i++){
+					pageList.addItem(i.toString());
+				}
+				cbPage.selectedIndex=curPage;
+				draw(curFusion);
+			}
+
+            // 提交融合关系修改
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				changeRelationResp.token=requirementFusionService.changeFusionRelation(fusionChangeMap);
+			}
+
+
+			protected function changeRelationResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				var graphic:Graphics=container.graphics;
+				graphic.clear();
+				loadData();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService"/>
+		
+		<s:CallResponder id="resultResp" result="resultResp_resultHandler(event)"/>
+		<s:CallResponder id="getFusionRsltByPrjIDFlexResult" result="getFusionRsltByPrjIDFlexResult_resultHandler(event)"/>
+		<s:CallResponder id="changeRelationResp" result="changeRelationResp_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<s:Label x="362" y="6" text="融合结果图" fontSize="16" color="#0840F6"/>
+	<s:Label x="141" y="30" text="融合源数据" fontSize="14"/>
+	<s:Label x="587" y="30" text="融合结果" fontSize="14"/>
+	<mx:Canvas x="0" id="can" width="100%" top="53" bottom="25" verticalScrollPolicy="on" horizontalScrollPolicy="off" borderVisible="true" borderColor="#FA0202">
+	</mx:Canvas>
+	<!--<s:Label id="container" width="100%" height="100%" />-->
+	<s:Label x="367" y="215" text="正在处理...." id="lbtip" visible="false" fontSize="15"/>
+	<mx:Canvas id="pageCanvas" visible="false" bottom="1" right="2" width="321" height="25"  verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<mx:LinkButton enabled="false" id="lbtnLast" x="32" y="2" label="上一页" fontSize="11"  click="linkbutton1_clickHandler(event)"/>
+		<mx:LinkButton enabled="false" id="lbtnNext" x="106" y="2" label="下一页" fontSize="11" click="linkbutton2_clickHandler(event)"/>
+		<s:Label x="85" y="8" text="{curPage+1}" fontSize="11" width="28"/>
+		<s:Label x="167" y="8" text="跳转到"/>
+		<mx:ComboBox text="{curPage+1}" id="cbPage" dataProvider="{pageList}" change="combobox1_changeHandler(event)" x="210" y="1" width="71" height="23"/>
+	</mx:Canvas>
+	<mx:Canvas id="submitCanvas" visible="true"  bottom="1" width="100%" height="25"  verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+		<s:Button y="5" label="更新修改的融合关系" left="400" click="button1_clickHandler(event)"/>
+		
+	
+	</mx:Canvas>
+	
+</Container:TheCanvas>
+
+
+

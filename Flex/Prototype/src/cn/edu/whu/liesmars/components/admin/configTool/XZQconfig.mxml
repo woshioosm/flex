@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"   title="行政区名称编辑"
+					 xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" 
+					 width="682" height="140" headerHeight="18" close="titlewindow1_closeHandler(event)"
+					 creationComplete="titlewindow1_creationCompleteHandler(event)" xmlns:services="services.*" showCloseButton="true">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.event.XZQEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.utils.StringUtil;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.XZQLayer;
+			import valueObjects.XZQValue;
+
+			[Bindable]
+			private var proArray:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var cityArray:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var districtArray:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var townArray:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var villageArray:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var layerName:String="";
+			
+			private var newFeaCode:Number=0;
+			
+			private var proLayerName:String="";
+			private var cityLayerName:String="";
+			private var districtLayerName:String="";
+			private var townLayerName:String="";
+			private var villageLayerName:String="";
+			
+			private var curMaxProFeaCode:Number;
+			private var curMaxCityFeaCode:Number;
+			private var curMaxDistrictFeaCode:Number;
+			private var curMaxTownFeaCode:Number;
+			private var curMaxVillageFeaCode:Number;
+			
+			
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				CursorManager.setBusyCursor();
+				xzqResp.token=naturalLangService.loadXZQ("","ADMProvince");
+			}
+
+
+
+			//行政区的combox选择事件
+
+			protected function cbPro_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				cityArray.removeAll();
+				districtArray.removeAll();
+				townArray.removeAll();
+				villageArray.removeAll();
+				
+				if(cbPro.selectedIndex<0)
+					return;
+				var feacode:String=(proArray.getItemAt(cbPro.selectedIndex) as XZQValue).feacode;
+				cityResp.token=naturalLangService.loadXZQ(feacode,"ADMCity");
+			}
+			protected function cbCity_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				districtArray.removeAll();
+				townArray.removeAll();
+				villageArray.removeAll();
+				
+				if(cbCity.selectedIndex<0)
+					return;
+				var feacode:String=(cityArray.getItemAt(cbCity.selectedIndex) as XZQValue).feacode;
+				districtResp.token=naturalLangService.loadXZQ(feacode,"ADMDistrict");
+			}
+			protected function cbDis_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				townArray.removeAll();
+				villageArray.removeAll();
+				
+				if(cbDis.selectedIndex<0)
+					return;
+				var feacode:String=(districtArray.getItemAt(cbDis.selectedIndex) as XZQValue).feacode;
+				townResp.token=naturalLangService.loadXZQ(feacode,"ADMTown");
+			}
+			protected function cbTown_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				villageArray.removeAll();
+				
+				if(cbTown.selectedIndex<0)
+					return;
+				var feacode:String=(townArray.getItemAt(cbTown.selectedIndex) as XZQValue).feacode;
+				VillageResp.token=naturalLangService.loadXZQ(feacode,"ADMVillage");
+			}
+		
+			
+			
+			//处理后台数据
+			
+			protected function xzqResp_resultHandler(event:ResultEvent):void
+			{
+				// TODO Auto-generated method stub
+				proArray.removeAll();
+				cityArray.removeAll();
+				districtArray.removeAll();
+				townArray.removeAll();
+				villageArray.removeAll();
+				
+				var xzqLayer:XZQLayer=event.result as XZQLayer;
+				proLayerName=xzqLayer.layerName;
+				curMaxProFeaCode=xzqLayer.maxFeacode;
+				
+				for each(var value:XZQValue in xzqLayer.values){
+					proArray.addItem(value);
+				}
+				if(xzqLayer!=null&&xzqLayer.values.length>0){
+					cbPro.text=(proArray.getItemAt(0) as XZQValue).name;
+					var curFea:String=(proArray.getItemAt(0) as XZQValue).feacode;
+					cityResp.token=naturalLangService.loadXZQ(curFea,"ADMCity");
+				}
+				checkEnable();
+			}
+			protected function cityResp_resultHandler(event:ResultEvent):void
+			{
+			
+				var xzqLayer:XZQLayer=event.result as XZQLayer;
+				cityLayerName=xzqLayer.layerName;
+				curMaxCityFeaCode=xzqLayer.maxFeacode;
+				
+				for each(var value:XZQValue in xzqLayer.values){
+					cityArray.addItem(value);
+				}
+				if(xzqLayer!=null&&xzqLayer.values.length>0){
+					cbCity.text=(cityArray.getItemAt(0) as XZQValue).name;
+					var curFea:String=(cityArray.getItemAt(0) as XZQValue).feacode;
+					districtResp.token=naturalLangService.loadXZQ(curFea,"ADMDistrict");
+				}
+				checkEnable();
+			}
+			protected function districtResp_resultHandler(event:ResultEvent):void
+			{
+				
+				var xzqLayer:XZQLayer=event.result as XZQLayer;
+				districtLayerName=xzqLayer.layerName;
+				curMaxDistrictFeaCode=xzqLayer.maxFeacode;
+				
+				for each(var value:XZQValue in xzqLayer.values){
+					districtArray.addItem(value);
+				}
+				if(xzqLayer!=null&&xzqLayer.values.length>0){
+					cbDis.text=(districtArray.getItemAt(0) as XZQValue).name;
+					var curFea:String=(districtArray.getItemAt(0) as XZQValue).feacode;
+					townResp.token=naturalLangService.loadXZQ(curFea,"ADMTown");
+				}
+				checkEnable();
+			}
+			protected function townResp_resultHandler(event:ResultEvent):void
+			{
+				
+				var xzqLayer:XZQLayer=event.result as XZQLayer;
+				townLayerName=xzqLayer.layerName;
+				curMaxTownFeaCode=xzqLayer.maxFeacode;
+				
+				for each(var value:XZQValue in xzqLayer.values){
+					townArray.addItem(value);
+				}
+				if(xzqLayer!=null&&xzqLayer.values.length>0){
+					cbTown.text=(townArray.getItemAt(0) as XZQValue).name;
+					var curFea:String=(townArray.getItemAt(0) as XZQValue).feacode;
+					VillageResp.token=naturalLangService.loadXZQ(curFea,"ADMVillage");
+				}
+				checkEnable();
+				CursorManager.removeAllCursors();
+			}
+			protected function VillageResp_resultHandler(event:ResultEvent):void
+			{
+				CursorManager.removeAllCursors();
+				var xzqLayer:XZQLayer=event.result as XZQLayer;
+				villageLayerName=xzqLayer.layerName;
+				curMaxVillageFeaCode=xzqLayer.maxFeacode;
+				
+				for each(var value:XZQValue in xzqLayer.values){
+					villageArray.addItem(value);
+				}
+				if(xzqLayer!=null&&xzqLayer.values.length>0){
+					cbVillage.text=(villageArray.getItemAt(0) as XZQValue).name;
+					
+				}
+				checkEnable();
+			}
+			
+			
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				// TODO Auto-generated method stub
+			     PopUpManager.removePopUp(this);
+			}
+
+			protected function btnOK_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+				if(layerName!=""&&newFeaCode>0&&newName.text!=""){
+				   this.dispatchEvent(new XZQEvent(XZQEvent.XZQCHOOSEDONE,StringUtil.trim(newName.text),layerName,newFeaCode.toString()));
+				   PopUpManager.removePopUp(this);
+				   
+				}
+				else{
+					mx.controls.Alert.show("不能为空");
+				}
+			}
+			
+            private function increaseFeacode():void{
+				switch(layerName){
+					case proLayerName:
+						curMaxProFeaCode++;
+						break;
+					case cityLayerName:
+						curMaxCityFeaCode++;
+						break;
+					case districtLayerName:
+						curMaxDistrictFeaCode++;
+						break;
+					case townLayerName:
+						curMaxTownFeaCode++;
+						break;
+					case villageLayerName:
+						curMaxVillageFeaCode++;
+						break;
+					default:
+						return;
+					
+				}
+				newFeaCode++;
+			}
+
+			protected function btnPro_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerName=proLayerName;
+				newFeaCode=curMaxProFeaCode+1;
+				group.enabled=true;
+			}
+
+
+			protected function btnCity_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerName=cityLayerName;
+				newFeaCode=curMaxCityFeaCode+1;
+				group.enabled=true;
+			}
+
+
+			protected function btnDistrict_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerName=districtLayerName;
+				newFeaCode=curMaxDistrictFeaCode+1;
+				group.enabled=true;
+			}
+
+
+			protected function btnTown_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerName=townLayerName;
+				newFeaCode=curMaxTownFeaCode+1;
+				group.enabled=true;
+			}
+
+
+			protected function btnVillage_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				layerName=villageLayerName;
+				newFeaCode=curMaxVillageFeaCode+1;
+				group.enabled=true;
+			}
+
+			private function checkEnable():void{
+				if(proArray.length>0){
+					btnPro.enabled=true;
+				}else{
+					btnPro.enabled=false;
+				}
+				
+				if(cityArray.length>0){
+					btnCity.enabled=true;
+				}else{
+					btnCity.enabled=false;
+				}
+				
+				if(districtArray.length>0){
+					btnDistrict.enabled=true;
+				}else{
+					btnDistrict.enabled=false;
+				}
+				
+				if(townArray.length>0){
+					btnTown.enabled=true;
+				}else{
+					btnTown.enabled=false;
+				}
+				
+				if(villageArray.length>0){
+					btnVillage.enabled=true;
+				}else{
+					btnVillage.enabled=false;
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>
+		<s:CallResponder id="xzqResp" result="xzqResp_resultHandler(event)"/>
+		<s:CallResponder id="cityResp" result="cityResp_resultHandler(event)" />
+		<s:CallResponder id="districtResp" result="districtResp_resultHandler(event)"/>
+		<s:CallResponder id="townResp" result="townResp_resultHandler(event)"/>
+		<s:CallResponder id="VillageResp" result="VillageResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:Canvas width="100%" height="100%">
+		<mx:ComboBox labelField="name" dataProvider="{proArray}" x="18" y="10" width="110" id="cbPro"    change="cbPro_changeHandler(event)"/>
+		<mx:ComboBox labelField="name" dataProvider="{cityArray}" x="151" y="10" width="110" id="cbCity" change="cbCity_changeHandler(event)"/>
+		<mx:ComboBox labelField="name" dataProvider="{districtArray}" x="283" y="10" width="110" id="cbDis" change="cbDis_changeHandler(event)"/>
+		<mx:ComboBox labelField="name" dataProvider="{townArray}" x="416" y="10" width="110" id="cbTown" change="cbTown_changeHandler(event)"/>
+		<mx:ComboBox labelField="name" dataProvider="{villageArray}" x="552" y="10" width="110" id="cbVillage"/>
+		<s:Label x="5" y="16" text="省"/>
+		<s:Label x="138" y="16" text="市"/>
+		<s:Label x="270" y="16" text="区"/>
+		<s:Label x="402" y="16" text="镇"/>
+		<s:Button enabled="true"  id="btnPro" x="19" y="41" label="此级添加省" click="btnPro_clickHandler(event)"/>
+		<s:Button enabled="false" id="btnCity" x="152" y="41" label="此级添加市" click="btnCity_clickHandler(event)"/>
+		<s:Button enabled="false" id="btnDistrict" x="285" y="40" label="此级添加区" click="btnDistrict_clickHandler(event)"/>
+		<s:Button enabled="false" id="btnTown" x="418" y="40" label="此级添加镇" click="btnTown_clickHandler(event)"/>
+		<s:Button enabled="false" id="btnVillage" x="553" y="41" label="此级添加村" click="btnVillage_clickHandler(event)"/>
+		<s:Label x="538" y="15" text="村"/>	
+		
+		<s:Group id="group" enabled="false" x="10" y="72" width="652" height="32">
+			<s:TextInput id="newName" x="302" y="5" width="168"/>
+			<s:Label x="13" y="10" text="添加地名所在图层"/>
+			<s:Label x="117" y="10" text="{layerName}" width="99"/>
+			<s:Label x="233" y="10" text="输入新名称"/>
+			<s:Button id="btnOK" x="496" y="6" label="确定添加名称" width="108"  click="btnOK_clickHandler(event)"/>
+		</s:Group>
+	</mx:Canvas>
+</mx:TitleWindow>

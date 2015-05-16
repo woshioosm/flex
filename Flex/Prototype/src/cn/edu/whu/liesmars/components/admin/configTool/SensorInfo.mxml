@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" width="800" height="568"
+					 minHeight="568" minWidth="800"
+					 left="2" right="2" top="2" bottom="2"
+					 initialize="thecanvas1_initializeHandler(event)" xmlns:services="services.*"
+					 fontFamily="微软雅黑">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.mymodels.SensorBandInfoModel;
+			import cn.edu.whu.liesmars.components.admin.configTool.popups.SensorInfoMapTypicalConfPopup;
+			import cn.edu.whu.liesmars.components.admin.configTool.popups.SensorInfoTab1AddBandInfoPopup;
+			import cn.edu.whu.liesmars.components.admin.configTool.popups.SensorInfoTab1AddPopup;
+			import cn.edu.whu.liesmars.components.admin.configTool.popups.SensorInfoTab2AddPopup;
+			
+			import flash.sampler.NewObjectSample;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.IndexChangedEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import org.osmf.layout.AbsoluteLayoutFacet;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.SensorBand;
+			import valueObjects.SensorBandInfo;
+			
+			[Bindable]
+			private var mylistArray0:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var mylistArray1:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var adg1showArray:ArrayCollection = new ArrayCollection();
+			private var t1addBandInfoPopup;
+			private var t1addSensorBandPopup;
+			private var t2addSensorBandPopup;
+			private var mapTypicalConfPopup;
+			
+			protected function thecanvas1_initializeHandler(event:FlexEvent):void
+			{
+//				loadAllSensorBandResult.token = fusionService.loadAllSensorBand();
+			}
+			public override function loadData():void{
+				loadAllSensorBandResult.token = fusionService.loadAllSensorBand();
+			}
+			
+			protected function loadAllSensorBandResult_resultHandler(event:ResultEvent):void
+			{
+				var tempQueryResult = loadAllSensorBandResult.lastResult;
+				var queryResult:ArrayCollection = new ArrayCollection();
+				
+				for each(var atemp:SensorBandInfo in tempQueryResult)
+				{
+					var btemp:SensorBandInfoModel = new SensorBandInfoModel();
+					btemp.name = atemp.sensor.name;
+					btemp.sensorBandInfo = atemp;
+					queryResult.addItem(btemp);
+				}
+				
+				if(mylistArray0 != null)
+					mylistArray0.removeAll();
+				if(mylistArray1 != null)
+					mylistArray1.removeAll();
+				
+				for each(var item:SensorBandInfoModel in queryResult)
+				{
+					if(item.sensorBandInfo.sensor.sensortype == 0)
+						mylistArray0.addItem(item);
+					else if(item.sensorBandInfo.sensor.sensortype == 1)
+						mylistArray1.addItem(item);
+				}
+				if(myTabNav.selectedIndex == 0)
+				{
+					myList1.dataProvider = mylistArray0;
+				}
+				else if(myTabNav.selectedIndex == 1)
+				{
+					myList2.dataProvider = mylistArray1;
+				}
+			}
+			
+			protected function myTabNav_changeHandler(event:IndexChangedEvent):void
+			{
+				if(myTabNav.selectedIndex == 0)
+				{
+					myList1.dataProvider = mylistArray0;
+				}
+				else if(myTabNav.selectedIndex == 1)
+				{
+					myList2.dataProvider = mylistArray1;
+				}
+			}
+			
+			protected function t1btnDel_clickHandler(event:MouseEvent):void
+			{
+				if(myList1.selectedIndex != -1)
+				{
+					Alert.show("确认删除该条记录吗?","删除",Alert.YES|Alert.NO,this,t1btnDelAlertHandler);
+				}
+				
+			}
+			
+			protected function t1btnDelAlertHandler(event:CloseEvent):void
+			{
+				if(event.detail == Alert.YES)
+				{
+					var item:SensorBandInfoModel = myList1.selectedItem;
+					fusionService.delSensorBand(item.sensorBandInfo);
+					mylistArray0.removeItemAt(mylistArray0.getItemIndex(item));
+				}
+				
+			}
+			
+			protected function t1btnAdd_clickHandler(event:MouseEvent):void
+			{
+				t1addSensorBandPopup = PopUpManager.createPopUp(this, SensorInfoTab1AddPopup, false);
+				t1addSensorBandPopup.addEventListener("tab1addSensorBandInfoReadyMessage",tab1addSensorBandInfoReadyMessageHandler);
+			}
+			
+			protected function tab1addSensorBandInfoReadyMessageHandler(event:Event):void
+			{
+				var item:SensorBandInfo = t1addSensorBandPopup.returnSensorBandInfo;
+				fusionService.addSensorBand(item);
+				
+				var newShowItem:SensorBandInfoModel = new SensorBandInfoModel();
+				newShowItem.sensorBandInfo = item;
+				newShowItem.name = item.sensor.name;
+				mylistArray0.addItem(newShowItem);
+			}
+			
+			protected function t1btnSave_clickHandler(event:MouseEvent):void
+			{
+				if(myList1.selectedIndex != -1)
+				{
+					var item:SensorBandInfoModel = myList1.selectedItem;
+					
+					item.sensorBandInfo.sensor.name = t1Sensorname.text;
+					item.sensorBandInfo.sensor.aliasname = t1AliasName.text;
+					item.sensorBandInfo.sensor.spectralresolution = new Number(t1SpectrumResolution.text);
+					item.sensorBandInfo.sensor.fabricwidth = new Number(t1FabricWidth.text);
+					item.sensorBandInfo.sensor.encounterangle = new Number(t1encounterangle.text);
+					item.sensorBandInfo.sensor.steroimgway = t1steroimgway.selectedItem;
+					item.sensorBandInfo.sensor.side = new Number(t1side.text);
+					item.sensorBandInfo.sensor.confname = t1confname.text;
+					
+					item.sensorBandInfo.sensor.tracktype = t1tracktype.selectedItem;
+					item.sensorBandInfo.sensor.timeresolution = new Number(t1timeresolution.text);
+					item.sensorBandInfo.sensor.radioresolution = new Number(t1radioresolution.text);
+					item.sensorBandInfo.sensor.snr = new Number(t1snr.text);
+					item.sensorBandInfo.sensor.isimg = t1isimg.selectedItem;
+					item.sensorBandInfo.sensor.imgway = t1imgway.selectedItem;
+					
+					var theSpectral:String = null;
+					if(checkboxFullColor.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "全色";
+						}
+						else
+						{
+							theSpectral += ",全色";
+						}
+					}
+					if(checkboxMultiSpectrum.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "多光谱";
+						}
+						else
+						{
+							theSpectral += ",多光谱";
+						}
+					}
+					if(checkboxHighSpectrum.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "高光谱";
+						}
+						else
+						{
+							theSpectral += ",高光谱";
+						}
+					}
+					
+					
+					item.sensorBandInfo.sensor.type = theSpectral;
+					item.sensorBandInfo.bands = adg1showArray;
+					for each(var itemband:SensorBand in item.sensorBandInfo.bands)
+					{
+						itemband.sensorname = item.sensorBandInfo.sensor.name;
+					}
+					
+					fusionService.updateSensorBand(item.sensorBandInfo);
+				}
+			}
+			
+			
+			protected function t2btnDel_clickHandler(event:MouseEvent):void
+			{
+				if(myList2.selectedIndex != -1)
+				{
+					Alert.show("确认删除该条记录吗?","删除",Alert.YES|Alert.NO,this,t1btnDelAlertHandler);
+				}
+			}
+			
+			protected function t2btnDelAlertHandler(event:CloseEvent):void
+			{
+				if(event.detail == Alert.YES)
+				{
+					var item:SensorBandInfoModel = myList1.selectedItem;
+					fusionService.delSensorBand(item.sensorBandInfo);
+					mylistArray1.removeItemAt(mylistArray1.getItemIndex(item));
+				}
+			}
+			
+			protected function t2btnAdd_clickHandler(event:MouseEvent):void
+			{
+				t2addSensorBandPopup = PopUpManager.createPopUp(this, SensorInfoTab2AddPopup, false);
+				t2addSensorBandPopup.addEventListener("tab2addSensorBandInfoReadyMessage",tab2addSensorBandInfoReadyMessageHandler);
+				PopUpManager.centerPopUp(t2addSensorBandPopup);
+			}
+			
+			protected function tab2addSensorBandInfoReadyMessageHandler(event:Event):void
+			{
+				var item:SensorBandInfo = t2addSensorBandPopup.returnSensorBandInfo;
+				item.sensor.sensortype = 1;
+				fusionService.addSensorBand(item);
+				
+				var newShowItem:SensorBandInfoModel = new SensorBandInfoModel();
+				newShowItem.name = item.sensor.name;
+				newShowItem.sensorBandInfo = item;
+				mylistArray1.addItem(newShowItem);
+			}
+			
+			
+			protected function myList1_changeHandler(event:IndexChangeEvent):void
+			{
+				var item:SensorBandInfoModel  = myList1.selectedItem;
+				
+				t1Sensorname.text = item.sensorBandInfo.sensor.name;
+				t1AliasName.text = item.sensorBandInfo.sensor.aliasname;
+				
+				if(item.sensorBandInfo.sensor.spectralresolution.toString() !="0")
+				{
+					t1SpectrumResolution.text = item.sensorBandInfo.sensor.spectralresolution.toString();
+				}
+				if(item.sensorBandInfo.sensor.fabricwidth.toString() !="0")
+				{
+					t1FabricWidth.text = item.sensorBandInfo.sensor.fabricwidth.toString();
+				}
+				if(item.sensorBandInfo.sensor.encounterangle.toString() !="0")
+				{
+					t1encounterangle.text = item.sensorBandInfo.sensor.encounterangle.toString();
+				}
+				if(item.sensorBandInfo.sensor.side.toString() !="0")
+				{
+					t1side.text = item.sensorBandInfo.sensor.side.toString();
+				}
+				if(item.sensorBandInfo.sensor.timeresolution.toString() !="0")
+				{
+					t1timeresolution.text = item.sensorBandInfo.sensor.timeresolution.toString();
+				}
+				if(item.sensorBandInfo.sensor.radioresolution.toString() !="0")
+				{
+					t1radioresolution.text = item.sensorBandInfo.sensor.radioresolution.toString();
+				}
+				if(item.sensorBandInfo.sensor.snr.toString() !="0")
+				{
+					t1snr.text = item.sensorBandInfo.sensor.snr.toString();
+				}
+				
+				
+				
+				
+				t1steroimgway.selectedItem = item.sensorBandInfo.sensor.steroimgway;
+				
+				t1confname.text = item.sensorBandInfo.sensor.confname;
+				
+				t1tracktype.selectedItem = item.sensorBandInfo.sensor.tracktype;
+				
+				
+			
+				t1isimg.selectedItem = item.sensorBandInfo.sensor.isimg;
+				t1imgway.selectedItem = item.sensorBandInfo.sensor.imgway;
+				
+				adg1showArray = new ArrayCollection();
+				if(item.sensorBandInfo.bands != null)
+				{
+					adg1showArray = item.sensorBandInfo.bands;
+				}
+				adg1.dataProvider = adg1showArray;
+				
+				var spectrumArray:Array = new Array();
+				if(item.sensorBandInfo.sensor.type != null)
+				{
+					spectrumArray = item.sensorBandInfo.sensor.type.split(",");
+				}
+				checkboxFullColor.selected = false;
+				checkboxMultiSpectrum.selected = false;
+				checkboxHighSpectrum.selected = false;	
+				
+				for each(var tempItem:String in spectrumArray)
+				{
+					if(tempItem == "全色")
+					{
+						checkboxFullColor.selected = true;
+						continue;
+					}
+					if(tempItem == "多光谱")
+					{
+						checkboxMultiSpectrum.selected = true;
+						continue;
+					}
+					if(tempItem == "高光谱")
+					{
+						checkboxHighSpectrum.selected = true;
+						continue;
+					}
+					
+				}
+				adg1showArray = item.sensorBandInfo.bands;
+				
+			}
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(myList1.selectedIndex != -1)
+				{
+					t1addBandInfoPopup = PopUpManager.createPopUp(this,SensorInfoTab1AddBandInfoPopup,false);
+					t1addBandInfoPopup.addEventListener("t1addBandInfoReadyMessage",t1addBandInfoReadyMessageHandler);
+					PopUpManager.centerPopUp(t1addBandInfoPopup);
+				}
+				
+			}
+			
+			protected function t1addBandInfoReadyMessageHandler(event:Event):void
+			{
+				var newSensorBand:SensorBand = t1addBandInfoPopup.newSensorBand;
+				newSensorBand.sensorname = t1Sensorname.text;
+				adg1showArray.addItem(newSensorBand);
+			}
+			
+			
+			protected function t1btnCancel_clickHandler(event:MouseEvent):void
+			{
+				loadAllSensorBandResult.token = fusionService.loadAllSensorBand();
+				/* myList1.selectedIndex = -1;
+				
+				t1Sensorname.text = null;
+				t1SpectrumResolution.text = null;
+				t1FabricWidth.text = null;
+				t1encounterangle.text = null;
+				t1steroimgway.selectedItem = null;
+				t1side.text= null;
+				t1confname.text = null;
+				
+				t1tracktype.selectedItem = null;
+				t1timeresolution.text = null;
+				t1radioresolution.text = null;
+				t1snr.text = null;
+				t1isimg.selectedItem = null;
+				t1imgway.selectedItem = null;
+				
+				checkboxFullColor.selected = false;
+				checkboxMultiSpectrum.selected = false;
+				checkboxHighSpectrum.selected = false;	
+				checkboxVeryHigh.selected = false;	
+				checkboxVisualSpectrum.selected = false;
+				checkboxNearIR.selected = false;
+				checkboxShortIR.selected = false;
+				checkboxHotIR.selected = false;
+				
+				if(adg1showArray != null)
+				{
+					adg1showArray.removeAll();
+				} */
+				
+			}
+			
+			
+			protected function myList2_changeHandler(event:IndexChangeEvent):void
+			{
+				var selectedItem:SensorBandInfoModel  = myList2.selectedItem;
+				
+				t2sensorName.text = selectedItem.sensorBandInfo.sensor.name;
+				
+				if(selectedItem.sensorBandInfo.sensor.spectralresolution.toString() !="0")
+				{
+					t2spactialResolution.text = selectedItem.sensorBandInfo.sensor.spectralresolution.toString();
+				}
+				if(selectedItem.sensorBandInfo.sensor.timeresolution.toString() !="0")
+				{
+					t2TimeResolution.text = selectedItem.sensorBandInfo.sensor.timeresolution.toString();
+				}
+				if(selectedItem.sensorBandInfo.sensor.side.toString() !="0")
+				{
+					t2side.text = selectedItem.sensorBandInfo.sensor.side.toString();
+				}
+				if(selectedItem.sensorBandInfo.sensor.fabricwidth.toString() !="0")
+				{
+					t2fabricWidth.text = selectedItem.sensorBandInfo.sensor.fabricwidth.toString();
+				}
+				if(selectedItem.sensorBandInfo.sensor.snr.toString() !="0")
+				{
+					t2snr.text = selectedItem.sensorBandInfo.sensor.snr.toString();
+				}
+				if(selectedItem.sensorBandInfo.sensor.encounterangle.toString() !="0")
+				{
+					t2encounterAngle.text = selectedItem.sensorBandInfo.sensor.encounterangle.toString();
+				}
+				
+				
+				t2imgWay.selectedItem = selectedItem.sensorBandInfo.sensor.imgway;
+				t2steroimgway.selectedItem = selectedItem.sensorBandInfo.sensor.steroimgway;
+				t2confname.text = selectedItem.sensorBandInfo.sensor.confname;
+				t2tracktype.selectedItem = selectedItem.sensorBandInfo.sensor.tracktype;
+				
+				
+				
+				t2spectrum.text = selectedItem.sensorBandInfo.sensor.spectrum;
+				
+				var polarwayArray:Array=new Array();
+				if(selectedItem.sensorBandInfo.sensor.polarway!=null){
+					polarwayArray = selectedItem.sensorBandInfo.sensor.polarway.split(",");
+				}
+				t2chkHH.selected = false;
+				t2chkHV.selected = false;
+				t2chkVH.selected = false;
+				t2chkVV.selected = false;
+				
+				for each(var item:String in polarwayArray)
+				{
+					if(item == "HH")
+					{
+						t2chkHH.selected = true;
+						continue;
+					}
+					if(item == "HV")
+					{
+						t2chkHV.selected = true;
+						continue;
+					}
+					if(item == "VH")
+					{
+						t2chkVH.selected = true;
+						continue;
+					}
+					if(item == "VV")
+					{
+						t2chkVV.selected = true;
+						continue;
+					}
+					
+				}
+			}
+			
+			
+			protected function t2btnSave_clickHandler(event:MouseEvent):void
+			{
+				if(myList2.selectedIndex != -1)
+				{
+					
+					var selectedItem:SensorBandInfoModel = myList2.selectedItem;
+					
+					selectedItem.sensorBandInfo.sensor.name = t2sensorName.text;
+					selectedItem.sensorBandInfo.sensor.spectralresolution = new Number(t2spactialResolution.text);
+					selectedItem.sensorBandInfo.sensor.timeresolution = new Number(t2TimeResolution.text);
+					selectedItem.sensorBandInfo.sensor.imgway = t2imgWay.selectedItem;
+					selectedItem.sensorBandInfo.sensor.steroimgway = t2steroimgway.selectedItem;
+					selectedItem.sensorBandInfo.sensor.side = new Number(t2side.text);
+					selectedItem.sensorBandInfo.sensor.confname = t2confname.text;
+					
+					selectedItem.sensorBandInfo.sensor.tracktype = t2tracktype.selectedItem;
+					selectedItem.sensorBandInfo.sensor.fabricwidth = new Number(t2fabricWidth.text);
+					selectedItem.sensorBandInfo.sensor.snr = new Number(t2snr.text);
+					selectedItem.sensorBandInfo.sensor.encounterangle = new Number(t2encounterAngle.text);
+					selectedItem.sensorBandInfo.sensor.spectrum = t2spectrum.text;
+					
+					var polarwayString:String = null;
+					if(t2chkHH.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "HH";
+						}
+						else
+						{
+							polarwayString += ",HH";
+						}
+					}
+					if(t2chkHV.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "HV";
+						}
+						else
+						{
+							polarwayString += ",HV";
+						}
+					}
+					if(t2chkVH.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "VH";
+						}
+						else
+						{
+							polarwayString += ",VH";
+						}
+					}
+					if(t2chkVV.selected == true)
+					{
+						if(polarwayString == null)
+						{
+							polarwayString = "VV";
+						}
+						else
+						{
+							polarwayString += ",VV";
+						}
+					}
+					selectedItem.sensorBandInfo.sensor.polarway = polarwayString;
+					
+					fusionService.updateSensorBand(selectedItem.sensorBandInfo);
+				}
+			}
+			
+			
+			
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				if(adg1.selectedIndex != -1)
+				{
+					adg1showArray.removeItemAt(adg1showArray.getItemIndex(adg1.selectedItem));
+				}
+			}
+			
+
+			protected function b2btnCancel_clickHandler(event:MouseEvent):void
+			{
+				loadAllSensorBandResult.token = fusionService.loadAllSensorBand();
+			}
+
+
+			protected function t1btnMapTypicalConfig_clickHandler(event:MouseEvent):void
+			{
+				if(myList1.selectedIndex != -1)
+				{
+					mapTypicalConfPopup = PopUpManager.createPopUp(this,SensorInfoMapTypicalConfPopup,true);
+					mapTypicalConfPopup.sensorname = myList1.selectedItem.name;
+					mapTypicalConfPopup.addEventListener("mapConfReadyMessage",mapConfReadyMessageHandler);
+					PopUpManager.centerPopUp(mapTypicalConfPopup);
+				}
+			}
+			
+			protected function mapConfReadyMessageHandler(event:Event):void
+			{
+				if(myTabNav.selectedIndex == 0)
+				{
+					t1confname.text = mapTypicalConfPopup.returnConfName;
+				}
+				else
+				{
+					t2confname.text = mapTypicalConfPopup.returnConfName;
+				}
+				
+			}
+
+
+			protected function t2btnMapTypicalConfig_clickHandler(event:MouseEvent):void
+			{
+				if(myList2.selectedIndex != -1)
+				{
+					mapTypicalConfPopup = PopUpManager.createPopUp(this,SensorInfoMapTypicalConfPopup,true);
+					mapTypicalConfPopup.sensorname = myList2.selectedItem.name;
+					mapTypicalConfPopup.addEventListener("mapConfReadyMessage",mapConfReadyMessageHandler);
+					PopUpManager.centerPopUp(mapTypicalConfPopup);
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="loadAllSensorBandResult" result="loadAllSensorBandResult_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:TabNavigator id="myTabNav" left="2" right="2" top="1" bottom="2" change="myTabNav_changeHandler(event)">
+		<s:NavigatorContent label="光学传感器" width="100%" height="100%" fontFamily="微软雅黑">
+			<mx:Canvas borderStyle="solid" borderAlpha="0.5" left="14" right="589" top="10" bottom="46">
+				<s:List id="myList1" left="5" top="5" right="5" bottom="5" width="100%" height="100%" labelField="name" change="myList1_changeHandler(event)"></s:List>
+				
+			</mx:Canvas>
+			<mx:Canvas borderStyle="solid" borderAlpha="0.5" right="8" top="10" width="569" bottom="46">
+				<s:Label x="10" y="19" text="传感器名称" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="79" text="光谱分辨率(nm)" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="106" text="幅宽(km)" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="133" text="交会角(rad)" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="160" text="立体成像方式" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="188" text="侧摆能力" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="215" text="所属典型配置" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="262" text="波段信息(μm)" fontFamily="微软雅黑"/>
+				
+				<s:TextInput x="105" y="13" width="128" id="t1Sensorname" editable="false" tabEnabled="true" tabIndex="1"/>
+				<s:Label x="10" y="47" text="传感器别名" fontFamily="微软雅黑"/>
+				<s:TextInput x="105" y="41" width="128" id="t1AliasName" editable="false" tabEnabled="true" tabIndex="1"/>
+				<s:TextInput x="105" y="72" width="128" id="t1SpectrumResolution" tabEnabled="true" tabIndex="2"/>
+				<s:TextInput x="105" y="99" width="128" id="t1FabricWidth" tabEnabled="true" tabIndex="3"/>
+				<s:TextInput x="105" y="126" width="128" id="t1encounterangle" tabEnabled="true" tabIndex="4"/>
+				<s:DropDownList x="105" y="153" width="128" id="t1steroimgway" tabEnabled="true" tabIndex="5">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>同轨立体</fx:String>
+							<fx:String>异轨立体</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:TextInput x="118" y="180" width="102" id="t1side" tabEnabled="true" tabIndex="6"/>
+				<s:TextInput x="105" y="209" width="128" id="t1confname" enabled="false" tabEnabled="true" tabIndex="7"/>
+				<s:Label x="268" y="19" text="轨道类型" fontFamily="微软雅黑"/>
+				<s:Label x="268" y="47" text="时间分辨率(次/天)" fontFamily="微软雅黑"/>
+				<s:Label x="268" y="74" text="辐射分辨率(bit)" fontFamily="微软雅黑"/>
+				<s:Label x="268" y="101" text="信噪比(dB)" fontFamily="微软雅黑"/>
+				<s:Label x="268" y="128" text="是否成像" fontFamily="微软雅黑"/>
+				<s:Label x="268" y="156" text="成像方式" fontFamily="微软雅黑"/>
+				<s:DropDownList x="378" y="13" width="128" id="t1tracktype" tabEnabled="true" tabIndex="8">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>太阳同步</fx:String>
+							<fx:String>地球同步</fx:String>
+							<fx:String>极地轨道</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:TextInput x="378" y="40" width="128" id="t1timeresolution" tabEnabled="true" tabIndex="9"/>
+				<s:TextInput x="378" y="67" width="128" id="t1radioresolution" tabEnabled="true" tabIndex="10"/>
+				<s:TextInput x="378" y="94" width="128" id="t1snr" tabEnabled="true" tabIndex="11"/>
+				<s:DropDownList x="378" y="121" width="128" id="t1isimg" tabEnabled="true" tabIndex="12">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>成像</fx:String>
+							<fx:String>非成像</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:DropDownList x="378" y="148" width="128" id="t1imgway" tabEnabled="true" tabIndex="13">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>推扫式</fx:String>
+							<fx:String>摆扫式</fx:String>
+							<fx:String>框幅相机</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<mx:AdvancedDataGrid id="adg1" designViewDataType="flat" width="342"  fontFamily="微软雅黑" borderStyle="solid" x="10" bottom="4" top="279">
+					<mx:columns>
+						<mx:AdvancedDataGridColumn headerText="波段名称" dataField="bandname"/>
+						<mx:AdvancedDataGridColumn headerText="最小值" dataField="minvalue"/>
+						<mx:AdvancedDataGridColumn headerText="最大值" dataField="maxvalue"/>
+						<mx:AdvancedDataGridColumn headerText="空间分辨率" dataField="spatialresolution"/>
+					</mx:columns>
+				</mx:AdvancedDataGrid>
+				<s:Button x="378" y="270" label="添加" fontFamily="微软雅黑" click="button1_clickHandler(event)"/>
+				<s:Button x="378" y="304" label="删除" fontFamily="微软雅黑" click="button2_clickHandler(event)"/>
+				<s:Button x="272" y="177" label="映射典型配置" width="112" fontFamily="微软雅黑" id="t1btnMapTypicalConfig" click="t1btnMapTypicalConfig_clickHandler(event)"/>
+				<s:Label x="11" y="243" text="传感器类型" fontFamily="微软雅黑"/>
+				<s:CheckBox x="109" y="239" label="全色" id="checkboxFullColor" enabled="true" tabEnabled="true" tabIndex="14"/>
+				<s:CheckBox x="174" y="239" label="多光谱" id="checkboxMultiSpectrum" enabled="true" tabEnabled="true" tabIndex="15"/>
+				<s:CheckBox x="244" y="239" label="高光谱" id="checkboxHighSpectrum" enabled="true" tabEnabled="true" tabIndex="16"/>
+				
+				<s:Label x="103" y="185" text="±" fontSize="15"/>
+				<s:Label x="224" y="182" text="°" fontSize="15"/>
+				
+			</mx:Canvas>
+			<s:Label x="24" y="3" text="传感器列表 " fontFamily="微软雅黑" backgroundAlpha="1.0" backgroundColor="#FFFEFE" fontSize="13"/>
+			<s:Label text="详细信息" fontFamily="微软雅黑" fontSize="13" backgroundColor="#FCFCFC" right="496" width="52" top="5"/>
+			<s:Button label="删除" fontFamily="微软雅黑" id="t1btnDel" click="t1btnDel_clickHandler(event)" right="373" bottom="13"/>
+			<s:Button label="添加" fontFamily="微软雅黑" id="t1btnAdd" click="t1btnAdd_clickHandler(event)" right="279" bottom="13"/>
+			<s:Button label="保存修改" fontFamily="微软雅黑" id="t1btnSave" click="t1btnSave_clickHandler(event)" bottom="13" right="186"/>
+			<s:Button label="刷新" fontFamily="微软雅黑" id="t1btnCancel" click="t1btnCancel_clickHandler(event)" bottom="13" right="87"/>
+		</s:NavigatorContent>
+		<s:NavigatorContent label="SAR传感器" width="100%" height="100%" fontFamily="微软雅黑">
+			<mx:Canvas borderStyle="solid" borderAlpha="0.5" right="607" left="14" top="10" bottom="61">
+				<s:List left="5" top="5" right="5" bottom="5" width="100%" height="100%" labelField="name" id="myList2" change="myList2_changeHandler(event)"></s:List>
+				
+			</mx:Canvas>
+			<mx:Canvas borderStyle="solid" borderAlpha="0.5" right="4" width="590" top="10" bottom="61">
+				<s:Label x="10" y="20" text="传感器名称" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="50" text="空间分辨率" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="80" text="时间分辨率(次/天)" fontFamily="微软雅黑"/>
+				<s:Label x="277" y="111" text="交会角(rad)" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="140" text="立体成像方式" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="170" text="侧摆能力" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="200" text="所属典型配置" fontFamily="微软雅黑"/>
+				<s:Label x="11" y="231" text="极化方式" fontFamily="微软雅黑"/>
+				
+				<s:TextInput x="110" y="15" width="128" id="t2sensorName" editable="false" tabEnabled="true" tabIndex="30"/>
+				<s:TextInput x="110" y="45" width="128" id="t2spactialResolution" tabEnabled="true" tabIndex="31"/>
+				<s:TextInput x="110" y="75" width="128" id="t2TimeResolution" tabEnabled="true" tabIndex="32"/>
+				<s:DropDownList x="110" y="105" width="128" id="t2imgWay" tabEnabled="true" tabIndex="33">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>聚束模式</fx:String>
+							<fx:String>条带模式</fx:String>
+							<fx:String>扫描模式</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:DropDownList x="110" y="135" width="128" id="t2steroimgway" tabEnabled="true" tabIndex="34">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>同轨立体</fx:String>
+							<fx:String>异轨立体</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:TextInput x="110" y="165" width="128" id="t2side" tabEnabled="true" tabIndex="35"/>
+				<s:TextInput x="110" y="195" width="128" id="t2confname" enabled="false" tabEnabled="true" tabIndex="36"/>
+				<s:Label x="277" y="20" text="轨道类型" fontFamily="微软雅黑"/>
+				<s:Label x="277" y="50" text="幅宽(km)" fontFamily="微软雅黑"/>
+				<s:Label x="277" y="80" text="信噪比(dB)" fontFamily="微软雅黑"/>
+				<s:Label x="10" y="110" text="成像模式" fontFamily="微软雅黑"/>
+				<s:Label x="277" y="140" text="频段" fontFamily="微软雅黑"/>
+				<s:DropDownList x="373" y="15" width="128" id="t2tracktype" tabEnabled="true" tabIndex="37">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:String>太阳同步</fx:String>
+							<fx:String>地球同步</fx:String>
+							<fx:String>极地轨道</fx:String>
+							<fx:String>(空)</fx:String>
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				<s:TextInput x="373" y="45" width="128" id="t2fabricWidth" tabEnabled="true" tabIndex="38"/>
+				<s:TextInput x="373" y="75" width="128" id="t2snr" tabEnabled="true" tabIndex="39"/>		
+				<s:TextInput x="373" y="105" width="128" id="t2encounterAngle" tabEnabled="true" tabIndex="40"/>
+				<s:TextInput x="373" y="135" width="128" id="t2spectrum" tabEnabled="true" tabIndex="41"/>
+				<s:CheckBox x="105" y="227" label="HH" fontFamily="微软雅黑" id="t2chkHH" tabEnabled="true" tabIndex="42"/>
+				<s:CheckBox x="183" y="227" label="VH" fontFamily="微软雅黑" id="t2chkVH" tabEnabled="true" tabIndex="43"/>
+				<s:CheckBox x="144" y="227" label="HV" fontFamily="微软雅黑" id="t2chkHV" tabEnabled="true" tabIndex="44"/>
+				<s:CheckBox x="223" y="227" label="VV" fontFamily="微软雅黑" id="t2chkVV" tabEnabled="true" tabIndex="45"/>
+				
+				<s:Button x="273" y="197" label="映射典型配置" width="112" fontFamily="微软雅黑" id="t2btnMapTypicalConfig" click="t2btnMapTypicalConfig_clickHandler(event)"/>
+				
+				
+			</mx:Canvas>
+			<s:Label x="24" y="3" text="传感器列表 " fontFamily="微软雅黑" backgroundAlpha="1.0" backgroundColor="#FFFEFE" fontSize="13"/>
+			<s:Label text="详细信息" fontFamily="微软雅黑" fontSize="13" backgroundColor="#FCFCFC" right="498" top="3"/>
+			<s:Button label="删除" fontFamily="微软雅黑" id="t2btnDel" click="t2btnDel_clickHandler(event)" right="358" bottom="22"/>
+			<s:Button label="添加" fontFamily="微软雅黑" id="t2btnAdd" click="t2btnAdd_clickHandler(event)" right="260" bottom="23"/>
+			<s:Button label="保存修改" fontFamily="微软雅黑" id="t2btnSave" click="t2btnSave_clickHandler(event)" right="153" bottom="23"/>
+			<s:Button label="刷新" fontFamily="微软雅黑" id="b2btnCancel" click="b2btnCancel_clickHandler(event)" bottom="23" right="44"/>
+		</s:NavigatorContent>
+	</mx:TabNavigator>
+</Container:TheCanvas>

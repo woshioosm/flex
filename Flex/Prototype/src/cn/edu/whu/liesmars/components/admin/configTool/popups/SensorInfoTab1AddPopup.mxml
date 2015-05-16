@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="538" height="514" title="添加光学传感器" creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import services.FusionService;
+			
+			import valueObjects.Sensor;
+			import valueObjects.SensorBand;
+			import valueObjects.SensorBandInfo;
+			var mapTypicalConfPopup;
+			
+			[Bindable]
+			var adg1showArray:ArrayCollection = new ArrayCollection();
+			var t1addBandInfoPopup;
+			public var returnSensorBandInfo:SensorBandInfo;
+			
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				if(t1Sensorname.text == null)
+				{
+					Alert.show("必须输入传感器名称!","warning");
+				}
+				else
+				{
+					var item:SensorBandInfo = new SensorBandInfo();
+					
+					item.sensor = new Sensor();
+					item.bands = new ArrayCollection();
+					
+					item.sensor.name = t1Sensorname.text;
+					item.sensor.spectralresolution = new Number(t1SpectrumResolution.text);
+					item.sensor.fabricwidth = new Number(t1FabricWidth.text);
+					item.sensor.encounterangle = new Number(t1encounterangle.text);
+					item.sensor.steroimgway = t1steroimgway.selectedItem;
+					item.sensor.side = new Number(t1side.text);
+					item.sensor.confname = t1confname.text;
+					
+					item.sensor.tracktype = t1tracktype.selectedItem;
+					item.sensor.timeresolution = new Number(t1timeresolution.text);
+					item.sensor.radioresolution = new Number(t1radioresolution.text);
+					item.sensor.snr = new Number(t1snr.text);
+					item.sensor.isimg = t1isimg.selectedItem;
+					item.sensor.imgway = t1imgway.selectedItem;
+					
+					var theSpectral:String = null;
+					if(checkboxFullColor.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "全色";
+						}
+						else
+						{
+							theSpectral += ",全色";
+						}
+					}
+					if(checkboxMultiSpectrum.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "多光谱";
+						}
+						else
+						{
+							theSpectral += ",多光谱";
+						}
+					}
+					if(checkboxHighSpectrum.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "高光谱";
+						}
+						else
+						{
+							theSpectral += ",高光谱";
+						}
+					}
+					if(checkboxVeryHigh.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "甚高";
+						}
+						else
+						{
+							theSpectral += ",甚高";
+						}
+					}
+					if(checkboxVisualSpectrum.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "可见光";
+						}
+						else
+						{
+							theSpectral += ",可见光";
+						}
+					}
+					if(checkboxNearIR.selected == true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "近红外";
+						}
+						else
+						{
+							theSpectral += ",近红外";
+						}
+					}
+					if(checkboxShortIR.selected == true)
+					{
+						
+						if(theSpectral == null)
+						{
+							theSpectral = "短波红外";
+						}
+						else
+						{
+							theSpectral += ",短波红外";
+						}
+					}
+					if(checkboxHotIR.selected = true)
+					{
+						if(theSpectral == null)
+						{
+							theSpectral = "热红外";
+						}
+						else
+						{
+							theSpectral += ",热红外";
+						}
+					}
+					item.sensor.type = theSpectral;
+					if(adg1showArray != null)
+					{
+						item.bands = adg1showArray;
+					}
+					for each(var itemband:SensorBand in item.bands)
+					{
+						itemband.sensorname = item.sensor.name;
+					}
+					
+					returnSensorBandInfo = item;
+					
+					PopUpManager.removePopUp(this);
+					var readyEvent:Event = new Event("tab1addSensorBandInfoReadyMessage",false);
+					dispatchEvent(readyEvent);
+				}
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			protected function button4_clickHandler(event:MouseEvent):void
+			{
+				t1addBandInfoPopup = PopUpManager.createPopUp(this,SensorInfoTab1AddBandInfoPopup,false);
+				t1addBandInfoPopup.addEventListener("t1addBandInfoReadyMessage",t1addBandInfoReadyMessageHandler);
+				PopUpManager.centerPopUp(t1addBandInfoPopup);
+			}
+			
+			protected function t1addBandInfoReadyMessageHandler(event:Event):void
+			{
+				var newSensorBand:SensorBand = t1addBandInfoPopup.newSensorBand;
+				adg1showArray.addItem(newSensorBand);
+			}
+			
+			
+			protected function btnDel_clickHandler(event:MouseEvent):void
+			{
+				if(adg1.selectedIndex != -1)
+				{
+					var item:SensorBand = adg1.selectedItem as SensorBand;
+					adg1showArray.removeItemAt(adg1showArray.getItemIndex(item));
+				}
+			}
+			
+			
+			
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				adg1.dataProvider = adg1showArray;
+			}
+			
+
+			protected function t1btnMapTypicalConfig_clickHandler(event:MouseEvent):void
+			{
+					mapTypicalConfPopup = PopUpManager.createPopUp(this,SensorInfoMapTypicalConfPopup,true);
+					if(t1Sensorname.text != null)
+					{
+						mapTypicalConfPopup.sensorname = t1Sensorname.text;
+					}
+					mapTypicalConfPopup.addEventListener("mapConfReadyMessage",mapConfReadyMessageHandler);
+					PopUpManager.centerPopUp(mapTypicalConfPopup);
+			}
+			
+			protected function mapConfReadyMessageHandler(event:Event):void
+			{
+				t1confname.text = mapTypicalConfPopup.returnConfName;
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas x="9" y="11" width="518" height="428" borderStyle="solid" borderAlpha="0.5">
+		<s:Label x="10" y="19" text="传感器名称" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="47" text="光谱分辨率(μm)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="74" text="幅宽(km)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="101" text="交会角(rad)" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="128" text="立体成像方式" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="156" text="侧摆能力" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="183" text="所属典型配置" fontFamily="微软雅黑"/>
+		<s:Label x="10" y="272" text="波段信息" fontFamily="微软雅黑"/>
+		
+		<s:TextInput x="105" y="13" width="128" id="t1Sensorname" tabEnabled="true" tabIndex="1"/>
+		<s:TextInput x="105" y="40" width="128" id="t1SpectrumResolution" tabEnabled="true" tabIndex="2"/>
+		<s:TextInput x="105" y="67" width="128" id="t1FabricWidth" tabEnabled="true" tabIndex="3"/>
+		<s:TextInput x="105" y="94" width="128" id="t1encounterangle" tabEnabled="true" tabIndex="4"/>
+		<s:DropDownList x="105" y="121" width="128" id="t1steroimgway" tabEnabled="true" tabIndex="5">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>同轨立体</fx:String>
+					<fx:String>异轨立体</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:TextInput x="119" y="148" width="97" id="t1side" tabEnabled="true" tabIndex="6"/>
+		<s:Label x="103" y="153" text="±" fontSize="15"/>
+		<s:Label x="220" y="148" text="°" fontSize="15"/>
+		<s:TextInput x="105" y="177" width="128" id="t1confname" enabled="false" tabEnabled="true" tabIndex="7"/>
+		<s:Label x="268" y="19" text="轨道类型" fontFamily="微软雅黑"/>
+		<s:Label x="268" y="47" text="时间分辨率(次/天)" fontFamily="微软雅黑"/>
+		<s:Label x="268" y="74" text="辐射分辨率(bit)" fontFamily="微软雅黑"/>
+		<s:Label x="268" y="101" text="信噪比(dB)" fontFamily="微软雅黑"/>
+		<s:Label x="268" y="128" text="是否成像" fontFamily="微软雅黑"/>
+		<s:Label x="268" y="156" text="成像方式" fontFamily="微软雅黑"/>
+		<s:DropDownList x="378" y="13" width="128" id="t1tracktype" tabEnabled="true" tabIndex="8">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>太阳同步</fx:String>
+					<fx:String>地球同步</fx:String>
+					<fx:String>极地轨道</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:TextInput x="378" y="40" width="128" id="t1timeresolution" tabEnabled="true" tabIndex="9"/>
+		<s:TextInput x="378" y="67" width="128" id="t1radioresolution" tabEnabled="true" tabIndex="10"/>
+		<s:TextInput x="378" y="94" width="128" id="t1snr" tabEnabled="true" tabIndex="11"/>
+		<s:DropDownList x="378" y="121" width="128" id="t1isimg" tabEnabled="true" tabIndex="12">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>成像</fx:String>
+					<fx:String>非成像</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<s:DropDownList x="378" y="148" width="128" id="t1imgway" tabEnabled="true" tabIndex="13">
+			<s:dataProvider>
+				<s:ArrayCollection>
+					<fx:String>推扫式</fx:String>
+					<fx:String>摆扫式</fx:String>
+					<fx:String>框幅相机</fx:String>
+					<fx:String>(空)</fx:String>
+				</s:ArrayCollection>
+			</s:dataProvider>
+		</s:DropDownList>
+		<mx:AdvancedDataGrid x="10" y="286" id="adg1" designViewDataType="flat" width="342" height="128" fontFamily="微软雅黑">
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="波段名称" dataField="bandname"/>
+				<mx:AdvancedDataGridColumn headerText="最小值" dataField="minvalue"/>
+				<mx:AdvancedDataGridColumn headerText="最大值" dataField="maxvalue"/>
+				<mx:AdvancedDataGridColumn headerText="空间分辨率" dataField="spatialresolution"/>
+			</mx:columns>
+		</mx:AdvancedDataGrid>
+		<s:Button x="378" y="286" label="添加" fontFamily="微软雅黑" click="button4_clickHandler(event)" id="btnAdd"/>
+		<s:Button x="378" y="320" label="删除" fontFamily="微软雅黑" id="btnDel" click="btnDel_clickHandler(event)"/>
+		<s:Button x="272" y="177" label="映射典型配置" width="112" fontFamily="微软雅黑" id="t1btnMapTypicalConfig" click="t1btnMapTypicalConfig_clickHandler(event)"/>
+		<s:Label x="11" y="214" text="传感器类型" fontFamily="微软雅黑"/>
+		<s:CheckBox x="109" y="210" label="全色" id="checkboxFullColor" enabled="true" tabEnabled="true" tabIndex="14"/>
+		<s:CheckBox x="174" y="210" label="多光谱" id="checkboxMultiSpectrum" enabled="true" tabEnabled="true" tabIndex="15"/>
+		<s:CheckBox x="244" y="210" label="高光谱" id="checkboxHighSpectrum" enabled="true" tabEnabled="true" tabIndex="16"/>
+		<s:CheckBox x="319" y="210" label="甚高" id="checkboxVeryHigh" enabled="true" tabEnabled="true" tabIndex="17"/>
+		<s:CheckBox x="109" y="231" label="可见光" id="checkboxVisualSpectrum" enabled="true" tabEnabled="true" tabIndex="18"/>
+		<s:CheckBox x="174" y="231" label="近红外" id="checkboxNearIR" enabled="true" tabEnabled="true" tabIndex="19"/>
+		<s:CheckBox x="244" y="231" label="短波红外" id="checkboxShortIR" enabled="true" tabEnabled="true" tabIndex="20"/>
+		<s:CheckBox x="319" y="231" label="热红外" id="checkboxHotIR" enabled="true" tabEnabled="true" tabIndex="21"/>
+		
+	</mx:Canvas>
+	<s:Label x="36" y="4" text="详细信息" fontFamily="微软雅黑" fontSize="13" backgroundColor="#FCFCFC"/>
+	<s:Button x="131" y="446" label="确定" click="button2_clickHandler(event)" id="btnOk"/>
+	<s:Button x="283" y="446" label="取消" click="button3_clickHandler(event)" id="btnCancel"/>
+</s:TitleWindow>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:WaitingWinParent xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							xmlns:s="library://ns.adobe.com/flex/spark" 
+							xmlns:mx="library://ns.adobe.com/flex/mx"
+							xmlns:Container="cn.edu.whu.liesmars.Container.WaitingWin.*" 
+							creationComplete="parentmdi1_creationCompleteHandler(event)"
+							headerHeight="0"
+							verticalScrollPolicy="off"
+							horizontalScrollPolicy="off"
+							backgroundAlpha="0.8"
+							layout="absolute" width="302" height="50" xmlns:services="services.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.controls.Alert;
+			import mx.controls.SWFLoader;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.FaultEvent;
+			import mx.rpc.events.ResultEvent;
+			import mx.managers.CursorManager;
+			import valueObjects.ProgressObj;
+			
+			public override function run():void{
+				progessResp.token=userRecommendationService.getProgress(Config.searchId);
+			}	
+
+			protected function userRecommendationService_faultHandler(event:FaultEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(isStoped==false){
+					this.stopProgress();
+					mx.managers.CursorManager.removeAllCursors();
+					Config.midCanvs3.windowManager.remove(this);
+					mx.controls.Alert.show("网络连接错误");
+				}
+				
+				
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:UserRecommendationService id="userRecommendationService" destination="UserRecommendationService" fault="userRecommendationService_faultHandler(event)"/>
+	</fx:Declarations>
+	
+</Container:WaitingWinParent>

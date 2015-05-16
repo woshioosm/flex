@@ -1,0 +1,2664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model xmlns="http://ns.adobe.com/Fiber/1.0">
+  <annotation name="ActionScriptGeneration">
+    <item name="FullyQualifyReferences">true</item>
+  </annotation>
+  <entity name="LayerList">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">LayerList</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.LayerList</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="loadLayerName">
+      <item name="propertySpecifier">datasetName,layerNames</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="datasetName" type="string"/>
+    <property name="layerNames" type="string[]"/>
+  </entity>
+  <service name="UserRecommendationService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">UserRecommendationService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="deleteRecomendDatainDB" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="test" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="simulateProductRelease" arguments="arg0:TSimulateproduct[],arg1:string" return-type="RecommendResultToAdmin[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TSimulateproduct,string</item>
+        <item name="returnType">RecommendResultToAdmin</item>
+      </annotation>
+    </function>
+    <function name="showAdminRecommendation" return-type="TSimulateproduct[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TSimulateproduct</item>
+      </annotation>
+    </function>
+    <function name="showUserRecommendation" arguments="arg0:string" return-type="TSimulateproduct[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TSimulateproduct</item>
+      </annotation>
+    </function>
+    <function name="uploadMetadata" arguments="arg0:string[]" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="upload" arguments="arg0:string[]" return-type="TSimulateproduct[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TSimulateproduct</item>
+      </annotation>
+    </function>
+    <function name="insertIntoDB" arguments="arg0:TSimulateproduct[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TSimulateproduct</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getProgress" arguments="arg0:string" return-type="ProgressObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">ProgressObj</item>
+      </annotation>
+    </function>
+    <function name="recommendationFeedback" arguments="arg0:TSimulateproduct[],arg1:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TSimulateproduct,string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadAllRecommendContent" return-type="TUserrecommendcontent[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TUserrecommendcontent</item>
+      </annotation>
+    </function>
+    <function name="productQueryWithUUID" arguments="arg0:string,arg1:string,arg2:string" return-type="ImageQueryResultToAdm[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+        <item name="returnType">ImageQueryResultToAdm</item>
+      </annotation>
+    </function>
+    <function name="saveRecommnedResults" arguments="arg0:TUserrecommendcontent[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TUserrecommendcontent</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="productQuery" arguments="arg0:string,arg1:string,arg2:string" return-type="ImageQueryResultToAdm[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+        <item name="returnType">ImageQueryResultToAdm</item>
+      </annotation>
+    </function>
+    <function name="simulateCreateProduct" arguments="arg0:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="saveRecommendContent" arguments="arg0:TUserrecommendcontent" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TUserrecommendcontent</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="showResultCompareInfo" arguments="arg0:string,arg1:string" return-type="opaque[]">
+      <annotation name="original signature">
+        <item name="inputParams">string,string</item>
+        <item name="returnType">opaque</item>
+      </annotation>
+      <annotation name="analyze group">
+        <item name="analyzed">false</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="TSimulateproduct">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TSimulateproduct</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TSimulateproduct</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">UserRecommendationService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="simulateUuid" type="string"/>
+    <property name="simulateXml" type="string"/>
+  </entity>
+  <entity name="TUserrecommendcontent">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TUserrecommendcontent</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TUserrecommendcontent</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">UserRecommendationService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="recommendTime" type="Timestamp"/>
+    <property name="username" type="string"/>
+    <property name="accept" type="integer"/>
+    <property name="simulateUuid" type="string"/>
+  </entity>
+  <entity name="RecommendResultToAdmin">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RecommendResultToAdmin</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.RecommendResultToAdmin</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">UserRecommendationService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="username" type="string"/>
+    <property name="similarityValues" type="string[]"/>
+    <property name="no" type="integer"/>
+    <property name="accept" type="integer"/>
+    <property name="department" type="string"/>
+    <property name="productUUID" type="string"/>
+  </entity>
+  <entity name="ImageQueryResultToAdm">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ImageQueryResultToAdm</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.ImageQueryResultToAdm</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">UserRecommendationService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="imageTime" type="string"/>
+    <property name="username" type="string"/>
+    <property name="coords" type="string"/>
+    <property name="similarityValues" type="string[]"/>
+    <property name="imagePath" type="string"/>
+    <property name="detailCompareInfo" type="opaque[]"/>
+    <property name="no" type="integer"/>
+    <property name="imageSensorType" type="string"/>
+    <property name="productUUID" type="string"/>
+    <property name="imageSpatialResol" type="string"/>
+    <property name="sensorName" type="string"/>
+  </entity>
+  <service name="RuleManagerService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">RuleManagerService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="delRule" arguments="arg0:TRule" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRule</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadAllR2302Rules" return-type="RuleCodeAndName[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">RuleCodeAndName</item>
+      </annotation>
+    </function>
+    <function name="saveNewRule" arguments="arg0:TRule" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRule</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="saveOrUpdateRule" arguments="arg0:TRule" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRule</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadTreeXml" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="loadRules" arguments="arg0:string" return-type="TRule[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TRule</item>
+      </annotation>
+    </function>
+    <function name="putInLib" arguments="arg0:TRule" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRule</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="RuleCodeAndName">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">RuleCodeAndName</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.RuleCodeAndName</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RuleManagerService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="ruleCName" type="string"/>
+    <property name="rulecode" type="string"/>
+  </entity>
+  <service name="ConceptQueryService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">ConceptQueryService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="QryConceptByTime" arguments="arg0:string,arg1:string" return-type="WordResultModel[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string</item>
+        <item name="returnType">WordResultModel</item>
+      </annotation>
+    </function>
+    <function name="getProgress" arguments="arg0:string" return-type="ProgressObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">ProgressObj</item>
+      </annotation>
+    </function>
+    <function name="QryConcepts" arguments="arg0:string[],arg1:string" return-type="ConceptQryRsltFlex">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string</item>
+        <item name="returnType">ConceptQryRsltFlex</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="ConceptQryResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ConceptQryResult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.ConceptQuery.ConceptQryResult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">ConceptQueryService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_conceptLocation" type="string[]"/>
+    <property name="_conceptName" type="string"/>
+    <property name="_conceptExists" type="boolean"/>
+  </entity>
+  <entity name="ConceptQryRsltFlex">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ConceptQryRsltFlex</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.ConceptQuery.ConceptQryRsltFlex</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">ConceptQueryService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_presion" type="double"/>
+    <property name="_qryRslt" type="ConceptQryResult[]"/>
+  </entity>
+  <entity name="WordResultModel">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">WordResultModel</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.ConceptQuery.SearchByTime.WordResultModel</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">ConceptQueryService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="time" type="string"/>
+    <property name="OWLName" type="string"/>
+    <property name="name" type="string"/>
+    <property name="OWLClass" type="string"/>
+  </entity>
+  <service name="RuleEditService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">RuleEditService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="saveRule" arguments="arg0:TRule" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRule</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="TRule">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TRule</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TRule</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RuleEditService,RuleManagerService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="ruleDescription" type="string"/>
+    <property name="ruleExtend" type="string"/>
+    <property name="ruleModifyDate" type="string"/>
+    <property name="ruleCname" type="string"/>
+    <property name="isAdmitted" type="integer"/>
+    <property name="ruleIf" type="string"/>
+    <property name="ruleThen" type="string"/>
+    <property name="ruleCode" type="string"/>
+    <property name="ruleEname" type="string"/>
+    <property name="ruleCreateDate" type="string"/>
+  </entity>
+  <service name="NaturalLangService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">NaturalLangService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="loadLayerName" return-type="LayerSet[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">LayerSet</item>
+      </annotation>
+    </function>
+    <function name="test" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="getNLByID" arguments="arg0:string" return-type="TNaturallang">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TNaturallang</item>
+      </annotation>
+    </function>
+    <function name="deleteFeature" arguments="arg0:string,arg1:string,arg2:string" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="showFeedbackShallowFramework" arguments="arg0:string" return-type="TShallowframework">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TShallowframework</item>
+      </annotation>
+    </function>
+    <function name="singleNLP" arguments="arg0:string[],arg1:string,arg2:string" return-type="NLSearchResultWithTime">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+        <item name="returnType">NLSearchResultWithTime</item>
+      </annotation>
+    </function>
+    <function name="getOrderFormSingleNLP" arguments="arg0:string,arg1:string,arg2:string" return-type="FramePairObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+        <item name="returnType">FramePairObj</item>
+      </annotation>
+    </function>
+    <function name="formatNLP" arguments="arg0:string,arg1:string,arg2:string,arg3:string,arg4:string" return-type="NLSearchResultWithTime">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string,string,string</item>
+        <item name="returnType">NLSearchResultWithTime</item>
+      </annotation>
+    </function>
+    <function name="getNLPRsltFlex" arguments="arg0:string" return-type="NLPRsltFlex">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">NLPRsltFlex</item>
+      </annotation>
+    </function>
+    <function name="showAllNLSearchResult" arguments="arg0:string,arg1:integer,arg2:integer" return-type="NLSearchResult[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,integer,integer</item>
+        <item name="returnType">NLSearchResult</item>
+      </annotation>
+    </function>
+    <function name="deletePlacename" arguments="arg0:TPlacename" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TPlacename</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getDetailByUuid" arguments="arg0:string" return-type="NLSearchResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">NLSearchResult</item>
+      </annotation>
+    </function>
+    <function name="submitFeedback" arguments="arg0:string,arg1:string,arg2:string" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string</item>
+      </annotation>
+    </function>
+    <function name="savePlaceName" arguments="arg0:TPlacename" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TPlacename</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getProgress" arguments="arg0:string" return-type="ProgressObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">ProgressObj</item>
+      </annotation>
+    </function>
+    <function name="getPlace" arguments="arg0:string,arg1:string" return-type="PlaceQryResult[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string</item>
+        <item name="returnType">PlaceQryResult</item>
+      </annotation>
+    </function>
+    <function name="addPlace" arguments="arg0:string,arg1:string,arg2:string,arg3:string,arg4:string,arg5:string" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string,string,string,string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="getDetailFrameByUuid" arguments="arg0:string" return-type="FramePairObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">FramePairObj</item>
+      </annotation>
+    </function>
+    <function name="getConfigFrame" return-type="string[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="showAdminFeedbackDeepFrame" return-type="NLSearchFeedback[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">NLSearchFeedback</item>
+      </annotation>
+    </function>
+    <function name="singleNLPWithUUID" arguments="arg0:NLPInput[],arg1:string,arg2:string" return-type="NLSearchResultWithTime">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">NLPInput,string,string</item>
+        <item name="returnType">NLSearchResultWithTime</item>
+      </annotation>
+    </function>
+    <function name="updateFrameConfig" arguments="arg0:string[]" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="loadXZQ" arguments="arg0:string,arg1:string" return-type="XZQLayer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string</item>
+        <item name="returnType">XZQLayer</item>
+      </annotation>
+    </function>
+    <function name="loadAllFeedbackInfo" arguments="arg0:string" return-type="FeedBackInfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">FeedBackInfo</item>
+      </annotation>
+    </function>
+    <function name="getUserUUID" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="modifyPlace" arguments="arg0:string,arg1:string,arg2:string,arg3:string,arg4:string" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string,string,string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="loadTplacename" return-type="TPlacename[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TPlacename</item>
+      </annotation>
+    </function>
+    <function name="showFeedbackDeepFramework" arguments="arg0:string" return-type="TDeepframework">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TDeepframework</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="TPlacename">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TPlacename</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TPlacename</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="flag" type="integer"/>
+    <property name="standname" type="string"/>
+    <property name="featype" type="string"/>
+  </entity>
+  <entity name="NLSearchFeedback">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NLSearchFeedback</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.NLSearchFeedback</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="username" type="string"/>
+    <property name="feedbackDeepFrame" type="TNlqueryfeedbackdeep"/>
+  </entity>
+  <entity name="XZQValue">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">XZQValue</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.XZQValue</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="name" type="string"/>
+    <property name="feacode" type="string"/>
+  </entity>
+  <entity name="TNlqueryfeedbackshallow">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TNlqueryfeedbackshallow</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TNlqueryfeedbackshallow</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="searchUuid" type="string"/>
+    <property name="shallowFrameXml" type="string"/>
+  </entity>
+  <entity name="XZQLayer">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">XZQLayer</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.XZQLayer</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="values" type="XZQValue[]"/>
+    <property name="maxFeacode" type="double"/>
+    <property name="layerName" type="string"/>
+  </entity>
+  <entity name="FramePairObj">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FramePairObj</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.FramePairObj</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="sensors" type="SensorBandInfo[]"/>
+    <property name="primaryFrame" type="PrimaryFrame"/>
+    <property name="advancedFrame" type="AdvancedFrame"/>
+  </entity>
+  <entity name="TShallowframework">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TShallowframework</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TShallowframework</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="searchUuid" type="string"/>
+    <property name="shallowFrameXml" type="string"/>
+  </entity>
+  <entity name="PrimaryTask">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryTask</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryTask</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="aspect" type="string[]"/>
+    <property name="action" type="string[]"/>
+    <property name="fullDescribe" type="string"/>
+    <property name="expressRule" type="string"/>
+    <property name="object" type="string[]"/>
+  </entity>
+  <entity name="FeedBackInfo">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FeedBackInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.FeedBackInfo</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="shallowFramework" type="string"/>
+    <property name="naturalLang" type="string"/>
+    <property name="deepFeedback" type="string"/>
+    <property name="searchUUID" type="string"/>
+    <property name="searchTime" type="Timestamp"/>
+    <property name="deepFramework" type="string"/>
+    <property name="shallowFeedback" type="string"/>
+  </entity>
+  <entity name="PlaceQryResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PlaceQryResult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.SpatialDB.SpatialObj.PlaceQryResult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_PlaceNameLst" type="string"/>
+    <property name="feaCode" type="string"/>
+    <property name="_placeName" type="string"/>
+    <property name="_GeometryType" type="string"/>
+  </entity>
+  <entity name="PrimaryDescribeList">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryDescribeList</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryDescribeList</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="primaryDescribes" type="PrimaryDescribe[]"/>
+    <property name="originalDescribe" type="string"/>
+  </entity>
+  <entity name="PrimaryImage">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryImage</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryImage</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="snr" type="PrimaryImageParameter"/>
+    <property name="scale" type="PrimaryImageParameter"/>
+    <property name="fabricWidth" type="PrimaryImageParameter"/>
+    <property name="imageLevel" type="PrimaryImageParameter"/>
+    <property name="spatialResolution" type="PrimaryImageParameter"/>
+    <property name="temporalResolution" type="PrimaryImageParameter"/>
+    <property name="frequency" type="PrimaryImageParameter"/>
+    <property name="sensorSARPolarType" type="string"/>
+    <property name="radiometricResolution" type="PrimaryImageParameter"/>
+    <property name="sensorSARPolarLst" type="string[]"/>
+    <property name="band" type="PrimaryImageParameter"/>
+    <property name="extendsParams" type="opaque"/>
+    <property name="sensorType" type="string[]"/>
+    <property name="encounterAngle" type="PrimaryImageParameter"/>
+    <property name="senorWorkType" type="string[]"/>
+    <property name="spectralResolution" type="PrimaryImageParameter"/>
+    <property name="sensorName" type="string[]"/>
+  </entity>
+  <entity name="NLSearchResultWithTime">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NLSearchResultWithTime</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.NLSearchResultWithTime</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="aTime" type="long"/>
+    <property name="pTime" type="long"/>
+    <property name="searchResultList" type="NLSearchResult[]"/>
+  </entity>
+  <entity name="PrimaryDescribe">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryDescribe</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryDescribe</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="parameterDescribe" type="string[]"/>
+    <property name="expressRule" type="string[]"/>
+    <property name="fullRule" type="string"/>
+  </entity>
+  <entity name="TNlqueryfeedbackdeep">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TNlqueryfeedbackdeep</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TNlqueryfeedbackdeep</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="searchUuid" type="string"/>
+    <property name="deepFrameXml" type="string"/>
+  </entity>
+  <entity name="NLSearchResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NLSearchResult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.NLSearchResult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="nlString" type="string"/>
+    <property name="shallowFramework" type="string"/>
+    <property name="deepFeedback" type="string"/>
+    <property name="username" type="string"/>
+    <property name="primaryTime" type="long"/>
+    <property name="advanceTime" type="long"/>
+    <property name="shwllowFeedback" type="string"/>
+    <property name="searchUUID" type="string"/>
+    <property name="searchTime" type="string"/>
+    <property name="inputMethod" type="integer"/>
+    <property name="deepFramework" type="string"/>
+  </entity>
+  <entity name="PrimaryFrame">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryFrame</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryFrame</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="frameImages" type="PrimaryImage[]"/>
+    <property name="domain" type="string"/>
+    <property name="frameRange" type="PrimaryDescribeList"/>
+    <property name="frameTime" type="PrimaryDescribeList"/>
+    <property name="uuid" type="string"/>
+    <property name="frameTask" type="PrimaryTask"/>
+    <property name="framePlace" type="PrimaryDescribeList"/>
+  </entity>
+  <entity name="NLPInput">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NLPInput</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrap.NLPInput</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_xqbh" type="string"/>
+    <property name="_type" type="integer"/>
+    <property name="_imgpara" type="string"/>
+    <property name="_nl" type="string"/>
+    <property name="_space" type="string"/>
+    <property name="_task" type="string"/>
+    <property name="_time" type="string"/>
+  </entity>
+  <entity name="NLPRsltFlex">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NLPRsltFlex</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrapFlex.NLPRsltFlex</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_primaryFrame" type="TShallowframework"/>
+    <property name="_deepFrame" type="TDeepframework"/>
+    <property name="_feedbackprimaryFrame" type="TNlqueryfeedbackshallow"/>
+    <property name="_nl" type="TNaturallang"/>
+    <property name="_uuid" type="string"/>
+    <property name="_feedbackdeepFrame" type="TNlqueryfeedbackdeep"/>
+  </entity>
+  <entity name="LayerSet">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">LayerSet</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.SpatialDB.GeoTools.LayerSet</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="layerType" type="string"/>
+    <property name="layerName" type="string"/>
+  </entity>
+  <entity name="PrimaryImageParameter">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PrimaryImageParameter</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.PrimaryImageParameter</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="middleExpressRule" type="string[]"/>
+    <property name="name" type="string"/>
+    <property name="fullDescribe" type="string"/>
+    <property name="fullExpressRule" type="string"/>
+    <property name="middleDescribe" type="string[]"/>
+  </entity>
+  <service name="RegisterAndLoginService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">RegisterAndLoginService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="admitRegister" arguments="arg0:string,arg1:integer" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,integer</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="userRegister" arguments="arg0:string,arg1:string,arg2:string,arg3:string,arg4:string,arg5:string,arg6:integer" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string,string,string,string,integer</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="login2" arguments="arg0:integer,arg1:string,arg2:string" return-type="LoginResult">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">integer,string,string</item>
+        <item name="returnType">LoginResult</item>
+      </annotation>
+    </function>
+    <function name="loadAllUserInfo" return-type="TUserinfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TUserinfo</item>
+      </annotation>
+    </function>
+    <function name="queryDepartmentCodeByUsername" arguments="arg0:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="login" arguments="arg0:integer,arg1:string,arg2:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">integer,string,string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="showRegisterAskList" return-type="TUserinfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TUserinfo</item>
+      </annotation>
+    </function>
+    <function name="queryDepartmentNameByUsername" arguments="arg0:string" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="LoginResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">LoginResult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.LoginResult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RegisterAndLoginService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="department" type="string"/>
+    <property name="success" type="boolean"/>
+  </entity>
+  <entity name="TUserinfo">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TUserinfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TUserinfo</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RegisterAndLoginService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="phone" type="string"/>
+    <property name="username" type="string"/>
+    <property name="email" type="string"/>
+    <property name="department" type="string"/>
+    <property name="isAdmitted" type="integer"/>
+    <property name="isAdmin" type="integer"/>
+    <property name="realname" type="string"/>
+    <property name="departmentCode" type="integer"/>
+    <property name="password" type="string"/>
+  </entity>
+  <service name="RequireImageRecordService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">RequireImageRecordService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="getDepartmentByUsername" arguments="arg0:string" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="delRecord" arguments="arg0:TRoutinetask" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRoutinetask</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="saveOrUpdateRecord" arguments="arg0:TRoutinetask" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TRoutinetask</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadAllRecords" return-type="TRoutinetask[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TRoutinetask</item>
+      </annotation>
+    </function>
+    <function name="loadRecordsByUsername" arguments="arg0:string" return-type="TRoutinetask[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TRoutinetask</item>
+      </annotation>
+    </function>
+    <function name="loadTaskName" return-type="string[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="TRoutinetask">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TRoutinetask</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TRoutinetask</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequireImageRecordService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="taskId" type="string"/>
+    <property name="spaceRangeStr" type="string"/>
+    <property name="sensorClassType" type="string"/>
+    <property name="expectTime" type="string"/>
+    <property name="department" type="string"/>
+    <property name="spaceRange" type="string"/>
+    <property name="frequency" type="string"/>
+    <property name="endTime" type="date"/>
+    <property name="taskName" type="string"/>
+    <property name="spaceResol" type="string"/>
+    <property name="startTime" type="date"/>
+    <property name="bandName" type="string"/>
+    <property name="band" type="string"/>
+    <property name="sensorType" type="string"/>
+  </entity>
+  <service name="FusionService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">FusionService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="LINKED_FILE"></item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="updateConfBand" arguments="arg0:ConfBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">ConfBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="createRelatedModel" arguments="arg0:TDeepframework[]" return-type="PriRelatedModel">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TDeepframework</item>
+        <item name="returnType">PriRelatedModel</item>
+      </annotation>
+    </function>
+    <function name="getFusionResultByTime" arguments="arg0:Timestamp" return-type="AdvancedFrame[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">Timestamp</item>
+        <item name="returnType">AdvancedFrame</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">imageRanges,imageParameters,area,taskIDReasonRule,domain,imageTimes,uuid,taskName,taskID</item>
+      </annotation>
+    </function>
+    <function name="delTaskSensorconf" arguments="arg0:TaskSensorconf" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TaskSensorconf</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="addTaskSensorconf" arguments="arg0:TaskSensorconf" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TaskSensorconf</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="delConfBand" arguments="arg0:ConfBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">ConfBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getSensors" arguments="arg0:TDeepframework" return-type="SensorBandInfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TDeepframework</item>
+        <item name="returnType">SensorBandInfo</item>
+      </annotation>
+    </function>
+    <function name="loadAllTaskSensorconf" return-type="TaskSensorconf[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TaskSensorconf</item>
+      </annotation>
+    </function>
+    <function name="loadSensorPriorityConf" return-type="SensorPriorityConf[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">SensorPriorityConf</item>
+      </annotation>
+    </function>
+    <function name="getTaskModel" return-type="opaque">
+      <annotation name="original signature">
+        <item name="returnType">opaque</item>
+      </annotation>
+      <annotation name="analyze group">
+        <item name="analyzed">false</item>
+      </annotation>
+    </function>
+    <function name="updateSensorPriorityTime" arguments="arg0:SensorPriorityTime" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorPriorityTime</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="addSensorBand" arguments="arg0:SensorBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadAllConfBand" return-type="ConfBandInfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">ConfBandInfo</item>
+      </annotation>
+    </function>
+    <function name="addConfBand" arguments="arg0:ConfBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">ConfBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="addTaskSensor" arguments="arg0:TaskSensor[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TaskSensor</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="updateSensorPriority" arguments="arg0:SensorPriorityTime,arg1:SensorPriorityConf[],arg2:SensorPriority[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorPriorityTime,SensorPriorityConf,SensorPriority</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="delSensorBand" arguments="arg0:SensorBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadSensorPriority" return-type="SensorPriority[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">SensorPriority</item>
+      </annotation>
+    </function>
+    <function name="loadNaturalLange" arguments="arg0:string[]" return-type="NaturalLang[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">NaturalLang</item>
+      </annotation>
+    </function>
+    <function name="updateTaskSensorconf" arguments="arg0:TaskSensorconf" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TaskSensorconf</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="updateSensorBand" arguments="arg0:SensorBandInfo" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorBandInfo</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getSensorNames" arguments="arg0:TDeepframework" return-type="SensorBandInfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TDeepframework</item>
+        <item name="returnType">SensorBandInfo</item>
+      </annotation>
+    </function>
+    <function name="deleteTaskSensor" arguments="arg0:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="getSensorPriorityTime" return-type="SensorPriorityTime">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">SensorPriorityTime</item>
+      </annotation>
+    </function>
+    <function name="updateTaskSensor" arguments="arg0:TaskSensor[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">TaskSensor</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="loadAllNaturalLange" return-type="TNaturallang[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TNaturallang</item>
+      </annotation>
+    </function>
+    <function name="getSensorNamesByTypicalconf" arguments="arg0:string" return-type="string[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="getTaskSensor" arguments="arg0:string" return-type="TaskSensor[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TaskSensor</item>
+      </annotation>
+    </function>
+    <function name="addSensorPriority" arguments="arg0:Sensor,arg1:string" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">Sensor,string</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="updateSensorPriorityConf" arguments="arg0:SensorPriorityConf[]" return-type="integer">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">SensorPriorityConf</item>
+        <item name="returnType">integer</item>
+      </annotation>
+    </function>
+    <function name="updateTaskSensorTest" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="loadAllSensorBand" return-type="SensorBandInfo[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">SensorBandInfo</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="SensorBandInfo">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SensorBandInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.SensorBandInfo</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="sensor" type="Sensor"/>
+    <property name="bands" type="SensorBand[]"/>
+    <property name="spatialresolution" type="double[]"/>
+  </entity>
+  <entity name="SensorPriorityTime">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SensorPriorityTime</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.SensorPriorityTime</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="lasttime" type="Timestamp"/>
+  </entity>
+  <entity name="PriPoint">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PriPoint</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.fusion.PriPoint</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="frame" type="string"/>
+    <property name="uuid" type="string"/>
+  </entity>
+  <entity name="TaskSensor">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TaskSensor</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TaskSensor</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="sensorname" type="string"/>
+    <property name="uuid" type="string"/>
+  </entity>
+  <entity name="SensorPriorityConf">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SensorPriorityConf</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.SensorPriorityConf</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="productcount" type="integer"/>
+    <property name="taskID" type="string"/>
+  </entity>
+  <entity name="PriRelatedModel">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PriRelatedModel</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.fusion.PriRelatedModel</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="edges" type="PriRelatedEdge[]"/>
+    <property name="points" type="PriPoint[]"/>
+  </entity>
+  <entity name="TNaturallang">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TNaturallang</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TNaturallang</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="xqType" type="integer"/>
+    <property name="username" type="string"/>
+    <property name="flag" type="integer"/>
+    <property name="searchUuid" type="string"/>
+    <property name="searchTime" type="Timestamp"/>
+    <property name="nlstring" type="string"/>
+    <property name="inputMethod" type="integer"/>
+  </entity>
+  <entity name="SensorBand">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SensorBand</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.SensorBand</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="bandname" type="string" required="true"/>
+    <property name="sensorname" type="string" required="true"/>
+    <property name="minvalue" type="double" required="true"/>
+    <property name="maxvalue" type="double" required="true"/>
+    <property name="spatialresolution" type="double" required="true"/>
+  </entity>
+  <entity name="ConfBand">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ConfBand</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.ConfBand</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="bandname" type="string" required="true"/>
+    <property name="id" type="integer" required="true"/>
+    <property name="minvalue" type="double" required="true"/>
+    <property name="unit" type="double" required="true"/>
+    <property name="confname" type="string" required="true"/>
+    <property name="maxvalue" type="double" required="true"/>
+  </entity>
+  <entity name="Conf">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Conf</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.Conf</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="imgway" type="string" required="true"/>
+    <property name="bandmin" type="double" required="true"/>
+    <property name="imagemode" type="string" required="true"/>
+    <property name="spectrum" type="string" required="true"/>
+    <property name="steroimgway" type="string" required="true"/>
+    <property name="type" type="integer" required="true"/>
+    <property name="spatialmax" type="double" required="true"/>
+    <property name="agility" type="string" required="true"/>
+    <property name="tracktype" type="string" required="true"/>
+    <property name="polarway" type="string" required="true"/>
+    <property name="spatialmin" type="double" required="true"/>
+    <property name="timemax" type="double" required="true"/>
+    <property name="side" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="isimg" type="string" required="true"/>
+    <property name="timemin" type="double" required="true"/>
+    <property name="spectral" type="string" required="true"/>
+    <property name="bandmax" type="double" required="true"/>
+  </entity>
+  <entity name="PriRelatedEdge">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">PriRelatedEdge</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.fusion.PriRelatedEdge</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="weight" type="double"/>
+    <property name="endPointIndex" type="integer"/>
+    <property name="startPointIndex" type="integer"/>
+  </entity>
+  <entity name="NaturalLang">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">NaturalLang</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.NaturalLang</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="xqType" type="integer"/>
+    <property name="username" type="string"/>
+    <property name="searchUuid" type="string"/>
+    <property name="searchTime" type="Timestamp"/>
+    <property name="nlstring" type="string"/>
+    <property name="inputMethod" type="integer"/>
+  </entity>
+  <entity name="Sensor">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Sensor</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.Sensor</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="snr" type="double" required="true"/>
+    <property name="imgway" type="string" required="true"/>
+    <property name="radioresolution" type="double" required="true"/>
+    <property name="spectralresolution" type="double" required="true"/>
+    <property name="spectrum" type="string" required="true"/>
+    <property name="timeresolution" type="double" required="true"/>
+    <property name="steroimgway" type="string" required="true"/>
+    <property name="type" type="string" required="true"/>
+    <property name="encounterangle" type="double" required="true"/>
+    <property name="tracktype" type="string" required="true"/>
+    <property name="polarway" type="string" required="true"/>
+    <property name="side" type="double" required="true"/>
+    <property name="confname" type="string" required="true"/>
+    <property name="name" type="string" required="true"/>
+    <property name="aliasname" type="string" required="true"/>
+    <property name="fabricwidth" type="double" required="true"/>
+    <property name="imgmode" type="string" required="true"/>
+    <property name="isimg" type="string" required="true"/>
+    <property name="uuid" type="string" required="true"/>
+    <property name="sensortype" type="integer" required="true"/>
+  </entity>
+  <entity name="ConfBandInfo">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ConfBandInfo</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.ConfBandInfo</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="bands" type="ConfBand[]"/>
+    <property name="conf" type="Conf"/>
+  </entity>
+  <entity name="SensorPriority">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">SensorPriority</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.SensorPriority</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="sensorname" type="string"/>
+    <property name="priority" type="double"/>
+    <property name="taskid" type="string"/>
+  </entity>
+  <entity name="TaskSensorconf">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TaskSensorconf</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TaskSensorconf</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">FusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="scale" type="integer"/>
+    <property name="confname" type="string"/>
+    <property name="priority" type="double"/>
+    <property name="taskid" type="string"/>
+  </entity>
+  <service name="RequirementFusionService">
+    <annotation name="ActionScriptGeneration">
+      <item name="ServiceType">RemoteObject</item>
+      <item name="Package">services</item>
+      <item name="Destination">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ServiceConfig">
+      <item name="DEFAULT_ENTITY_PACKAGE">valueObjects</item>
+      <item name="contextRoot">/SemanticRequirementFusionWebProj</item>
+      <item name="rootUrl">http://localhost:8080/SemanticRequirementFusionWebProj</item>
+      <item name="ABSOLUTE_ENDPOINT">http://localhost:8080/SemanticRequirementFusionWebProj/messagebroker/amf</item>
+    </annotation>
+    <annotation name="ServiceTypeGroup">
+      <item name="ServiceBackendType">BlazeDS</item>
+    </annotation>
+    <function name="showFusionSourceList" arguments="arg0:string[],arg1:TFusionresult[]" return-type="FusionResultMap[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,TFusionresult</item>
+        <item name="returnType">FusionResultMap</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">fusionResult,uuid,sources</item>
+      </annotation>
+    </function>
+    <function name="showProduceState" return-type="TFusionresult[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">TFusionresult</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">arg4,arg3,arg2,arg1,fusionState,fusionUuid,sourceAreas,fusiontime,fusionXml,ftype,projUuid</item>
+      </annotation>
+    </function>
+    <function name="getProgress" arguments="arg0:string" return-type="ProgressObj">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">ProgressObj</item>
+      </annotation>
+    </function>
+    <function name="getFusionResultWithSource" arguments="arg0:integer,arg1:integer,arg2:string" return-type="FusionResultMapWithTotlePage">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">integer,integer,string</item>
+        <item name="returnType">FusionResultMapWithTotlePage</item>
+      </annotation>
+    </function>
+    <function name="showFusionSource" arguments="arg0:string" return-type="TDeepframework[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">TDeepframework</item>
+      </annotation>
+    </function>
+    <function name="showTest" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="test" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="Update" arguments="arg0:string" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="fusionInputFromList" arguments="arg0:string[],arg1:string,arg2:integer,arg3:integer,arg4:integer,arg5:integer" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,integer,integer,integer,integer</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="CalResolve" arguments="arg0:AdvancedFrame[],arg1:AdvancedFrame[]" return-type="TProductsplit[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">AdvancedFrame,AdvancedFrame</item>
+        <item name="returnType">TProductsplit</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">id,searchUuid,fusionUuid</item>
+      </annotation>
+    </function>
+    <function name="getFusionRsltByPrjIDFlex" arguments="arg0:string" return-type="FusionMapResultFlex[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">FusionMapResultFlex</item>
+      </annotation>
+    </function>
+    <function name="upDateDic" arguments="arg0:string" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+    <function name="showDeepFramework" arguments="arg0:string,arg1:string,arg2:string[],arg3:integer,arg4:integer" return-type="ResultWithPageTotle">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string,string,string,integer,integer</item>
+        <item name="returnType">ResultWithPageTotle</item>
+      </annotation>
+    </function>
+    <function name="clearPlacename" return-type="void">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+    </function>
+    <function name="getFusionRsltByPrjID" arguments="arg0:string" return-type="FusionMapResult[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">FusionMapResult</item>
+      </annotation>
+    </function>
+    <function name="showFusionResultList" arguments="arg0:integer,arg1:integer" return-type="TFusionresult[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">integer,integer</item>
+        <item name="returnType">TFusionresult</item>
+      </annotation>
+      <annotation name="ValidProperties">
+        <item name="propertySpecifier">arg4,arg3,arg2,arg1,fusionState,fusionUuid,sourceAreas,fusiontime,fusionXml,ftype,projUuid</item>
+      </annotation>
+    </function>
+    <function name="fusionInputFromListLazy" arguments="arg0:AdvancedFrame[],arg1:string,arg2:integer,arg3:integer,arg4:integer,arg5:integer" return-type="string">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">AdvancedFrame,string,integer,integer,integer,integer</item>
+        <item name="returnType">string</item>
+      </annotation>
+    </function>
+    <function name="showProductSplit" return-type="ProductSplit[]">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="returnType">ProductSplit</item>
+      </annotation>
+    </function>
+    <function name="changeFusionRelation" arguments="arg0:string[]" return-type="boolean">
+      <annotation name="analyze group">
+        <item name="analyzed">true</item>
+      </annotation>
+      <annotation name="original signature">
+        <item name="inputParams">string</item>
+        <item name="returnType">boolean</item>
+      </annotation>
+    </function>
+  </service>
+  <entity name="TFusionsource">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TFusionsource</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TFusionsource</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="id" type="integer"/>
+    <property name="searchUuid" type="string"/>
+    <property name="fusionUuid" type="string"/>
+    <property name="cell" type="string"/>
+  </entity>
+  <entity name="ResultWithPageTotle">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ResultWithPageTotle</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.ResultWithPageTotle</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="result" type="TDeepFrameWithLang[]"/>
+    <property name="totlePage" type="integer"/>
+  </entity>
+  <entity name="TFusionresult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TFusionresult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TFusionresult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="showProduceState">
+      <item name="propertySpecifier">arg4,arg3,arg2,arg1,fusionState,fusionUuid,sourceAreas,fusiontime,fusionXml,ftype,projUuid</item>
+    </annotation>
+    <annotation name="showFusionResultList">
+      <item name="propertySpecifier">arg4,arg3,arg2,arg1,fusionState,fusionUuid,sourceAreas,fusiontime,fusionXml,ftype,projUuid</item>
+    </annotation>
+    <property name="arg4" type="integer" required="true"/>
+    <property name="arg3" type="integer" required="true"/>
+    <property name="arg2" type="integer" required="true"/>
+    <property name="arg1" type="integer" required="true"/>
+    <property name="fusionState" type="integer" required="true"/>
+    <property name="fusionUuid" type="string" required="true"/>
+    <property name="sourceAreas" type="string" required="true"/>
+    <property name="fusiontime" type="Timestamp" required="true"/>
+    <property name="fusionXml" type="string" required="true"/>
+    <property name="ftype" type="integer" required="true"/>
+    <property name="projUuid" type="string" required="true"/>
+  </entity>
+  <entity name="ProductSplit">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ProductSplit</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.ProductSplit</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+  </entity>
+  <entity name="TProductsplit">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TProductsplit</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TProductsplit</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="CalResolve">
+      <item name="propertySpecifier">id,searchUuid,fusionUuid</item>
+    </annotation>
+    <property name="id" type="integer" required="true"/>
+    <property name="searchUuid" type="string" required="true"/>
+    <property name="fusionUuid" type="string" required="true"/>
+  </entity>
+  <entity name="DeepFrameWithLang">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">DeepFrameWithLang</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.DeepFrameWithLang</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="naturalLang" type="string"/>
+    <property name="frame" type="string"/>
+  </entity>
+  <entity name="ProgressObj">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">ProgressObj</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.business.service.impl.ProgressObj</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">UserRecommendationService,RequirementFusionService,ConceptQueryService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="progress" type="integer"/>
+    <property name="totleCount" type="integer"/>
+    <property name="temp" type="double[]"/>
+  </entity>
+  <entity name="AdvancedRange">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AdvancedRange</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.AdvancedRange</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="coordinate" type="string"/>
+    <property name="reasonRules" type="string[]"/>
+  </entity>
+  <entity name="Timestamp">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">Timestamp</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">java.sql.Timestamp</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="nanos" type="integer" required="true"/>
+    <property name="time" type="long" required="true"/>
+    <property name="minutes" type="integer" required="true"/>
+    <property name="seconds" type="integer" required="true"/>
+    <property name="hours" type="integer" required="true"/>
+    <property name="month" type="integer" required="true"/>
+    <property name="timezoneOffset" type="integer" required="true"/>
+    <property name="year" type="integer" required="true"/>
+    <property name="day" type="integer" required="true"/>
+    <property name="date" type="integer" required="true"/>
+  </entity>
+  <entity name="FusionResultMapWithTotlePage">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionResultMapWithTotlePage</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.FusionResultMapWithTotlePage</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="fusions" type="FusionResultMap[]"/>
+    <property name="totlePages" type="integer"/>
+  </entity>
+  <entity name="AdvancedImageParameter">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AdvancedImageParameter</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.AdvancedImageParameter</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="snr" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="scale" type="integer" required="true"/>
+    <property name="fabricWidth" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="bands" type="AdvancedDoubleMinMaxDescribe[]" required="true"/>
+    <property name="extendsParam" type="opaque" required="true"/>
+    <property name="sensorSARPloarType" type="string" required="true"/>
+    <property name="spectralresolution" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="imageLevel" type="integer" required="true"/>
+    <property name="spatialResolution" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="temporalResolution" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="frequency" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="sensorNames" type="string[]" required="true"/>
+    <property name="radiometricResolution" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="sensorSARPolarLst" type="string[]" required="true"/>
+    <property name="sensorType" type="string[]" required="true"/>
+    <property name="encounterAngle" type="AdvancedDoubleMinMaxDescribe" required="true"/>
+    <property name="senorWorkType" type="string[]" required="true"/>
+  </entity>
+  <entity name="FusionRsltFlex">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionRsltFlex</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrapFlex.FusionRsltFlex</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_etime" type="string" required="true"/>
+    <property name="_ftype" type="integer" required="true"/>
+    <property name="_fusionUUID" type="string" required="true"/>
+    <property name="_stime" type="string" required="true"/>
+    <property name="_prjUUId" type="string" required="true"/>
+    <property name="_fusionXML" type="string" required="true"/>
+    <property name="_coordLst" type="string[]" required="true"/>
+    <property name="_coord" type="string" required="true"/>
+    <property name="_sensor" type="string" required="true"/>
+  </entity>
+  <entity name="FusionMapResult">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionMapResult</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrap.FusionMapResult</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_srclst" type="TFusionsource[]"/>
+    <property name="_prjUUID" type="string"/>
+    <property name="_Frslt" type="TFusionresult"/>
+  </entity>
+  <entity name="TDeepFrameWithLang">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TDeepFrameWithLang</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TDeepFrameWithLang</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="canQuery" type="boolean" required="true"/>
+    <property name="tdeepFrameWork" type="TDeepframework" required="true"/>
+    <property name="naturaLang" type="string" required="true"/>
+    <property name="uuid" type="string" required="true"/>
+  </entity>
+  <entity name="FusionSrcFlex">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionSrcFlex</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrapFlex.FusionSrcFlex</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_etime" type="string" required="true"/>
+    <property name="_cell" type="string" required="true"/>
+    <property name="_fusionUUID" type="string" required="true"/>
+    <property name="_stime" type="string" required="true"/>
+    <property name="_xqtype" type="integer" required="true"/>
+    <property name="_prjUUId" type="string" required="true"/>
+    <property name="_srcUUID" type="string" required="true"/>
+    <property name="_nl" type="string" required="true"/>
+    <property name="_task" type="string" required="true"/>
+    <property name="_coordLst" type="string[]" required="true"/>
+    <property name="_coord" type="string" required="true"/>
+    <property name="_sensor" type="string" required="true"/>
+  </entity>
+  <entity name="AdvancedDoubleMinMaxDescribe">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AdvancedDoubleMinMaxDescribe</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.AdvancedDoubleMinMaxDescribe</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="oriMinVal" type="double"/>
+    <property name="oriMaxVal" type="double"/>
+    <property name="unitType" type="string"/>
+    <property name="maxDoubleValue" type="double"/>
+    <property name="expressRule" type="string[]"/>
+    <property name="minDoubleValue" type="double"/>
+  </entity>
+  <entity name="AdvancedTime">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AdvancedTime</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.AdvancedTime</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="startTime" type="string"/>
+    <property name="expressRule" type="string[]"/>
+    <property name="endTime" type="string"/>
+  </entity>
+  <entity name="TDeepframework">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">TDeepframework</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.TDeepframework</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,FusionService,NaturalLangService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="searchUuid" type="string"/>
+    <property name="deepFrameXml" type="string"/>
+  </entity>
+  <entity name="FusionResultMap">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionResultMap</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.model.FusionResultMap</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService,Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="showFusionSourceList">
+      <item name="propertySpecifier">fusionResult,uuid,sources</item>
+    </annotation>
+    <property name="fusionResult" type="TFusionresult" required="true"/>
+    <property name="uuid" type="string" required="true"/>
+    <property name="sources" type="DeepFrameWithLang[]" required="true"/>
+  </entity>
+  <entity name="AdvancedFrame">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">AdvancedFrame</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.frame.AdvancedFrame</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">Dummy</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <annotation name="getFusionResultByTime">
+      <item name="propertySpecifier">imageRanges,imageParameters,area,taskIDReasonRule,domain,imageTimes,uuid,taskName,taskID</item>
+    </annotation>
+    <property name="imageRanges" type="AdvancedRange[]" required="true"/>
+    <property name="imageParameters" type="AdvancedImageParameter[]" required="true"/>
+    <property name="area" type="double" required="true"/>
+    <property name="taskIDReasonRule" type="string" required="true"/>
+    <property name="domain" type="string" required="true"/>
+    <property name="imageTimes" type="AdvancedTime[]" required="true"/>
+    <property name="uuid" type="string" required="true"/>
+    <property name="taskName" type="string" required="true"/>
+    <property name="taskID" type="string" required="true"/>
+  </entity>
+  <entity name="FusionMapResultFlex">
+    <annotation name="EntityProperties">
+      <item name="EntityOriginalName">FusionMapResultFlex</item>
+    </annotation>
+    <annotation name="ServerProperties">
+      <item name="RemoteClass">cn.edu.whu.lmars.service54.datawrapFlex.FusionMapResultFlex</item>
+      <item name="IncludeRemoteClass">nonempty</item>
+    </annotation>
+    <annotation name="service Group">
+      <item name="service">RequirementFusionService</item>
+    </annotation>
+    <annotation name="ActionScriptGeneration">
+      <item name="Package">valueObjects</item>
+    </annotation>
+    <property name="_srclst" type="FusionSrcFlex[]"/>
+    <property name="_prjUUID" type="string"/>
+    <property name="_Frslt" type="FusionRsltFlex"/>
+  </entity>
+</model>

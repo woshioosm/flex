@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="510" title="添加新规则" close="titlewindow1_closeHandler(event)"
+			   creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.TRule;
+			public var ruleCodeFirst6:String;
+			public var newRule:TRule;
+			
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				ruleCodeText.text = ruleCodeFirst6;
+			}
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				newRule = new TRule();
+				
+				newRule.ruleCode = ruleCodeFirst6;
+				
+				newRule.ruleCname = ruleCNameText.text;
+				newRule.ruleEname = ruleENameText.text;
+				newRule.ruleIf = ruleIFText.text;
+				newRule.ruleThen = ruleThenText.text;
+				newRule.ruleExtend = ruleExtendText.text;
+				newRule.ruleDescription = ruleDescriptionText.text;
+				
+				var myEvent:Event = new Event("addNewRuleReadyMessage",false);
+				dispatchEvent(myEvent);
+				PopUpManager.removePopUp(this);
+			}
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			
+
+		]]>
+	</fx:Script>
+	<mx:Form x="20.6" y="11.65">
+		<mx:FormItem label="规则编码前6位">
+			<s:TextInput id="ruleCodeText" width="229" editable="false" enabled="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则中文名称">
+			<s:TextInput id="ruleCNameText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则英文名称">
+			<s:TextInput id="ruleENameText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则前提">
+			<s:TextArea id="ruleIFText" width="229" height="115"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则结论">
+			<s:TextArea id="ruleThenText" width="229" height="104"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则扩展">
+			<s:TextInput id="ruleExtendText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则描述">
+			<s:TextInput id="ruleDescriptionText" width="229"/>
+		</mx:FormItem>
+	</mx:Form>
+	<s:Button x="94" y="427" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="236" y="427" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   width="100%" height="100%" 
+		   xmlns:natureLanguageQuery="cn.edu.whu.liesmars.components.user.natureLanguageQuery.*"
+		   verticalScrollPolicy="off"
+		   horizontalScrollPolicy="off"
+		   resize="application1_resizeHandler(event)"
+		   initialize="canvas1_initializeHandler(event)"
+		   creationComplete="application1_creationCompleteHandler(event)"
+		   xmlns:code="http://code.google.com/p/flexlib/" xmlns:map="cn.edu.whu.liesmars.map.*" xmlns:Container="cn.edu.whu.liesmars.Container.*">
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import assets.LogoAsset;
+			
+			import caurina.transitions.Tweener;
+			
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			
+			import fl.transitions.Tween;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import org.liesmars.flashwebclient.Control;
+			internal static const LogoAssert:Class=assets.LogoAsset;
+			[Bindable]
+			private var curUser:String;
+			
+			internal static const HideAsset:Class=assets.HideAsset;
+			internal static const ShowAsset:Class=assets.ShowAsset;
+			
+			/**
+			 * 
+			 * 控件事件
+			 * 
+			 * */
+
+			protected function application1_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(banner!=null){
+					if(this.width>1280 ){
+						banner.width=this.width-30;
+						searchPanel.width=750;
+					}else{
+						banner.width=1250;
+						searchPanel.width=this.width-500<400?400:this.width-500;
+					}	
+				}
+				
+				
+			}
+			protected function application1_creationCompleteHandler(event:FlexEvent):void
+			{			
+				Controller.container.visible=false;
+				Controller.container.left=Config.midCanvs2.width/2-50;
+				Config.midCanvs2.windowManager.add(Controller.container);
+				
+				Controller.feedBackWin.visible=false;
+				Config.midCanvs2.windowManager.add(Controller.feedBackWin);
+				Controller.userView=this;
+				
+				Controller.leftContainer_user=leftContainer_User;
+				Controller.mapContainer=map;
+				curUser="当前登录: "+Config.userName;
+			}
+			
+			protected function lbHistory_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				btnHide.source=HideAsset;
+				leftContainer_User.open(1);
+				
+			}
+			protected function lbSuggestion_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				btnHide.source=HideAsset;
+				leftContainer_User.open(2);
+			}
+			protected function lbRss_clickHandler(event:MouseEvent):void
+			{
+				btnHide.source=HideAsset;
+				leftContainer_User.open(3);
+				// TODO Auto-generated method stub
+			}
+//			protected function lbProduct_clickHandler(event:MouseEvent):void
+//			{
+//				// TODO Auto-generated method stub
+//				btnHide.source=HideAsset;
+//				leftContainer_User.open(4);
+//			}
+		
+			protected function canvas1_initializeHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				Config.midCanvs=this.mdiCanvas;
+				Config.midCanvs2=this.mdiCanvas2;
+				var point:Point=map.globalToContent(new Point(0,0)); // 应用程序窗口距 map的相对位置
+				Config.stageOffsetX=point.x;
+				Config.stageOffsetY=point.y;
+			}
+			
+			protected function btnHide_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(leftContainer_User.isOpen==true){;
+					closeLeftContainer();
+				}
+				else{
+					///backgroundAlpha=1;
+					leftContainer_User.visible=true;
+					//Tweener.addTween(leftContainer_User,{visible:true,transition :"linear", time:0.1});
+					leftContainer_User.resizable=true;
+					
+					leftContainer_User.isOpen=true;
+					btnHide.source=HideAsset;
+					leftContainer_User.resizable=true;
+				}
+				
+			}
+			protected function btnHide_mouseOverHandler(event:MouseEvent):void
+			{
+				btnHide.height=23;
+				btnHide.width=23;
+				btnHide.top=148;
+			}
+			protected function btnHide_mouseOutHandler(event:MouseEvent):void
+			{
+				btnHide.height=19;
+				btnHide.width=19;
+				btnHide.top=150;
+			}
+			public  function closeLeftContainer():void{
+				leftContainer_User.isOpen=false;
+				leftContainer_User.resizable=false;
+				leftContainer_User.visible=false;
+				
+				btnHide.source=ShowAsset;
+				leftContainer_User.resizable=false;
+			}
+			
+	
+
+
+
+		]]>
+	</fx:Script>
+	<mx:Canvas  x="0" y="0" height="25" width="100%">
+		<s:Label  right="60" top="7" text="{curUser}"  height="15" width="95"/>
+		<mx:LinkButton right="16" top="2" label="注销" color="0x017189"/>
+		<mx:LinkButton id="lbHistory" x="23" y="2" label="历史查询结果" width="91" color="0x017189" click="lbHistory_clickHandler(event)"/>
+		<mx:LinkButton id="lbSuggestion" x="110" y="2" label="查看用户推荐" color="0x017189" click="lbSuggestion_clickHandler(event)"/>
+		<mx:LinkButton id="lbRss" x="198" y="2" label="用户背景知识录入" color="0x017189" click="lbRss_clickHandler(event)"/>
+		<!--<mx:LinkButton id="lbProduct" x="113" y="2" label="查看产品分解" color="0x017189" click="lbProduct_clickHandler(event)"/>
+		-->
+		
+	</mx:Canvas>
+	
+	<mx:Panel id="banner" x="12" y="26" width="1250" headerHeight="0" backgroundColor="0x017189"  height="110" >
+		<mx:Image y="2" width="100%" height="98%" source="{LogoAssert}" />
+	</mx:Panel>
+	
+	
+	
+	
+	<code:MDICanvas id="mdiCanvas" x="0" y="144" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<map:MapContainer  id="map" left="5" right="5" width="100%" height="100%"></map:MapContainer>
+		<Container:LeftContainer_User visible="false"   resizable="false" backgroundAlpha="0" id="leftContainer_User" x="-5" height="400" width="1000" >	
+		</Container:LeftContainer_User>
+		
+	</code:MDICanvas>	
+	
+	<mx:Canvas  left="7" top="149" height="21" width="21" backgroundColor="0xffffff" backgroundAlpha="0.4">
+		
+	</mx:Canvas>
+	<mx:Image left="8" top="150" height="19" width="19"  id="btnHide" source="{ShowAsset}" 
+			  mouseOver="btnHide_mouseOverHandler(event)"		
+			  mouseOut="btnHide_mouseOutHandler(event)"
+			  click="btnHide_clickHandler(event)" />	
+
+	
+	<code:MDICanvas id="mdiCanvas2" x="0" y="144" width="100%" height="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		
+	</code:MDICanvas>
+	<s:Label x="0" y="141" height="9" width="100%" backgroundColor="#E4E3E3"/>
+	<natureLanguageQuery:SearchInputPanel id="searchPanel" left="350" y="55">
+		
+	</natureLanguageQuery:SearchInputPanel>
+</mx:Canvas>

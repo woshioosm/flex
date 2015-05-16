@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="462" height="198" title="修改地理坐标表示规则结论" close="titlewindow1_closeHandler(event)" creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			public var ruleThenString;
+
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				for each(var item:Object in dropdownData)
+				{
+					if(item.value == ruleThenString)
+					{
+						mydropdown.selectedItem = item;
+						break;
+					}	
+				}
+			}
+
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				ruleThenString = mydropdown.selectedItem.value;
+				var outgoingEvent:Event = new Event("geoCoorModifyThenReadyMessage",false);
+				dispatchEvent(outgoingEvent);
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:ArrayCollection id="dropdownData">
+			<fx:Object label="中心点形式计算" value="onepoint"/>
+			<fx:Object label="对角点（左上右下）" value="twopoint"/>
+			<fx:Object label="地理范围计算（经度-经度，纬度-纬度）" value="specialpoint"/>
+			<fx:Object label="地理坐标串计算" value="multipoint"/>
+		</s:ArrayCollection>
+	</fx:Declarations>
+	<s:DropDownList id="mydropdown" x="111" y="43" width="324" dataProvider="{dropdownData}" labelField="label"/>
+	<s:Label x="46" y="48" text="规则结论"/>
+	<s:Button x="111" y="105" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="273" y="105" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

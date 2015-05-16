@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 width="768" height="300"  left="2" right="2" bottom="2" top="2" >
+
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.ProductPublishObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.ImitatePublishDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+
+			[Bindable]
+			private var publishArray:ArrayCollection=new ArrayCollection();
+		
+
+			public  function loadDataResult(arr:ArrayCollection):void{
+				var dataHandler:ImitatePublishDataHandler=new ImitatePublishDataHandler(arr);
+				dataHandler.bindData(publishArray);
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:AdvancedDataGrid id="adg1" sortableColumns="false" designViewDataType="flat" dataProvider="{publishArray}" left="10" right="10" top="9" bottom="10" fontFamily="微软雅黑" fontSize="13">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号"  itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="产品ID" dataField="productID"/>
+			<mx:AdvancedDataGridColumn headerText="部门" dataField="department"/>
+			<mx:AdvancedDataGridColumn headerText="用户" dataField="userName"/>
+			<mx:AdvancedDataGridColumn headerText="是否接受" dataField="accept"/>
+			<mx:AdvancedDataGridColumn headerText="操作" itemRenderer="cn.edu.whu.liesmars.renderer.SuggestionDetailRenderer" />
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>
+
+
+
+
+

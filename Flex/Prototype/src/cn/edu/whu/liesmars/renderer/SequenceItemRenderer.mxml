@@ -1,0 +1,23 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.AdvancedDataGrid;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			override public function set data(value:Object):void
+			{      
+				if(value != null)
+				{
+					super.data = value;
+					
+					LbSequence.text=((this.owner as AdvancedDataGrid).dataProvider.getItemIndex(value)+1).toString();
+					if(value.uuid=="moreInfo"||value.uuid=="moreFusionReslut")
+						LbSequence.text="";
+				}
+			}    
+		]]>
+	</mx:Script>
+	
+	<mx:Label  id="LbSequence" />
+</mx:HBox> 

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"	
+		   verticalScrollPolicy="off"
+		   horizontalScrollPolicy="off"
+		   resize="canvas1_resizeHandler(event)"
+		   borderVisible="true" borderColor="0x000000"
+		   initialize="canvas1_initializeHandler(event)"		 creationComplete="group1_creationCompleteHandler(event)"
+		   addedToStage="group1_addedToStageHandler(event)"  xmlns:map="cn.edu.whu.liesmars.map.*">
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.LoadXMLEvent;
+			import cn.edu.whu.liesmars.asPack.event.LocateEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.ParserType;
+			import cn.edu.whu.liesmars.asPack.util.XmlParser;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			import org.liesmars.flashwebclient.BaseTypes.Bounds;
+			import org.liesmars.flashwebclient.BaseTypes.LonLat;
+			import org.liesmars.flashwebclient.GEOTYPES;
+			import org.liesmars.flashwebclient.GeoEvent.DrawResultEvent;
+			import org.liesmars.flashwebclient.GeoMap;
+			import org.liesmars.flashwebclient.GeoShape;
+			import org.liesmars.flashwebclient.Layer;
+			import org.liesmars.flashwebclient.Layer.Raster.Tianditu;
+			import org.liesmars.flashwebclient.Layer.VectorLayer;
+			import org.liesmars.flashwebclient.MapUIEvent.*;
+			import org.liesmars.flashwebclient.Util;
+			
+			import spark.components.Label;
+			
+		    public var ctlrBarVisiable:Boolean=true;
+			public var clearBtnVisiable:Boolean=true;
+			
+			public  var geomap:GeoMap;
+			private var xmlParser:XmlParser=new XmlParser();
+			private var vectorLayer:VectorLayer;
+			
+			public function init():void{
+				var layer:Layer;
+				var annoLayer:Layer;
+				
+				geomap = new GeoMap(map, {"mapOffsetX":Config.stageOffsetX,"mapOffsetY":Config.stageOffsetY});
+				layer = new Tianditu("GeoGlobe Image Service", Config.tileServerUrl, {"visibility":true, 
+					"serviceType":"tianditu","buffer":"1", "isBaseLayer":true, "maxExtent":new Bounds(-180, -90, 180, 90),
+					"maxResolution":"0.3515625", "numPyramidLevels":"8"},"RsMap");
+				annoLayer = new Tianditu("GeoGlobe Image Service",  Config.tileServerUrl, {"visibility":true, 
+					"serviceType":"tianditu","buffer":"1", "isBaseLayer":false, "maxExtent":new Bounds(-180, -90, 180, 90),
+					"maxResolution":"0.3515625", "numPyramidLevels":"8"},"RsAnnoMap");
+				
+				geomap.addLayer(layer);
+				geomap.addLayer(annoLayer);
+				vectorLayer=new VectorLayer("area",{},{visibility:true},areaClick);
+				geomap.addLayer(vectorLayer);
+				geomap.setCenter(new LonLat(104,37), 3);
+				this.mapCtrl.initMap(geomap);
+			}
+			
+			public function initAndDraw(coords:String){
+				var layer:Layer;
+				var annoLayer:Layer;
+				
+				geomap = new GeoMap(map, {"mapOffsetX":Config.stageOffsetX,"mapOffsetY":Config.stageOffsetY});
+				layer = new Tianditu("GeoGlobe Image Service", Config.tileServerUrl, {"visibility":true, 
+					"serviceType":"tianditu","buffer":"1", "isBaseLayer":true, "maxExtent":new Bounds(-180, -90, 180, 90),
+					"maxResolution":"0.3515625", "numPyramidLevels":"8"},"RsMap");
+				annoLayer = new Tianditu("GeoGlobe Image Service",  Config.tileServerUrl, {"visibility":true, 
+					"serviceType":"tianditu","buffer":"1", "isBaseLayer":false, "maxExtent":new Bounds(-180, -90, 180, 90),
+					"maxResolution":"0.3515625", "numPyramidLevels":"8"},"RsAnnoMap");
+				
+				geomap.addLayer(layer);
+				geomap.addLayer(annoLayer);
+				vectorLayer=new VectorLayer("area",{},{visibility:true},areaClick);
+				geomap.addLayer(vectorLayer);
+				geomap.setCenter(new LonLat(104,37), 3);
+				drawAreaByCoords(coords);
+
+//				this.mapCtrl.initMap(geomap);
+			}
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{	
+				
+
+			}
+			
+			protected function group1_addedToStageHandler(event:Event):void
+			{
+				this.addEventListener(LocateEvent.LOCATE,onLocate);
+			}
+			private function onLocate(event:LocateEvent):void{
+				drawAreaByCoords(event.coords);
+			}
+			private function areaClick(e:MouseEvent):void{
+				mx.controls.Alert.show("点击了区域");
+			}
+			
+			public function drawAreaRect(LeftBottom:LonLat,RighTop:LonLat):void{
+				
+				vectorLayer.drawRectArea(LeftBottom,RighTop);
+			}
+			public function drawAreaByCoords(points:String):void{
+				var bounds:Bounds= vectorLayer.drawAreaByCoordsStr(points);
+				reCenter(bounds);
+			}
+			public function drawPointByCoords(point:String):void{
+				var bounds:Bounds= vectorLayer.drawPointByCoord(point);
+				reCenter(bounds);
+			}
+			public function drawLineByCoords(point:String):void{
+				var bounds:Bounds= vectorLayer.drawLineByCoordsStr(point);
+				reCenter(bounds);
+			}
+			private function reCenter( bounds:Bounds):void{  // 绘制多边形后 重设 center和zoom 以适应多边形的大小
+				//				var bouds:Bounds;
+				var lonDis:Number=bounds.right-bounds.left;
+				var latDis:Number=bounds.top-bounds.bottom;
+				
+				if(lonDis<0||latDis<0)
+					return ;
+				var center:LonLat=new LonLat(lonDis/2+bounds.left,latDis/2+bounds.bottom);
+				
+				var mapScreen:Number=Math.min(this.height,this.width);
+				var resolution:Number=geomap.resolution;
+				var zoom:int=geomap.zoom;
+				
+				var recWidthInScreen:Number= Math.max(lonDis,latDis)/resolution;
+				if(recWidthInScreen>mapScreen/4*3)
+					while(recWidthInScreen>mapScreen/4*3 && zoom>0 ){
+						zoom--;
+						resolution=resolution*2;
+						recWidthInScreen= Math.max(lonDis,latDis)/resolution;
+					}
+				else
+					while(recWidthInScreen<mapScreen/2.5 && zoom<7){
+						zoom++;
+						resolution=resolution/2;
+						recWidthInScreen= Math.max(lonDis,latDis)/resolution;
+					}
+				geomap.setCenter(center, zoom);
+				
+			}
+			
+			protected function canvas1_resizeHandler(event:ResizeEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(geomap!=null)
+					geomap.updateSize();
+			}
+			protected function canvas1_initializeHandler(event:FlexEvent):void
+			{
+				
+				
+			}
+			public function clear_handle(event:MouseEvent):void{
+				clearMap();
+				this.stopDraw();
+			}
+			public function clearMap():void{
+				vectorLayer.clear();	
+			}
+			
+			
+			
+			
+			public  function drawPolygon():void{
+				if(geomap!=null)
+				   this.geomap.DrawPl();
+			}
+			public  function drawRect():void
+			{
+				if(geomap!=null)
+				   this.geomap.DrawRectangular();
+			}
+			public function stopDraw():void
+			{	
+				if(geomap!=null)
+				   this.geomap.StopDraw();
+			}
+			public function reDraw():void
+			{
+				if(geomap!=null)
+				   geomap.clear();
+			}
+			
+			public function drawPoint():void
+			{
+				// TODO Auto-generated method stub
+				if(geomap!=null)
+				   this.geomap.DrawPt();
+			}
+			
+			
+			public function drawLine():void
+			{
+				if(geomap!=null)
+				    this.geomap.DrawLn();
+			}
+			
+			public function initDraw():void{
+				if(geomap!=null)
+				   this.geomap.setEvt();
+			}
+			public function disableDrag():void{
+				if(geomap!=null)
+				   this.geomap.setEvt();
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:Label width="100%" height="100%"  id="map"/>
+	<!--<s:Button visible="false"  right="10" y="364" label="测试范围画框" click="drawRectOfArea(event)"/>
+	<s:Button visible="false"  right="10" y="414" label="测试范围画框2" click="drawRectOfArea2(event)" width="103"/>
+	-->
+	<s:Button  right="12" label="清空绘制" click="clear_handle(event)" width="72" fontFamily="微软雅黑" top="257" visible="{clearBtnVisiable}"/>
+	
+	<map:MapCtrlBar id="mapCtrl" right="18" top="10" visible="{ctlrBarVisiable}" >
+	</map:MapCtrlBar>
+	<!--
+	<s:Button right="10"  bottom="161" label="矩形" click="drawRect(event)"/>
+	<s:Button  right="10"  bottom="132" label="多边形" click="drawPolygon(event)"/>
+	<s:Button  right="10"  bottom="103" label="停止绘制" click="stopDraw(event)"/>
+	<s:Button  right="10" bottom="74" label="重画" click="reDraw(event)"/>
+	<s:Button id="btnDrawPoint" label="点" right="10" bottom="215" click="drawPoint(event)"/>
+	<s:Button id="btnDrawLine" label="线" right="10" bottom="190" click="drawLine(event)"/>
+	-->
+</mx:Canvas >

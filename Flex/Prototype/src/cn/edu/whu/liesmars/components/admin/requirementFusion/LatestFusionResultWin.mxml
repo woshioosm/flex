@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 fontFamily="微软雅黑" initialize="thecanvas1_initializeHandler(event)"
+					 verticalScrollPolicy="off" horizontalScrollPolicy="off" 
+					 left="2" right="2" bottom="0" top="0" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 width="828" height="504" xmlns:services="services.*">
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.FusionResultObj;
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.FusionSourceDataObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionResultDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionSourceGraphicDataHandler;
+			import cn.edu.whu.liesmars.renderer.FusionResultCanvas;
+			import cn.edu.whu.liesmars.renderer.FusionSourceCanvas;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.FusionResultMap;
+			import valueObjects.FusionResultMapWithTotlePage;
+			import valueObjects.TFusionresult;
+			
+			private var sourceList:ArrayCollection=new ArrayCollection();  //所有的融合结果
+			private var resultList:ArrayCollection=new ArrayCollection();  //所有融合结果的数据集
+			
+			private var startCanvasPoint:Point=new Point();
+			private var startResultPoint:Point=new Point();
+			
+			private var curSourceY:int;
+			private var curResultY:int;
+			private var container:Label;
+			private var record:ArrayCollection=new ArrayCollection(); // 记录当前添加的绘制内容
+			
+			
+			/********
+			 * 分页变量和相关函数
+			 **/
+			[Bindable]
+			private var curPage:int=0;
+			private var totlePage:int;
+			[Bindable]
+			private var pageList:ArrayCollection=new ArrayCollection;
+			private var recordMap:Dictionary=new Dictionary();// 存储已经访问过的值 当做缓存 不在去后台取
+			private var curFusion:ArrayCollection;
+			
+			
+			public override function clearDate():void{
+				clearRecordMap();
+				pageList.removeAll();
+			}
+			
+			private function clearRecordMap():void{
+				for(var i:int=1;i<=totlePage;i++){
+					if(recordMap[i]!=null){
+					    recordMap[i]=null;
+					    delete  recordMap[i];
+					}
+				}
+			}
+			
+			protected function resultResp_resultHandler(event:ResultEvent):void
+			{
+	
+				var result:FusionResultMapWithTotlePage=event.result as FusionResultMapWithTotlePage;
+				if(result==null){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				totlePage=result.totlePages;
+				if(totlePage==0){
+					mx.controls.Alert.show("没有数据");
+					cursorManager.removeAllCursors();
+					return;
+				}
+				
+				curFusion=result.fusions;
+				recordMap[curPage]=curFusion;
+				
+				lbtnNext.enabled=true;
+				lbtnLast.enabled=true;
+				if(curPage==totlePage-1){
+					lbtnNext.enabled=false;
+				}
+				if(curPage==0){
+					lbtnLast.enabled=false;
+				}
+				pageList.removeAll();
+				for(var i:int=1;i<=totlePage;i++){
+					pageList.addItem(i.toString());
+				}
+				cbPage.selectedIndex=curPage;
+				draw(curFusion);
+			}
+			//上一页
+			protected function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.setBusyCursor();
+				curPage--;
+				if(recordMap[curPage]==null){
+					resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}	
+				cbPage.selectedIndex=curPage;
+				
+			}
+			
+			//下一页
+			protected function linkbutton2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				CursorManager.setBusyCursor();
+				curPage++;
+				if(recordMap[curPage]==null){
+				resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}	
+				cbPage.selectedIndex=curPage;
+			}
+			protected function combobox1_changeHandler(event:ListEvent):void
+			{
+				CursorManager.setBusyCursor();
+				curPage=Number(cbPage.selectedItem);
+				curPage--;
+				if(recordMap[curPage]==null){
+					resultResp.token=requirementFusionService.getFusionResultWithSource(10,curPage,null);
+				}else{
+					lbtnNext.enabled=true;
+					lbtnLast.enabled=true;
+					if(curPage==totlePage-1){
+						lbtnNext.enabled=false;
+					}
+					if(curPage==0){
+						lbtnLast.enabled=false;
+					}
+					draw(recordMap[curPage]);
+				}
+				cbPage.selectedIndex=curPage;
+				
+			}
+			
+			
+		
+			protected function thecanvas1_initializeHandler(event:FlexEvent):void
+			{
+				pageList.removeAll();
+				initDraw();
+			}
+			
+			
+			public override function loadData():void{
+				CursorManager.setBusyCursor();
+				pageCanvas.enabled=true;
+				clearRecordMap();
+				curPage=0;
+				totlePage=0;
+				pageList.removeAll();
+				resultResp.token=requirementFusionService.getFusionResultWithSource(10,0,null);
+				
+				pageCanvas.enabled=true;
+			}
+			public  function loadResult(result:ArrayCollection):void{
+				pageCanvas.enabled=false;
+				draw(result);
+			
+			}
+			private function getResultByUUID(uuid:String):FusionResultObj{
+				for each(var t:FusionResultObj in resultList){
+					if(t.uuid==uuid)
+						return t;
+				}
+				return null;
+			}
+			
+			
+			
+			
+			
+			private function initDraw():void{
+				startCanvasPoint.x=20;
+				startCanvasPoint.y=10;
+				
+				startResultPoint.x=460;
+				startResultPoint.y=10;
+				
+				curSourceY=startCanvasPoint.y;
+				curResultY=startResultPoint.y;
+				can.removeAllChildren();
+				
+				container=new Label();
+				can.addChild(container);
+				container.percentWidth=100;
+				container.percentHeight=100;
+				container.x=0;
+				container.y=0;
+			}
+			private function clear():void{
+				for each(var canvas:FusionSourceCanvas in record){
+					this.removeChild(canvas);
+				}
+				container.graphics.clear();
+			}
+			
+			private function draw(result:ArrayCollection):void{
+				lbtip.visible=true;
+				var fusionResult:ArrayCollection=result;  // 为FusionResultMap 的list
+				
+				
+				
+				var dataHandler:FusionResultDataHandler=new FusionResultDataHandler(null);
+				
+				initDraw();
+				for each(var source:FusionResultMap in fusionResult){
+					var uuid:String=source.uuid;
+					var fusionResultobj:FusionResultObj=dataHandler.bindSingleData(source.fusionResult);
+					
+					var sourceList:ArrayCollection=new ArrayCollection();
+					var dataBinder:FusionSourceGraphicDataHandler=new FusionSourceGraphicDataHandler(source.sources);
+					dataBinder.bindData(sourceList);
+					drawMethod(sourceList,fusionResultobj);					
+				}	
+				
+				CursorManager.removeAllCursors();
+				lbtip.visible=false;
+			}
+			//绘制融合结果的方法
+			private function drawMethod(sourceList:ArrayCollection,result:FusionResultObj):void{
+				var graphic:Graphics=container.graphics;
+				graphic.lineStyle(3,0x000000,1);
+				var startP:Point=new Point();
+				var endP:Point=new Point();
+				var midP:Point=new Point();
+				for(var i:int=0;i<sourceList.length;i++){
+					var fusionSourcecanvas:FusionSourceCanvas=new FusionSourceCanvas();
+					var fusionSouce:FusionSourceDataObj=sourceList.getItemAt(i) as FusionSourceDataObj;
+					fusionSourcecanvas.loadData(fusionSouce.naturalLang,fusionSouce.imageDate,fusionSouce.sensorType,fusionSouce.task,"需求"+(i+1),fusionSouce.imageArea,fusionSouce.spacialResolution);
+					can.addChild(fusionSourcecanvas);
+					record.addItem(fusionSourcecanvas);
+					
+					fusionSourcecanvas.x=startCanvasPoint.x;
+					fusionSourcecanvas.y=curSourceY;	
+					
+					curSourceY=curSourceY+120;
+					
+					graphic.moveTo(fusionSourcecanvas.getPosition().x,fusionSourcecanvas.getPosition().y);
+					graphic.lineTo(fusionSourcecanvas.getPosition().x+50,fusionSourcecanvas.getPosition().y);
+					
+					if(i==0){
+						startP.x=fusionSourcecanvas.getPosition().x+50;
+						startP.y=fusionSourcecanvas.getPosition().y;
+					}
+					if(i==sourceList.length-1){
+						endP.x=fusionSourcecanvas.getPosition().x+50;
+						endP.y=fusionSourcecanvas.getPosition().y;
+					}
+					
+				}
+				graphic.moveTo(startP.x,startP.y);
+				graphic.lineTo(endP.x,endP.y);
+				midP.x=startP.x+(endP.x-startP.x)/2;
+				midP.y=startP.y+(endP.y-startP.y)/2;
+				
+				var fusionResultCanvas:FusionResultCanvas=new FusionResultCanvas();
+				fusionResultCanvas.loadData(result.imageDate,result.sensorName,result.task,"融合结果",result.imageArea,result.spacialResolution);
+				can.addChild(fusionResultCanvas);
+				record.addItem(fusionResultCanvas);
+				
+				fusionResultCanvas.x=startResultPoint.x;
+				fusionResultCanvas.y=midP.y-(fusionResultCanvas.height/2+3);	
+				
+				graphic.moveTo(midP.x,midP.y);
+				graphic.lineTo(startResultPoint.x,midP.y);
+				
+				
+			}
+			
+
+			
+
+
+			
+
+
+			protected function can_mouseWheelHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				event.preventDefault();
+				event.stopPropagation();
+				
+			}
+
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService"/>
+		
+		<s:CallResponder id="resultResp" result="resultResp_resultHandler(event)"/>
+	</fx:Declarations>
+	
+	<s:Label x="362" y="6" text="融合结果图" fontSize="16" color="#0840F6"/>
+	<s:Label x="141" y="30" text="融合源数据" fontSize="14"/>
+	<s:Label x="587" y="30" text="融合结果" fontSize="14"/>
+	<mx:Canvas x="0" id="can" width="100%" top="53" bottom="25" verticalScrollPolicy="on" horizontalScrollPolicy="off">
+		
+	</mx:Canvas>
+	<!--<s:Label id="container" width="100%" height="100%" />-->
+	<s:Label x="367" y="215" text="正在处理...." id="lbtip" visible="false" fontSize="15"/>
+	<mx:Canvas id="pageCanvas" bottom="1" right="2" width="321" height="25"  verticalScrollPolicy="off" horizontalScrollPolicy="off">
+		<mx:LinkButton enabled="false" id="lbtnLast" x="32" y="2" label="上一页" fontSize="11"  click="linkbutton1_clickHandler(event)"/>
+		<mx:LinkButton enabled="false" id="lbtnNext" x="106" y="2" label="下一页" fontSize="11" click="linkbutton2_clickHandler(event)"/>
+		<s:Label x="85" y="8" text="{curPage+1}" fontSize="11" width="28"/>
+		<s:Label x="167" y="8" text="跳转到"/>
+		<mx:ComboBox text="{curPage+1}" id="cbPage" dataProvider="{pageList}" change="combobox1_changeHandler(event)" x="210" y="1" width="71" height="23"/>
+	</mx:Canvas>
+</Container:TheCanvas>
+
+
+

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 width="808" height="300"  left="2" right="2" bottom="2" top="2" creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*">
+	
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:RequirementFusionService id="requirementFusionService" destination="RequirementFusionService"/>
+		<s:CallResponder id="fusionStateResp" result="fusionStateResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.AdminBaseModel.ProduceStateObj;
+			import cn.edu.whu.liesmars.asPack.componentsData.ProductStateDataHandler;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			[Bindable]
+            private var stateArray:ArrayCollection=new ArrayCollection();
+			public override function loadData():void{
+				fusionStateResp.token=requirementFusionService.showProduceState();
+			}
+			protected function fusionStateResp_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:ProductStateDataHandler=new ProductStateDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(stateArray);
+			}
+
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//loadData();
+			}
+
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid id="adg1" sortableColumns="false" designViewDataType="flat" dataProvider="{stateArray}" left="10" right="10" top="10" bottom="10" fontFamily="微软雅黑" fontSize="13">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="序号"  itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="产品ID" dataField="productId"/>
+			<mx:AdvancedDataGridColumn headerText="生产状态" dataField="produceState"/>
+			<mx:AdvancedDataGridColumn headerText="影像时间"  minWidth="70" dataTipField="imageDate" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" width="160"  minWidth="160" dataField="imageArea" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" minWidth="90" width="90" dataField="spacialResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率"  minWidth="90" width="90" dataField="timeResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率"  minWidth="110" width="110" dataField="spectrumResolution" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+</Container:TheCanvas>

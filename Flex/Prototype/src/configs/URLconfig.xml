@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<URL>
+    <url id="1" name="TileServer" value="http://localhost:80"/>
+	<url id="2" name="Server" value="http://localhost"/>
+	<url id="3" name="CrossDomain" value="http://localhost:80/crossdomain.xml"/>
+	<url id="4" name="imagePath" value="http://localhost:8080/SemanticRequirementFusionWebProj/Image/"/>
+	<url id="5" name="2" value=""/>
+</URL>

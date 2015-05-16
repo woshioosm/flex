@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:ParentMDI xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 verticalScrollPolicy="off" horizontalScrollPolicy="off"
+					 xmlns:services="services.*" 
+					 headerHeight="25"
+					 title="查询列表"
+					 creationComplete="parentmdi1_creationCompleteHandler(event)"
+					 backgroundAlpha="0.5"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" layout="absolute" width="498" height="338">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<services:NaturalLangService id="naturalLangService" destination="NaturalLangService"/>
+		<s:CallResponder id="queryByFile" result="queryByFile_resultHandler(event)"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.WaitingWin.NatureLangWaitingWin;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.FileContent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.NLSearchResultWithTime;
+			private var waitingWin:NatureLangWaitingWin=new NatureLangWaitingWin();
+			
+			private var fileDataList:ArrayCollection=new ArrayCollection();
+			[Bindable]
+			private var bindList:ArrayCollection=new ArrayCollection();
+			public function setData(array:ArrayCollection):void{
+				fileDataList=array;
+				bindList.removeAll();
+				for each(var arr:String in array){
+					var obj:FileContent=new FileContent();
+					obj.content=arr;
+					bindList.addItem(obj);
+				}
+			}
+			protected function parentmdi1_creationCompleteHandler(event:FlexEvent):void
+			{
+				// TODO Auto-generated method stub
+				//this.closeBtn.visible=false;
+				//this.closeBtn.enabled=false;
+			}
+			
+			
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				waitingWin.init();
+				waitingWin.mdiCanvas=Config.midCanvs2;
+				Config.midCanvs2.windowManager.remove(this);
+				Config.midCanvs2.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs2.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs2.height/2-waitingWin.height;
+				queryByFile.token=naturalLangService.singleNLP(fileDataList,Config.userName,Config.searchId);
+				Config.startTime=(new Date()).time;
+				Config.totleSearchNum=bindList.length;
+			}
+			public override function closeWin(event:MDIWindowEvent):void{
+				event.preventDefault();
+				Config.midCanvs2.windowManager.remove(this);
+			} 
+			protected function queryByFile_resultHandler(event:ResultEvent):void
+			{
+				waitingWin.stopProgress();
+				Config.midCanvs2.windowManager.remove(waitingWin);
+				(Controller.userView as UserView).queryComplete(new QueryEvent(QueryEvent.COMPLETE,event.result as NLSearchResultWithTime,null));
+				//EventManager.dispatchEvent(Controller.leftContainer_user,new QueryEvent(QueryEvent.COMPLETE,event.result as ArrayCollection));
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:AdvancedDataGrid left="5" right="5" top="5" bottom="32" dataProvider="{bindList}">
+		<mx:columns >
+			<mx:AdvancedDataGridColumn  headerText="序号" width="50" dataField="uuid" itemRenderer="cn.edu.whu.liesmars.renderer.SequenceItemRenderer" />
+			
+			<mx:AdvancedDataGridColumn  headerText="自然语言列表" dataField="content"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	<s:Button label="开始查询" height="25" bottom="3" left="10" right="10" click="button1_clickHandler(event)"/>
+</Container:ParentMDI>

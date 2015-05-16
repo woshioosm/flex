@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="478" height="254"  chromeColor="0xffffff"
+			   close="titlewindow1_closeHandler(event)" fontFamily="微软雅黑"
+			   creationComplete="titlewindow1_creationCompleteHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			public var ruleIf:String;
+			public var ruleThen:String;
+			
+			protected function titlewindow1_creationCompleteHandler(event:FlexEvent):void
+			{
+				var ruleIfArray:Array = ruleIf.split(";");
+				if(ruleIfArray.length == 2)
+				{
+					ruleIfNum.text = ruleIfArray[0];
+					ruleIfUnit.text = ruleIfArray[1];
+				}
+				else
+				{
+					Alert.show("规则前提格式错误！");
+				}
+				
+				var ruleThenArray:Array = ruleThen.split(";");
+				if(ruleThenArray.length == 2)
+				{
+					ruleThenNum.text = ruleThenArray[0];
+					ruleThenUnit.text = ruleThenArray[1];
+				}
+				else
+				{
+					Alert.show("规则结论格式错误！");
+				}
+				
+			}
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				ruleIf = ruleIfNum.text + ";" + ruleIfUnit.text;
+				ruleThen = ruleThenNum.text + ";" + ruleThenUnit.text;
+				var readyEvent:Event = new Event("transUnitReadyMessage", false);
+				dispatchEvent(readyEvent);
+				PopUpManager.removePopUp(this);
+			}
+
+
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+
+			
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:TextInput x="31" y="52" width="59" id="ruleIfNum"/>
+	<s:TextInput x="258" y="52" width="59" id="ruleThenNum"/>
+	<s:TextInput x="324" y="52" width="119" id="ruleThenUnit"/>
+	<s:TextInput x="97" y="52" width="127" id="ruleIfUnit"/>
+	<s:Label x="236" y="57" text="=" fontSize="15"/>
+	<s:Label x="28" y="28" text="规则前提" fontSize="15"/>
+	<s:Label x="258" y="29" text="规则结论" fontSize="15"/>
+	<s:Label x="43" y="78" text="数值"/>
+	<s:Label x="128" y="78" text="单位"/>
+	<s:Label x="278" y="78" text="数值"/>
+	<s:Label x="363" y="78" text="单位"/>
+	<s:Label x="36" y="112" text="注：多个单位之间用英文逗号&quot;,&quot;隔开" color="#FF0000" fontSize="15"/>
+	<s:Button x="82" y="155" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="285" y="156" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

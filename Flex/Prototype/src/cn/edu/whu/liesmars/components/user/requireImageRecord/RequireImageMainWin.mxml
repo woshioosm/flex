@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑"
+		 left="2" right="2" top="2" bottom="2"
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="644" height="430"  xmlns:services="services.*" creationComplete="panel1_creationCompleteHandler(event)">
+	
+	<fx:Declarations>
+		<services:RequireImageRecordService id="requireImageRecordService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+		<s:CallResponder id="saveOrUpdateResult" result="saveOrUpdateResult_resultHandler(event)"/>
+		<s:CallResponder id="delResult" result="delResult_resultHandler(event)"/>
+		<s:CallResponder id="loadRecordsByUsernameResult" result="loadRecordsByUsernameResult_resultHandler(event)"/>
+	
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import services.RequireImageRecordService;
+			
+			import valueObjects.TRoutinetask;
+			[Bindable]
+			public var mylistShowCollection:ArrayCollection;
+			var myAddPopup;
+			var delitem:TRoutinetask;
+			var username:String;
+			
+			public override function loadData():void{
+//				username = Config.userName;
+//				loadRecordsByUsername(username);
+			}
+			
+			protected function panel1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+//				username = "USER_C";
+				username = Config.userName;
+				loadRecordsByUsername(username);
+				
+			}
+
+			protected function loadRecordsByUsername(arg0:String):void
+			{
+				loadRecordsByUsernameResult.token = requireImageRecordService.loadRecordsByUsername(arg0);
+			}
+			
+			
+			protected function loadRecordsByUsernameResult_resultHandler(event:ResultEvent):void
+			{
+				var allRecords = loadRecordsByUsernameResult.lastResult;
+				mylistShowCollection = allRecords;
+			}
+
+			protected function btnModify_clickHandler(event:MouseEvent):void
+			{
+				if(mylist.selectedIndex != -1)
+				{
+					var selectedItem:TRoutinetask = mylist.selectedItem;
+//					myAddPopup = PopUpManager.createPopUp(this,requireImageAddPopup,true);
+					myAddPopup=new requireImageAddPopup(); 
+					myAddPopup.functionFlag = 0;
+					myAddPopup.routineTaskItem = selectedItem;
+					myAddPopup.username = username;
+					myAddPopup.addEventListener("requireImageAddReadyMessage",requireImageAddReadyMessageHandler);
+
+					PopUpManager.addPopUp(myAddPopup,Config.midCanvs3,true);
+//					PopUpManager.centerPopUp(myAddPopup);
+					
+				}
+				else
+				{
+					Alert.show("必须选择一个项目！","warning");
+				}
+			}
+			
+			protected function requireImageAddReadyMessageHandler(event:Event):void
+			{
+				saveOrUpdateResult.token = requireImageRecordService.saveOrUpdateRecord(myAddPopup.routineTaskItem);
+			}
+
+
+			protected function btnAdd_clickHandler(event:MouseEvent):void
+			{
+				myAddPopup = PopUpManager.createPopUp(this,requireImageAddPopup,true);
+				myAddPopup.functionFlag = 1;
+				myAddPopup.username = username;
+				myAddPopup.addEventListener("requireImageAddReadyMessage",requireImageAddReadyMessageHandler);
+				PopUpManager.centerPopUp(myAddPopup);
+			}
+
+
+			protected function saveOrUpdateResult_resultHandler(event:ResultEvent):void
+			{
+				if(saveOrUpdateResult.lastResult == 0)
+				{
+					Alert.show("成功写入数据库!");
+					if(myAddPopup.functionFlag == 1)
+					{
+						mylistShowCollection.addItem(myAddPopup.routineTaskItem);
+					}
+				}
+				else
+				{
+					Alert.show("写入数据库失败！");
+				}
+				
+			}
+
+
+			protected function btnDel_clickHandler(event:MouseEvent):void
+			{
+				if(mylist.selectedIndex != -1)
+				{
+					Alert.show("确定删除本条记录？","警告",Alert.YES|Alert.NO,this,delMessageHandler);
+				}
+				else
+				{
+					Alert.show("请先选择要删除的记录！");
+				}
+			}
+			
+			protected function delMessageHandler(event:CloseEvent):void
+			{
+				if(event.detail == Alert.YES)
+				{
+					delitem = mylist.selectedItem;
+					delResult.token = requireImageRecordService.delRecord(delitem);
+				}
+			}
+
+
+			protected function delResult_resultHandler(event:ResultEvent):void
+			{
+				if(delResult.lastResult == 0)
+				{
+					mylistShowCollection.removeItemAt(mylistShowCollection.getItemIndex(delitem));
+				}
+				else
+				{
+					Alert.show("删除失败！");
+				}
+			}
+
+			
+			
+
+		]]>
+	</fx:Script>
+	<s:List id="mylist" dataProvider="{mylistShowCollection}" labelField="taskName" left="10" right="10" top="10" bottom="46"></s:List>
+	<s:Button label="修改" id="btnModify"  click="btnModify_clickHandler(event)" horizontalCenter="-110" bottom="14"/>
+	<s:Button label="添加" id="btnAdd" click="btnAdd_clickHandler(event)" horizontalCenter="0" bottom="13"/>
+	<s:Button label="删除" id="btnDel" click="btnDel_clickHandler(event)" horizontalCenter="110" bottom="13"/>
+</Container:TheCanvas>

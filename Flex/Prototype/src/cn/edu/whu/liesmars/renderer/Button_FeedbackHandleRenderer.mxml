@@ -1,0 +1,27 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center">
+	<mx:Script>
+		<![CDATA[
+		
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			override public function set data(value:Object):void
+			{      
+				if(value!= null)
+				{
+					super.data = value;
+			
+					
+				}
+			}    
+			protected function buttonInGrid_clickHandler(event:MouseEvent):void
+			{
+				//  mx.controls.Alert.show(id);
+			  
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:Button  click="buttonInGrid_clickHandler(event)" id="buttonInGrid" label="处理"/>
+</mx:HBox> 

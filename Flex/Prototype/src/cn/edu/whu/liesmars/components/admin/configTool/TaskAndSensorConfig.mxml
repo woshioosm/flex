@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 left="2" right="2" top="2" bottom="2"
+					 minWidth="844" minHeight="526"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" width="844" height="526" xmlns:services="services.*"
+					creationComplete="thecanvas2_creationCompleteHandler(event)"
+				     fontFamily="微软雅黑">
+	<fx:Declarations>
+		<services:FusionService id="fusionService" destination="FusionService"/>
+		<s:CallResponder id="loadAllTaskSensorconfResult" result="loadAllTaskSensorconfResult_resultHandler(event)"/>
+		<s:CallResponder id="getTaskModel" result="getTaskModel_resultHandler(event)"/>
+		<s:CallResponder id="delResult" result="delResult_resultHandler(event)"/>
+		<fx:XML id="myTreeInitXml" xmlns="">
+			<root>
+				<field taskname="测绘" type="field"/>
+				<field taskname="林业" type="field"/>
+				<field taskname="农业" type="field"/>
+				<field taskname="减灾" type="field"/>
+			</root>
+		</fx:XML>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.popups.TaskAndSensorConfAddPopup;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ArrayList;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			public var myTreeXmlCollection:XMLListCollection = new XMLListCollection();
+			[Bindable]
+			public var globalQueryResult;
+			[Bindable]
+			public var myTaskSensorconfList:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			public var showAdg:ArrayCollection = new ArrayCollection;
+			
+			public var delArray:ArrayCollection = new ArrayCollection();
+			public var addArray:ArrayCollection = new ArrayCollection();
+			public var selectedTaskId:String = "";
+			public var selectedTaskName:String = "";
+			public var newShowAdgItem:TaskSensorconf;
+			
+			
+			
+			import valueObjects.TaskSensorconf;
+
+			
+			public override function loadData():void{
+				adg1.dataProvider = globalQueryResult;
+				getTaskModel.token = fusionService.getTaskModel();
+			}
+			protected function fusionServiceRes_resultHandler(event:ResultEvent):void
+			{
+				myTaskSensorconfList =  event.result as ArrayCollection;
+			}
+
+		
+
+			protected function button1_clickHandler(event:MouseEvent):void
+			{
+				if(myTree.selectedItem==null)
+					return;
+				if(myTree.selectedItem.@type == "item")
+				{
+					var newitem:TaskSensorconf = new TaskSensorconf();
+					selectedTaskId = myTree.selectedItem.@taskid;
+					selectedTaskName = myTree.selectedItem.@taskname;
+					
+					/* selectedTaskId = myTree.selectedItem.toString(); */
+					
+					var myAddPopup = PopUpManager.createPopUp(this, TaskAndSensorConfAddPopup, true);
+					myAddPopup.scaleValue = scaleDropdown.selectedItem.value;
+					myAddPopup.addEventListener("addokmessage",addokmessageHandler);
+					PopUpManager.centerPopUp(myAddPopup);
+				}
+				else
+				{
+					Alert.show("请选择一个任务名称","警告");
+				}
+			}
+			
+			protected function addokmessageHandler(event:Event):void
+			{
+				//loadAllTaskSensorconfResult.token = fusionService.loadAllTaskSensorconf();
+			}
+
+
+			protected function list_clickHandler(event:MouseEvent):void
+			{
+				/* showAdg.removeAll();
+				var clickedTaskID:String = mylist.selectedItem;
+				
+				for each(var item:TaskSensorconf in globalQueryResult)
+				{
+					if(item.taskid == clickedTaskID)
+					{
+						showAdg.addItem(item);
+					}
+				}
+				adg1.dataProvider = showAdg; */
+			}
+
+
+
+			
+
+			protected function button2_clickHandler(event:MouseEvent):void
+			{
+				if(adg1.selectedIndex == -1)
+				{
+					Alert.show("请先选择要删除的项目!");
+				}
+				else
+				{
+					Alert.show("确定删除此项目吗？","warning",Alert.YES|Alert.NO,this,delAlertHandler);
+				}
+				
+			}
+
+			protected function delAlertHandler(event:CloseEvent):void
+			{
+				if(event.detail == Alert.YES)
+				{
+					var item:TaskSensorconf = adg1.selectedItem as TaskSensorconf;
+					delResult.token = fusionService.delTaskSensorconf(item);
+				}
+			}
+
+			protected function btnSave_clickHandler(event:MouseEvent):void
+			{
+				/* for each(var item:TaskSensorconf in delArray)
+				{
+					fusionService.delTaskSensorconf(item);
+				}
+				for each(var item:TaskSensorconf in addArray)
+				{
+					fusionService.addTaskSensorconf(item);
+				}
+				delArray.removeAll();
+				addArray.removeAll(); */
+				var modifyList:ArrayCollection = showAdg;
+				for each(var item:TaskSensorconf in modifyList)
+				{
+					fusionService.updateTaskSensorconf(item);
+				}
+				
+				loadAllTaskSensorconfResult.token = fusionService.loadAllTaskSensorconf();
+				
+			}
+
+
+			protected function thecanvas2_creationCompleteHandler(event:FlexEvent):void
+			{
+				adg1.dataProvider = globalQueryResult;
+				
+				myTreeXmlCollection = new XMLListCollection(myTreeInitXml.children()); 
+				adg1.dataProvider = globalQueryResult;
+				getTaskModel.token = fusionService.getTaskModel();
+				
+			}
+			
+			protected function getTaskModel_resultHandler(event:ResultEvent):void
+			{
+				 var getmodelResult = event.result;
+				 
+				 var cehui:ArrayCollection = getmodelResult.测绘 as ArrayCollection;
+				 var linye:ArrayCollection = getmodelResult.林业 as ArrayCollection;
+				 var nongye:ArrayCollection = getmodelResult.农业 as ArrayCollection;
+				 var jianzai:ArrayCollection = getmodelResult.减灾 as ArrayCollection;
+
+				 for each(var itemObj:Object in cehui)
+				{
+					var newItem:XML = new XML(<item/>);
+					newItem.@taskid = itemObj._taskID;
+					newItem.@taskname = itemObj._taskName;
+					newItem.@type = "item";
+					var aa:XMLList = myTreeInitXml.child("field").(@taskname=="测绘");
+					aa.appendChild(newItem);
+				}  
+				for each(var itemObj:Object in linye)
+				{
+					var newItem:XML = new XML(<item/>);
+					newItem.@taskid = itemObj._taskID;
+					newItem.@taskname = itemObj._taskName;
+					newItem.@type = "item";
+					var aa:XMLList = myTreeInitXml.child("field").(@taskname=="林业");
+					aa.appendChild(newItem);
+				}  
+				for each(var itemObj:Object in nongye)
+				{
+					var newItem:XML = new XML(<item/>);
+					newItem.@taskid = itemObj._taskID;
+					newItem.@taskname = itemObj._taskName;
+					newItem.@type = "item";
+					var aa:XMLList = myTreeInitXml.child("field").(@taskname=="农业");
+					aa.appendChild(newItem);
+				}  
+				for each(var itemObj:Object in jianzai)
+				{
+					var newItem:XML = new XML(<item/>);
+					newItem.@taskid = itemObj._taskID;
+					newItem.@taskname = itemObj._taskName;
+					newItem.@type = "item";
+					var aa:XMLList = myTreeInitXml.child("field").(@taskname=="减灾");
+					aa.appendChild(newItem);
+				}  
+				
+				myTreeXmlCollection = new XMLListCollection(myTreeInitXml.children());
+				myTree.dataProvider = myTreeXmlCollection;
+				
+				myTree.selectable = true;
+				myTree.selectedIndex = 0;
+				btnAdd.enabled = true;
+				btnDel.enabled = true;
+				btnSave.enabled = true;
+				
+				loadAllTaskSensorconfResult.token = fusionService.loadAllTaskSensorconf();
+			}
+			
+			protected function loadAllTaskSensorconfResult_resultHandler(event:ResultEvent):void
+			{
+				if(showAdg != null)
+				{
+					showAdg.removeAll();
+				}
+				myTree.selectedIndex = -1;
+				
+				var queryResult = loadAllTaskSensorconfResult.lastResult;
+				globalQueryResult = queryResult;  
+				
+			}
+
+
+			protected function myTree_changeHandler(event:ListEvent):void
+			{
+				showAdg.removeAll();
+				
+				for each(var item:TaskSensorconf in globalQueryResult)
+				{
+					if(myTree.selectedItem.@taskid == item.taskid && scaleDropdown.selectedItem.value == item.scale)
+					{
+						showAdg.addItem(item);
+					}
+				}
+				adg1.dataProvider = showAdg;
+			}
+
+
+			protected function button3_clickHandler(event:MouseEvent):void
+			{
+				/* showAdg.removeAll(); */
+				loadAllTaskSensorconfResult.token = fusionService.loadAllTaskSensorconf();
+			}
+
+
+			protected function delResult_resultHandler(event:ResultEvent):void
+			{
+				var intResult:int = delResult.lastResult;
+				if(intResult == 1)
+				{
+					loadAllTaskSensorconfResult.token = fusionService.loadAllTaskSensorconf();
+				}
+				else
+				{
+					Alert.show("删除失败","error");
+				}
+			}
+
+
+			protected function scaleDropdown_changeHandler(event:IndexChangeEvent):void
+			{
+				
+				if(myTree.selectedIndex != -1)
+				{
+					showAdg.removeAll();
+					for each(var item:TaskSensorconf in globalQueryResult)
+					{
+						if(myTree.selectedItem.@taskid == item.taskid && scaleDropdown.selectedItem.value == item.scale)
+						{
+							showAdg.addItem(item);
+						}
+						
+					}
+					adg1.dataProvider = showAdg;
+				}
+				
+			}
+
+		]]>
+	</fx:Script>
+	
+	<mx:Canvas borderStyle="solid" borderAlpha="0.5" width="285" left="14" bottom="10" top="19">
+		<mx:Tree tabEnabled="true" tabIndex="0" id="myTree" labelField="@taskname" change="myTree_changeHandler(event)" selectable="false" width="283" bottom="0" x="0" top="0">
+		</mx:Tree>
+		
+	</mx:Canvas>
+	<mx:Canvas borderStyle="solid" right="10" left="312" bottom="10" top="91">
+		<mx:AdvancedDataGrid tabEnabled="true" tabIndex="0" editable="true" id="adg1" designViewDataType="flat" left="8.2" right="19.799988" top="11.5" bottom="75.5">
+			<mx:columns>
+				<mx:AdvancedDataGridColumn headerText="典型配置"   dataField="confname">
+					
+				</mx:AdvancedDataGridColumn>
+				<mx:AdvancedDataGridColumn headerText="优先级"  width="150" minWidth="150" dataField="priority" editorDataField="itemPriority" itemEditor="cn.edu.whu.liesmars.components.admin.configTool.myPriorityEditor"/>
+			</mx:columns>
+		</mx:AdvancedDataGrid>
+		<s:Button label="删除" click="button2_clickHandler(event)" id="btnDel" enabled="false" bottom="18" right="313"/>
+		<s:Button label="添加" click="button1_clickHandler(event)" id="btnAdd" enabled="false" bottom="18" right="230"/>
+		<s:Button label="保存修改" click="btnSave_clickHandler(event)" id="btnSave" enabled="false" bottom="18" right="147"/>
+		<s:Button label="刷新" click="button3_clickHandler(event)" bottom="18" right="64"/>
+	</mx:Canvas>
+	<s:Label x="24" y="13" text="任务名称" backgroundColor="#FDFBFB" fontFamily="微软雅黑"/>
+	<s:Label text="对应传感器典型配置" fontFamily="微软雅黑" left="319" top="70.15" width="108" height="13" backgroundColor="#FBFBFB"/>
+	<s:DropDownList x="320" y="36" width="188" id="scaleDropdown" labelField="label" selectedIndex="0" change="scaleDropdown_changeHandler(event)">
+		<s:dataProvider>
+			<s:ArrayList>
+				<fx:Object label="默认" value="0"/>
+				<fx:Object label="大尺度" value="1"/>
+				<fx:Object label="中尺度" value="2"/>
+				<fx:Object label="小尺度" value="3"/>
+			</s:ArrayList>
+		</s:dataProvider>
+	</s:DropDownList>
+	<s:Label x="320" y="17" text="尺度"/>
+</Container:TheCanvas>

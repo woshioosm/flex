@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 width="770" height="350" 
+					 left="2" right="2" bottom="2" top="2"
+					 creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserFeedBackDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserRegisterWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserSuggestionDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.SuggestionObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.TSimulateproduct;
+			[Bindable]
+			private var suggestionArray:ArrayCollection=new ArrayCollection();
+			private function testInit():void{
+				
+			}
+			
+			
+			public override function loadData():void{
+				getProduct.token=userRecommendationService.showAdminRecommendation();
+			}
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				
+			}
+			
+			
+			protected function btnSeperate_clickHandler(event:MouseEvent):void
+			{
+					
+				
+			}
+			
+			
+			
+			protected function getProductResp_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:UserSuggestionDataHandler=new UserSuggestionDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(suggestionArray);
+			}
+			
+			
+			protected function publishResp_resultHandler(event:ResultEvent):void
+			{
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:UserRecommendationService id="userRecommendationService" destination="UserRecommendationService"/>
+		<s:CallResponder id="getProduct" result="getProductResp_resultHandler(event)"/>
+		
+	</fx:Declarations>
+	<mx:AdvancedDataGrid sortableColumns="false" verticalScrollPolicy="auto" id="adg1" designViewDataType="flat" horizontalScrollPolicy="off" dataProvider="{suggestionArray}" left="10" right="9" top="10" bottom="55" fontFamily="微软雅黑" fontSize="13">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="选择" width="70" minWidth="70" dataField="col1" itemRenderer="cn.edu.whu.liesmars.renderer.CheckBoxRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="序号" width="70" minWidth="70" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="影像获取时间" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" width="160" minWidth="160" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+		</mx:columns>
+	</mx:AdvancedDataGrid>	
+	<s:Button id="btnSeperate" label="执行产品分解" click="btnSeperate_clickHandler(event)" width="236" bottom="22" horizontalCenter="0"/>
+</Container:TheCanvas>

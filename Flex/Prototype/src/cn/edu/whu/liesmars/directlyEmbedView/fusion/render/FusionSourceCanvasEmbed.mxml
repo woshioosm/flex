@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" fontFamily="微软雅黑" 
+		   verticalScrollPolicy="off" horizontalScrollPolicy="off"
+		 xmlns:s="library://ns.adobe.com/flex/spark" borderStyle="none" backgroundAlpha="0" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="336" height="112">
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.LeftContainer_Admin;
+			import cn.edu.whu.liesmars.Container.LeftContainer_User;
+			import cn.edu.whu.liesmars.Container.MdiAdmin;
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.Container.UserView;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionResultDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.FusionSourceDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultHistoryWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.QueryResultWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.LocateEvent;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.Controller;
+			import cn.edu.whu.liesmars.asPack.util.Coordinate;
+			import cn.edu.whu.liesmars.directlyEmbedView.fusion.ShowFusionResultEmbedView;
+			import cn.edu.whu.liesmars.map.MapContainer;
+			import cn.edu.whu.liesmars.renderer.showCoordsWin;
+			
+			import flexlib.mdi.containers.MDIWindow;
+			import flexlib.mdi.events.MDIWindowEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.AdvancedDataGrid;
+			import mx.controls.Alert;
+			import mx.controls.Button;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			//获取的地理坐标值
+			private var imageArea:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var descriptionShow:String=""; //用于显示
+			[Bindable]
+			private var description:String="";
+		
+			[Bindable]
+			private var fusionDateShow:String=""; 
+			[Bindable]
+			private var fusionDate:String="";
+			
+			[Bindable]
+			private var imageParamShow:String="";
+			[Bindable]
+			private var imageParam:String="";
+			
+			[Bindable]
+			private var seq:String="";
+			[Bindable]
+			private var taskShow:String="";
+			[Bindable]
+			private var task:String="";
+			
+			private var resolution:ArrayCollection=new ArrayCollection();
+			[Bindable]
+			private var isSource:Boolean=true;
+			
+			
+			
+			
+			public function loadData(description:String,fusionDateArr:ArrayCollection,imageParam:String,
+				task:String,seq:String,imageArea:ArrayCollection,resolution:ArrayCollection,sensorName:String):void
+			{
+			
+//				StyleManager.getStyleDeclaration("ToolTip").setStyle("fontSize",20); 
+				
+				if(description!=null)
+				{
+					this.description=description;
+					descriptionShow=description;
+				}
+				
+				if(fusionDateArr!=null)
+				{
+					for each(var str:String in fusionDateArr){
+						this.fusionDate=str+"\n";
+					}
+					fusionDateShow=fusionDate.substr(0,Math.min(40,fusionDate.length));
+				}
+				
+			
+				if(sensorName!=null)
+				{
+					/* this.imageParam=resolution==null||resolution.length==0?"":resolution.getItemAt(0).toString()+imageParam;
+					imageParamShow=imageParam.substring(0,Math.min(40,imageParam.length)); */
+					this.imageParam = sensorName;
+					imageParamShow = sensorName.substr(0,Math.min(40,sensorName.length));
+				}
+					
+				if(task!=null)
+				{
+					this.task=task;
+					taskShow=task.substr(0,Math.min(15,task.length));
+				}
+					
+				if(seq!=null)
+				{
+					this.seq="   "+seq;
+				}
+				
+				if(imageArea!=null)
+				{
+					this.imageArea=imageArea;
+				}
+				
+				if(resolution!=null)
+				{
+					this.resolution=resolution;
+				}
+				
+			}
+			
+			//获取右侧中心在主界面的位置
+			public function getPosition():Point{
+				
+				var point:Point=new Point();
+				point.x=this.x+this.width-2;
+				point.y=this.y+this.height/2+3;
+				return point;
+				
+			}
+			//查看地图
+			protected function linkbutton1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				var coordsStr:String="";
+				for(var i:int=0;i<imageArea.length;i++){
+					
+					coordsStr+=imageArea.getItemAt(i).toString();
+					if(i!=imageArea.length-1)
+						coordsStr+="|";
+				}
+				if(coordsStr.length>0){
+					(Controller.mapContainer as MapContainer).drawAreaByCoords(coordsStr);
+					if(Config.isAdmin==false){
+//						(Controller.userView as UserView).closeLeftContainer();
+					}
+					else{
+						var mdi:MdiAdmin=(Controller.leftContainer_admin as LeftContainer_Admin).parentMdi;
+						mdi.minLize();
+					}
+				}
+				else{
+					(Controller.mapContainer as MapContainer).clearMap();
+					mx.controls.Alert.show("没有地理范围");
+				}
+				
+				//把图表隐藏起来，防止遮住地图
+				var showFusionResultEmbedView:ShowFusionResultEmbedView = this.parent.parent as ShowFusionResultEmbedView;
+				PopUpManager.removePopUp(showFusionResultEmbedView as IFlexDisplayObject);
+				showFusionResultEmbedView.adminView.btnShowFusionResult.setVisible(true);
+			}
+
+			//查看坐标
+			protected function linkbutton2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				 Controller.container.removeAllChildren();
+				
+				Controller.container.depth=100;
+				
+				/* var coordsWin:showCoordsWin=new showCoordsWin();
+				coordsWin.left=0;
+				coordsWin.right=0;
+				coordsWin.top=0;
+				coordsWin.bottom=0;
+				Controller.container.addChild(coordsWin);
+				Controller.container.visible=true;
+				Controller.container.width=coordsWin.width;
+				Controller.container.height=coordsWin.height+15;  */
+				
+				var coordsWin = PopUpManager.createPopUp(this, showCoordsWinEmbed, false, null, null);
+				PopUpManager.centerPopUp(coordsWin);
+				
+				
+				Controller.container.title="坐标范围";
+				var coordsList:ArrayCollection=new ArrayCollection();
+				Controller.container.mdiCanvas=Config.midCanvs;
+				
+				if(imageArea!=null && imageArea.length>0){
+					for each(var area:String in imageArea){
+						var points:Array=area.split(";");
+						for(var i:int=0;i<points.length;i++){
+							var point:Array=points[i].split(",");
+							if(point!=null && point.length==2){
+								var coord:Coordinate=new Coordinate(point[0],point[1]);
+								coordsList.addItem(coord);
+							}	
+						}	
+					}
+					coordsWin.coordsArray=coordsList;
+				}
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Style>
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		mx|ToolTip {
+			fontFamily: "微软雅黑";
+			fontSize: 19; 
+			color: #FFFFFF; 
+		}
+		
+	</fx:Style>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas x="247" y="2" cornerRadius="2" width="76" borderStyle="solid" height="15" backgroundColor="#C1C9E9" fontFamily="宋体"/>
+	<mx:Canvas borderStyle="inset"  backgroundColor="#C1C9E9" 
+			   backgroundAlpha="1" verticalScrollPolicy="off" horizontalScrollPolicy="off"
+			   dropShadowVisible="false" cornerRadius="8"  borderVisible="true" contentBackgroundAlpha="0.0" width="328" x="4" height="92" y="15">
+		<s:Label x="5" y="9" text="描述:"  width="32" height="16" fontSize="13" fontWeight="bold" visible="{isSource}"/>
+		<mx:Label x="41" y="5" text="{descriptionShow}" toolTip="{description}" width="275" height="20" fontSize="12" fontStyle="normal"  id="lbDescribe" visible="{isSource}"/>
+		<s:Label x="5" y="31" text="时间:" fontSize="13" fontWeight="bold"/>
+		<mx:Label x="41" y="27" text="{fusionDateShow}" toolTip="{fusionDate}" fontSize="12" width="249" fontStyle="normal"  id="lbDate" height="20"/>
+		<s:Label x="5" y="53" text="影像要求:" fontSize="13" fontWeight="bold"/>
+		<mx:Label x="67" y="48" text="{imageParamShow}" toolTip="{imageParam}" width="223" fontSize="12" fontStyle="normal"  id="lbImage" height="20"/>
+		<mx:LinkButton x="193" y="68" label="查看地图" fontSize="11" height="20"  selectionColor="#B1B3B4" rollOverColor="#AECBF7" width="63" click="linkbutton1_clickHandler(event)"/>
+		<mx:LinkButton x="258" y="68" label="查看坐标" fontSize="11" height="20" selectionColor="#B1B3B4" rollOverColor="#AECBF7" width="63" click="linkbutton2_clickHandler(event)"/>
+		<s:Label x="6" y="73"  text="任务:" fontSize="13" fontWeight="bold"/>
+		<mx:Label id="lbTask" toolTip="{task}" x="40" y="68" text="{taskShow}" height="20" width="145"/>
+	</mx:Canvas>
+	<s:Label x="248" y="5" text="{seq}" width="67" height="16" fontSize="14" id="lbSeq" color="#FB0303" backgroundColor="#C1C9E9"  backgroundAlpha="1" fontFamily="微软雅黑" fontWeight="bold"/>
+
+</mx:Canvas>

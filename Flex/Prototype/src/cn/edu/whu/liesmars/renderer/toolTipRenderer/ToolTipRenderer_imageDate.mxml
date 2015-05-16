@@ -1,0 +1,53 @@
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml"  horizontalAlign="center" verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	<mx:Style>
+		.ToolTip{
+			fontSize:14pt;
+		}
+		 
+	</mx:Style>
+	<mx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.controls.AdvancedDataGrid;
+			import mx.controls.Alert;
+			import mx.controls.ToolTip;
+			import mx.events.FlexEvent;
+			import mx.events.ToolTipEvent;
+			import mx.managers.ToolTipManager;
+			
+			private var toolTipStr:String;
+			override public function set data(value:Object):void
+			{   LbToolTip.text="";
+				if(value != null)
+				{
+					super.data = value;
+				    var list:ArrayCollection=value.imageDate;
+					for each(var str:String in list){
+						LbToolTip.text+=str+" "+"\n";
+					}
+				   
+                  
+				}
+			}    
+			
+		
+			private function createToolTips(event:ToolTipEvent):void {
+			
+			}
+			private function showToolTips(evt:ToolTipEvent):void{
+				
+			}
+
+
+			protected function LbSequence_mouseOverHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				LbToolTip.toolTip=LbToolTip.text;
+			
+			}
+
+		]]>
+	</mx:Script>
+	
+	<mx:Label  id="LbToolTip"  mouseOver="LbSequence_mouseOverHandler(event)"   width="100%" height="100%"  />
+</mx:HBox> 

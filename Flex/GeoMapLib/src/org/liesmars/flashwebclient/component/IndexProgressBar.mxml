@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas creationComplete="init()" xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="150" 
+	textAlign="center" textDecoration="underline" backgroundColor="#8A8189" borderStyle="solid" borderThickness="2">
+	<mx:Script>
+		<![CDATA[
+			private var timer:Timer;
+			
+			internal function init():void{
+				timer = new Timer(20);
+				timer.addEventListener(TimerEvent.TIMER,timerHandler);	
+				playProgressBar();
+			}
+			
+			private function timerHandler(e:TimerEvent):void{
+				progressBar.setProgress(progressBar.value + 1, 100);
+			}
+			
+			private function playProgressBar():void{
+				timer.start();
+			}
+			
+			private function completeHandler(e:Event):void{
+				timer.stop();
+				progressBar.setProgress(0,100);
+				playProgressBar();
+			}
+		]]>
+	</mx:Script>
+	<mx:Parallel id="progressBar_completeEffect">
+		<mx:Fade alphaTo="0.0"/>
+		<mx:Zoom zoomHeightTo="0"/>
+	</mx:Parallel>
+	<mx:ProgressBar id="progressBar" x="98" y="98" height="38" label="索引建立中..." textAlign="center" color="#F1F2F4" 
+		fontSize="12" fontStyle="normal" fontWeight="normal" mode="manual"
+	    barColor="#00F400" complete="completeHandler(event)" labelPlacement="bottom"/>
+	<mx:Text x="38.5" y="54" text="正在建立索引，该过程可能持续一段时间，请稍候..." 
+		width="310" height="30" fontSize="13" fontStyle="normal" fontWeight="normal" 
+	    textAlign="center" textDecoration="none" fontAntiAliasType="advanced" color="#FAFBFD"/>
+	<!--completeEffect="{progressBar_completeEffect}"-->
+</mx:Canvas>

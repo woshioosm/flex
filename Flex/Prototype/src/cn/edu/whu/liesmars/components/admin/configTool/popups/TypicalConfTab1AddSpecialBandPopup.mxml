@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark"  fontFamily="微软雅黑" chromeColor="0xffffff"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="298" height="222" title="添加特殊波段">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.components.admin.configTool.TypicalConfigInfo;
+			
+			import mx.managers.PopUpManager;
+			
+			import valueObjects.ConfBand;
+			
+			public var newConfBand:ConfBand;
+			
+			protected function btnOk_clickHandler(event:MouseEvent):void
+			{
+				var item:ConfBand = new ConfBand();
+				item.bandname = bandnameText.text;
+				item.minvalue = new Number(minvalueText.text);
+				item.maxvalue = new Number(maxvalueText.text);
+				item.unit = new Number(unitText.text);
+				
+				newConfBand = item;
+				
+				PopUpManager.removePopUp(this);
+				var outgoingEvent:Event = new Event("popupMessage",false);
+				dispatchEvent(outgoingEvent);
+			}
+			protected override function closeButton_clickHandler(event:MouseEvent):void{
+				PopUpManager.removePopUp(this);
+			} 
+			protected function btnCancel_clickHandler(event:MouseEvent):void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Form width="100%">
+		<mx:FormItem label="波段名称">
+			<s:TextInput id="bandnameText" width="195"/>
+		</mx:FormItem>
+		<mx:FormItem label="最小值">
+			<s:TextInput id="minvalueText" width="195"/>
+		</mx:FormItem>
+		<mx:FormItem label="最大值">
+			<s:TextInput id="maxvalueText" width="195"/>
+		</mx:FormItem>
+		<mx:FormItem label="单位">
+			<s:TextInput id="unitText" width="195"/>
+		</mx:FormItem>
+	</mx:Form>
+	<s:Button x="50" y="150" label="确定" id="btnOk" click="btnOk_clickHandler(event)"/>
+	<s:Button x="179" y="151" label="取消" id="btnCancel" click="btnCancel_clickHandler(event)"/>
+</s:TitleWindow>

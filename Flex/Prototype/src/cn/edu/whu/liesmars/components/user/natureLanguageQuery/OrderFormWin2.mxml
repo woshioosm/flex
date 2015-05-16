@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:Container="cn.edu.whu.liesmars.Container.*" 
+					 creationComplete="thecanvas1_creationCompleteHandler(event)" backgroundColor="0Xffffff" backgroundAlpha="1" fontFamily="微软雅黑"
+					 left="2" right="2" top="2" bottom="2"
+					 width="815" height="630" xmlns:map="cn.edu.whu.liesmars.map.*" verticalScrollPolicy="off" horizontalScrollPolicy="off" >
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.FrameObjParser;
+			import cn.edu.whu.liesmars.asPack.util.Util;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Image;
+			import mx.events.FlexEvent;
+			import mx.graphics.ImageSnapshot;
+			import mx.printing.FlexPrintJob;
+			
+			import valueObjects.AdvancedFrame;
+			import valueObjects.AdvancedRange;
+			import valueObjects.FramePairObj;
+			import valueObjects.PrimaryFrame;
+			import valueObjects.SensorBandInfo;
+
+			
+			private var coordStr:String="";
+			private var advancedFrame:AdvancedFrame;
+			private var primaryFrame:PrimaryFrame;
+			private var sensors:ArrayCollection;
+			private var maxSensorNum:int=18;
+			[Bindable]
+			private var sensorName:String="无" ;
+			[Bindable]
+			private var sensorType:String="无";
+			[Bindable]
+			private var spatialRes:String="无";
+			[Bindable]
+			private var timeRes:String="无";
+			[Bindable]
+			private var spectralRes:String="无";
+			[Bindable]
+			private var radiometricRes:String="无";
+			[Bindable]
+			private var fabricWidth:String="无";
+			[Bindable]
+			private var snr:String="无";
+			[Bindable]
+			private var band:String="无";
+			[Bindable]
+			private var encounterAngle:String="无";
+			[Bindable]
+			private var scale:String="无";
+			[Bindable]
+			private var frequency:String="无";
+	
+			[Bindable]
+			private var sensorSARPolarLst:String="无";
+			[Bindable]
+			private var date:String="无";
+			[Bindable]
+			private var taskName:String="无";
+			[Bindable]
+			private var requirement:String="无";
+			[Bindable]
+			private var place:String="无";
+			[Bindable]
+			private var sensorSARPloarType:String="无";
+			
+			
+			[Bindable]
+			private var orderDate:String="无";
+			[Bindable]
+			private var orderDepartment:String="无";
+			[Bindable]
+			private var orderUserName:String="无";
+			[Bindable]
+			private var sensorStr:String="";
+			
+			public  function load(advancedFrame:AdvancedFrame,primaryFrame:PrimaryFrame,sensors:ArrayCollection,input:String):void{
+				++Config.orderId;
+				orderUserName=Config.userName;
+				orderDepartment=Config.departmentName;
+				orderDate=Util.getTime();
+				this.sensors=sensors;
+				this.advancedFrame=advancedFrame;
+				this.primaryFrame=primaryFrame;
+				requirement=input;
+				constructForm();
+			    
+				
+			}
+		
+			private function constructForm():void{
+				if(advancedFrame!=null && primaryFrame!=null){
+					
+					place=primaryFrame.framePlace==null?"":primaryFrame.framePlace.originalDescribe;
+					var frameObjParser:FrameObjParser=new FrameObjParser(advancedFrame);
+					taskName=frameObjParser.getAdvancedTaskName();
+					date=frameObjParser.getAdvancedDate();
+					
+//					sensorName=frameObjParser.getAdvancedSensorName();
+//					sensorType=frameObjParser.getAdvancedSensorType();
+					spatialRes=frameObjParser.getAdvancedSpatialRes();
+					timeRes=frameObjParser.getAdvancedTemporalRes();
+					spectralRes=frameObjParser.getAdvancedSpectralRes();
+					radiometricRes=frameObjParser.getAdvancedRadiometricRes();
+					fabricWidth=frameObjParser.getAdvancedFabricWidth();
+					snr=frameObjParser.getAdvancedSNR();
+					encounterAngle=frameObjParser.getAdvancedEncounterAngle();
+					scale=frameObjParser.getAdvancedScale();
+					frequency=frameObjParser.getAdvancedFrequency();
+					sensorSARPloarType=frameObjParser.getSensorSARPolarType();
+					band=frameObjParser.getAdvancedBand();
+					var SARPloarList:ArrayCollection= frameObjParser.getSensorSARPolarLst();
+					for each(var SARPloar:String in SARPloarList){
+						(this[SARPloar] as CheckBox).selected=true;
+					}
+					
+					var i:int=0;
+					for each(var sensorInfo:SensorBandInfo in sensors ){
+						if(i==maxSensorNum)
+							return;
+						i++;
+						sensorStr+=i+": "+sensorInfo.sensor.name+"\n";
+					}
+				}
+			}
+			
+			private function constructMap():void{
+				if(advancedFrame!=null)
+					if(advancedFrame.imageRanges!=null&&advancedFrame.imageRanges.length>0){
+						for each(var range:AdvancedRange in advancedFrame.imageRanges){
+							if(range.coordinate==""){
+								map.visible=false;
+								return;
+							}
+							coordStr+=range.coordinate;
+						} 
+						map.initAndDraw(coordStr);
+						map.disableDrag();
+						return;
+					}
+				map.visible=false;
+			}
+			protected function thecanvas1_creationCompleteHandler(event:FlexEvent):void
+			{
+				constructMap();
+				txtAreaResize();
+			}
+          
+			private function txtAreaResize():void{
+//				ta.height = ta1.scroller.viewport.contentHeight + 2;
+//				ta0.height = ta2.scroller.viewport.contentHeight + 2;
+				ta1.height = ta1.scroller.viewport.contentHeight + 2;
+				ta2.height = ta2.scroller.viewport.contentHeight + 2;
+				ta3.height = ta3.scroller.viewport.contentHeight + 2;
+				ta4.height = ta4.scroller.viewport.contentHeight + 2;
+				ta5.height = ta5.scroller.viewport.contentHeight + 2;
+				ta6.height = ta6.scroller.viewport.contentHeight + 2;
+				ta7.height = ta7.scroller.viewport.contentHeight + 2;
+				ta8.height = ta8.scroller.viewport.contentHeight + 2;
+//				ta9.height = ta9.scroller.viewport.contentHeight + 8;
+				ta10.height = ta10.scroller.viewport.contentHeight + 2;
+				ta11.height = ta11.scroller.viewport.contentHeight + 2;
+//				ta12.height = ta12.scroller.viewport.contentHeight + 2;
+				ta14.height = ta14.scroller.viewport.contentHeight + 2;
+				
+			}
+
+			
+
+
+			protected function btnPrint_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				//btnPrint.visible=false;
+				var bitmap:Bitmap = new Bitmap(ImageSnapshot.captureBitmapData(order));
+
+				img.source = bitmap;
+				img.width = this.width;
+				img.height = this.height;
+				
+				var printjob:FlexPrintJob = new FlexPrintJob();
+				printjob.start();
+				
+				printjob.addObject(img);
+			
+				printjob.send();
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Canvas horizontalScrollPolicy="off" verticalScrollPolicy="auto" left="0" right="0" top="0" bottom="0">
+		
+		<mx:Canvas id="order"  left="10" right="25" top="10" height="851" borderStyle="solid" verticalScrollPolicy="off" cornerRadius="8">
+			<mx:Canvas  left="11" top="150" bottom="2"  right="11">
+				
+				<s:Label x="6" y="5" text="影像参数:" fontWeight="bold" fontSize="14"/>
+				<mx:HBox  horizontalGap="0" verticalGap="0" left="2" bottom="463" right="2" top="24" borderStyle="inset" cornerRadius="5">  
+					<mx:HBox  width="50%" height="100%" borderStyle="outset" cornerRadius="5">
+						<mx:Form borderVisible="true" width="100%" height="100%">
+							<!--<mx:FormItem label="传感器名称" fontSize="12" width="289" direction="horizontal"  borderStyle="inset" borderVisible="true">
+							<s:TextArea id="ta"  width="100%" height="23" verticalScrollPolicy="off" text="{sensorName}"/>
+							</mx:FormItem>
+							<mx:FormItem label="传感器类型" fontSize="12" width="289" direction="horizontal" >
+							<s:TextArea id="ta0"  width="100%" height="23" verticalScrollPolicy="off" text="{sensorType}"/>
+							</mx:FormItem>-->
+							<mx:FormItem label="空间分辨率(m)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta1"  width="100%" editable="false" height="23" verticalScrollPolicy="off" text="{spatialRes}"/>
+							</mx:FormItem>
+							<mx:FormItem label="时间分辨率(次/天)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta2"  width="100%" editable="false"  height="23" verticalScrollPolicy="off" text="{timeRes}"/>
+							</mx:FormItem>
+							<mx:FormItem label="光谱分辨率(nm)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta3"  width="100%" editable="false"  height="23" verticalScrollPolicy="off" text="{spectralRes}"/>
+							</mx:FormItem>
+							<mx:FormItem label="辐射分辨率" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta4"  width="100%" editable="false"  height="23" verticalScrollPolicy="off" text="{radiometricRes}"/>
+							</mx:FormItem>
+							<mx:FormItem label="波段(μm)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta6"  width="100%" editable="false"  height="23" verticalScrollPolicy="off" text="{band}"/>
+							</mx:FormItem>
+							
+							
+							
+						</mx:Form>
+					</mx:HBox>  
+					
+					<mx:HBox  width="50%" height="100%" borderStyle="outset" cornerRadius="5">
+						<mx:Form borderVisible="true" width="100%" height="100%">
+							<!--<mx:FormItem label="传感器名称" fontSize="12" width="289" direction="horizontal"  borderStyle="inset" borderVisible="true">
+							<s:TextArea id="ta"  width="100%" height="23" verticalScrollPolicy="off" text="{sensorName}"/>
+							</mx:FormItem>
+							<mx:FormItem label="传感器类型" fontSize="12" width="289" direction="horizontal" >
+							<s:TextArea id="ta0"  width="100%" height="23" verticalScrollPolicy="off" text="{sensorType}"/>
+							</mx:FormItem>-->
+							<mx:FormItem label="幅宽(km)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta5" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{fabricWidth}"/>
+							</mx:FormItem>
+							
+							
+							<mx:FormItem label="信噪比(dB)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta7" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{snr}"/>
+							</mx:FormItem>
+							<mx:FormItem label="交会角(rad)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta8" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{encounterAngle}"/>
+							</mx:FormItem>
+							<mx:FormItem label="极化要求" fontSize="12" width="289" direction="horizontal">
+								<s:CheckBox x="84" y="4" label="HH" id="HH" width="37" enabled="false"/>
+								<s:CheckBox x="84" y="4" label="HV" id="HV" width="37" enabled="false"/>
+								<s:CheckBox x="84" y="4" label="VH" id="VH" width="37" enabled="false"/>
+								<s:CheckBox x="84" y="4" label="VV" id="VV" width="37" enabled="false"/>
+							</mx:FormItem>
+							<mx:FormItem label="极化模式" fontSize="12" width="289" direction="horizontal" >
+								<s:TextArea id="ta14" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{sensorSARPloarType}"/>
+							</mx:FormItem>
+							<mx:FormItem label="比例尺" fontSize="12" width="289" direction="horizontal" >
+								<s:TextArea id="ta10" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{scale}"/>
+							</mx:FormItem>
+							<mx:FormItem label="频次(次)" fontSize="12" width="289" direction="horizontal">
+								<s:TextArea id="ta11" editable="false"   width="100%" height="23" verticalScrollPolicy="off" text="{frequency}"/>
+							</mx:FormItem>
+							
+						</mx:Form>
+					</mx:HBox>  
+					
+				</mx:HBox>
+				
+				
+				<mx:HBox  horizontalGap="0" verticalGap="0" left="2" right="2" top="265" borderStyle="inset" height="352" cornerRadius="5">  
+					<mx:HBox  width="65%" height="100%" borderStyle="outset" cornerRadius="5">
+						<mx:Canvas  visible="true" width="100%" height="100%" x="0" y="0">
+							<mx:Label text="无地图" horizontalCenter="0" verticalCenter="0">
+							</mx:Label>
+							<map:MapContainer left="0" right="0" top="0" bottom="0" id="map" ctlrBarVisiable="false" clearBtnVisiable="false" borderStyle="solid" chromeColor="#FDFCFC" backgroundColor="#FAF7F7">
+							</map:MapContainer>
+							<s:Label text="空间" backgroundColor="#E1DEDE"  width="29"  height="13" left="1" top="1" fontSize="14" fontWeight="bold"/>
+							<s:Label x="30" y="1" text="{place}" height="13" fontSize="13" fontWeight="bold"/>
+						</mx:Canvas>
+					</mx:HBox>  
+					
+					<mx:HBox  width="35%" height="100%" borderStyle="outset" cornerRadius="5">
+						<mx:Canvas width="100%" height="100%">
+							<s:Label x="2" y="2" text="推荐传感器" fontWeight="bold" fontSize="14"/>
+							<s:TextArea text="{sensorStr}" left="10" heightInLines="20"  right="10" top="25" bottom="15" editable="false" borderVisible="false" fontSize="13"/>
+						</mx:Canvas>
+						
+					</mx:HBox>  
+					
+				</mx:HBox>
+				<mx:Canvas borderStyle="solid" y="626" height="60" left="2" right="2" cornerRadius="5">
+					<s:Label x="15" y="21" text="订单时间:" fontWeight="bold" fontSize="14"/>
+					<s:Label x="77" y="21" text="{orderDate}" width="328"/>
+					<s:Label x="602" y="21" text="部门:" fontSize="14" fontWeight="bold"/>
+					<s:Label x="638" y="21" text="{orderDepartment}"/>
+					<s:Label x="413" y="21" text="订单人:" fontWeight="bold" fontSize="14"/>
+					<s:Label x="467" y="21" text="{orderUserName}" width="110"/>	
+				</mx:Canvas>
+				
+			</mx:Canvas>
+			<mx:HBox horizontalGap="0" verticalGap="0" borderStyle="inset" y="89" height="60" right="12" left="11" cornerRadius="5">
+				<mx:HBox height="100%" width="50%" borderStyle="outset" cornerRadius="5">
+					<mx:Form  width="100%">
+						<mx:FormItem label="影像时间" fontSize="12" fontWeight="normal" width="100%">
+							<s:TextArea id="ta12"  width="100%" height="23" verticalScrollPolicy="off" text="{date}"/>
+						</mx:FormItem>
+					</mx:Form>
+				</mx:HBox>
+				<mx:HBox height="100%" width="50%" borderStyle="outset" cornerRadius="5">
+					<mx:Form right="0" left="0" top="0" bottom="0">
+						<mx:FormItem label="任务" width="100%">
+							<s:TextArea id="ta13"  width="100%" height="23" verticalScrollPolicy="off" text="{taskName}"/>
+						</mx:FormItem>
+					</mx:Form>
+				</mx:HBox>
+			</mx:HBox>
+			
+			<mx:Canvas top="33" left="11" right="11" borderStyle="outset"  height="50" cornerRadius="5"  verticalScrollPolicy="off">
+				<s:Label x="7" y="8" text="需求:" fontSize="13" fontWeight="bold"/>
+				<s:Label id="ta9"  height="35" right="14" left="46" top="8" fontSize="14"  text="{requirement}"/>
+				
+			</mx:Canvas>
+			<s:Label y="6" textAlign="center" text="订单号:BA00{Config.orderId}" width="171" height="22" horizontalCenter="0" fontSize="22" fontWeight="bold"/>
+			<mx:Button id="btnPrint" y="5" click="btnPrint_clickHandler(event)"  right="14" width="22" height="22" icon="@Embed(source='../../../../../../../assets/print.png')"/>
+			
+		</mx:Canvas>
+	</mx:Canvas>
+	
+	<mx:Image id="img" visible="false"/>
+</Container:TheCanvas>

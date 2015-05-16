@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+		 width="770" height="350" 
+		 left="2" right="2" bottom="2" top="2"
+		 creationComplete="group1_creationCompleteHandler(event)" xmlns:services="services.*">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import cn.edu.whu.liesmars.Container.ParentMDI;
+			import cn.edu.whu.liesmars.Container.WaitingWin.RecomendWaiingWin;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserFeedBackDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserRegisterWinDataHandler;
+			import cn.edu.whu.liesmars.asPack.componentsData.UserSuggestionDataHandler;
+			import cn.edu.whu.liesmars.asPack.event.EventManager;
+			import cn.edu.whu.liesmars.asPack.event.QueryEvent;
+			import cn.edu.whu.liesmars.asPack.userBaseModel.SuggestionObj;
+			import cn.edu.whu.liesmars.asPack.util.Config;
+			import cn.edu.whu.liesmars.asPack.util.GetDataFromXml;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.managers.CursorManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import valueObjects.TSimulateproduct;
+			
+			[Bindable]
+			private var suggestionArray:ArrayCollection=new ArrayCollection();
+			
+			private var upLoadCollection:ArrayCollection=new ArrayCollection;
+			private var count:int=0;
+			private var index:int=0;
+			
+			private var waitingWin:RecomendWaiingWin=new RecomendWaiingWin();
+			private function testInit():void{
+			//	var suggestionObj:SuggestionObj=new SuggestionObj(1,1,false,"2011年5月1日 16:02:16","东经102°52'-103°25',北纬30°45'-30°60'","50cm","1次/1小时","[200nm，520nm]");
+			//	suggestionArray.addItem(suggestionObj);
+			}
+			//private  var addInList:ArrayCollection=new ArrayCollection();
+			
+			public override function clearDate():void{
+				suggestionArray.removeAll();
+				upLoadCollection.removeAll();
+			}
+			
+			public override function loadData():void{
+				userRecommendationResp.token=userRecommendationService.showAdminRecommendation();
+				
+				rbSelectedAll.selected=false;
+				rbRemoveAll.selected=false;
+				
+			}
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				//loadData();
+			}
+
+
+			protected function btnProduce_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+//				var parent:ParentMDI=new ParentMDI();
+//				parent.mdiCanvas=Config.midCanvs;
+//				var imitateProdceWin:ImitateProduceWin=new ImitateProduceWin();
+//				parent.width=imitateProdceWin.width;
+//				parent.height=imitateProdceWin.height;
+//				parent.addChild(imitateProdceWin);
+//				Config.midCanvs.windowManager.add(parent);
+				
+			}
+			protected function btnPublish_clickHandler(event:MouseEvent):void
+			{
+				
+				var productList:ArrayCollection=new ArrayCollection();
+				for each(var suggestion:SuggestionObj in suggestionArray){
+					if(suggestion.checked==true){
+						var product:TSimulateproduct=new TSimulateproduct();
+						product.simulateUuid=suggestion.uuid;
+						product.simulateXml=suggestion.deepFrame;
+						productList.addItem(product);
+					}
+				}
+				if(productList.length==0)
+				{
+					mx.controls.Alert.show("选择不能为空");
+					return;
+				}
+//				CursorManager.setBusyCursor();
+				publishResp.token=userRecommendationService.simulateProductRelease(productList,Config.searchId);
+				waitingWin.init();
+				Config.midCanvs3.windowManager.add(waitingWin);
+				waitingWin.x=Config.midCanvs3.width/2-waitingWin.width/2;
+				waitingWin.y=Config.midCanvs3.height/2-waitingWin.height;
+			}
+
+
+			protected function userRecommendationServiceResp_resultHandler(event:ResultEvent):void
+			{
+				var dataHandler:UserSuggestionDataHandler=new UserSuggestionDataHandler(event.result as ArrayCollection);
+				dataHandler.bindData(suggestionArray);
+			}
+
+
+			protected function publishResp_resultHandler(event:ResultEvent):void
+			{
+				waitingWin.stopProgress();
+				Config.midCanvs3.windowManager.remove(waitingWin);
+				
+				var parent:ParentMDI=new ParentMDI();
+				parent.mdiCanvas=Config.midCanvs;
+				parent.title="模拟产品推荐结果";
+				var imitatePublishWin:ImitatePublishWin=new ImitatePublishWin();
+				parent.width=imitatePublishWin.width;
+				parent.height=imitatePublishWin.height;
+				parent.addChild(imitatePublishWin);
+				Config.midCanvs3.windowManager.add(parent);
+				imitatePublishWin.loadDataResult(event.result as ArrayCollection);
+//				EventManager.dispatchEvent(imitatePublishWin,new QueryEvent(QueryEvent.PRODUCT_PUBLISH,null,event.result as ArrayCollection));
+				CursorManager.removeAllCursors();
+			}
+
+			
+			/********************************文件操作****************************************/
+			
+			private var  fileList:FileReferenceList=new FileReferenceList();
+
+			protected function btnOpenFile_clickHandler(event:MouseEvent):void
+			{
+//				CursorManager.setBusyCursor();
+				fileList.browse();				
+				fileList.addEventListener(Event.SELECT,onFileSelected);
+			}
+			private function onFileSelected(e:Event):void{
+				CursorManager.setBusyCursor();
+				upLoadCollection.removeAll();
+				count=fileList.fileList.length;
+				index=1;
+				for each(var f:FileReference in fileList.fileList){
+					f.load();
+					f.addEventListener(Event.COMPLETE,onComplete);
+				}				
+			}
+
+			private function onComplete(e:Event):void{
+				var bytes:ByteArray = e.target.data;
+			
+				//var xml:String=bytes.readUTFBytes(bytes.length);
+				var xml:String=bytes.readMultiByte(bytes.length,"GBK");
+				upLoadCollection.addItem(xml);
+				(e.target as FileReference).removeEventListener(Event.COMPLETE,onComplete);
+				if(index==count)
+				{
+					upLoadResp.token=userRecommendationService.upload(upLoadCollection);
+				}else{
+					index++;
+				}
+
+			}
+			private function bindSuggesion(xmlStr:String):void{
+				var suggestion:SuggestionObj=new SuggestionObj();
+				var xml:XML=GetDataFromXml.formatXmlString(xmlStr);
+				suggestion.deepFrame=xmlStr;
+				suggestion.checked=false;
+				suggestion.uuid=GetDataFromXml.getUUID(xml);                 // 设置uuid
+				suggestion.imageArea=GetDataFromXml.getImageRange(xml);
+				suggestion.imageDate=GetDataFromXml.getImageTime(xml);
+				suggestion.spacialResolution=GetDataFromXml.getSpatialResolution(xml);
+				suggestion.spectrumResolution=GetDataFromXml.getSpectralResolution(xml);
+				suggestion.timeResolution=GetDataFromXml.getTemporalResolution(xml);
+				suggestionArray.addItem(suggestion);
+			}
+
+			protected function upLoadResp_resultHandler(event:ResultEvent):void
+			{
+				rbSelectedAll.selected=false;
+				rbRemoveAll.selected=false;
+				var resultCollection:ArrayCollection=event.result as ArrayCollection;
+				for each(var a:TSimulateproduct in resultCollection){
+				     bindSuggesion(a.simulateXml);
+				}
+				CursorManager.removeAllCursors();
+			    
+			}
+
+
+			protected function radiobutton1_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbSelectedAll.selected==true){
+					
+					for each(var suggestion:SuggestionObj in suggestionArray){
+						suggestion.checked=true;
+					}
+				}
+				adg1.dataProvider=suggestionArray;
+			}
+
+
+			protected function radiobutton2_changeHandler(event:Event):void
+			{
+				// TODO Auto-generated method stub
+				if(rbRemoveAll.selected==true){
+					for each(var suggestion:SuggestionObj in suggestionArray){
+						if(suggestion.checked==false)
+						    suggestion.checked=true;
+						else if(suggestion.checked==true)
+							suggestion.checked=false;
+					}
+				}
+				adg1.dataProvider=suggestionArray;
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:UserRecommendationService id="userRecommendationService" destination="UserRecommendationService"/>
+		<s:CallResponder id="upLoadResp" result="upLoadResp_resultHandler(event)"/>
+		<s:CallResponder id="userRecommendationResp" result="userRecommendationServiceResp_resultHandler(event)"/>
+		<s:CallResponder id="publishResp" result="publishResp_resultHandler(event)"/>
+	</fx:Declarations>
+	<mx:AdvancedDataGrid sortableColumns="false" verticalScrollPolicy="auto" id="adg1" designViewDataType="flat" horizontalScrollPolicy="off" dataProvider="{suggestionArray}" left="10" right="9" top="10" bottom="55" fontFamily="微软雅黑" fontSize="13">
+		<mx:columns>
+			<mx:AdvancedDataGridColumn headerText="选择" width="70" minWidth="70" dataField="col1" itemRenderer="cn.edu.whu.liesmars.renderer.CheckBoxRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="序号" width="70" minWidth="70" itemRenderer=" cn.edu.whu.liesmars.renderer.SequenceItemRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="影像获取时间" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_imageDate"/>
+			<mx:AdvancedDataGridColumn headerText="影像覆盖地理范围" width="160" minWidth="160" itemRenderer="cn.edu.whu.liesmars.renderer.Button_CheckMapRenderer"/>
+			<mx:AdvancedDataGridColumn headerText="空间分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spacial"/>
+			<mx:AdvancedDataGridColumn headerText="时间分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_time"/>
+			<mx:AdvancedDataGridColumn headerText="光谱分辨率" width="90" minWidth="90" itemRenderer="cn.edu.whu.liesmars.renderer.toolTipRenderer.ToolTipRenderer_spectrum"/>
+			
+		</mx:columns>
+	</mx:AdvancedDataGrid>
+	<s:Button id="btnProduce" label="模拟产品加载（批量文件导入）" click="btnOpenFile_clickHandler(event)"  width="188" bottom="22" horizontalCenter="-104"/>
+	
+	<s:Button id="btnPublish" label="模拟产品发布" click="btnPublish_clickHandler(event)" width="100" bottom="22" horizontalCenter="102"/>
+	<s:RadioButton id="rbSelectedAll" left="20"  bottom="22" label="全选"  change="radiobutton1_changeHandler(event)" />
+	<s:RadioButton id="rbRemoveAll" left="70"  bottom="22" label="反选" change="radiobutton2_changeHandler(event)"/>
+<!--	<mx:ProgressBar  id="processBar" direction="right"  mode="manual" label="%3%" labelPlacement="center" visible="false"  width="188" bottom="22" horizontalCenter="-104" height="22"/> -->
+</Container:TheCanvas>

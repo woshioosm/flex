@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Container:TheCanvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:Container="cn.edu.whu.liesmars.Container.*"
+					 xmlns:s="library://ns.adobe.com/flex/spark" fontFamily="微软雅黑"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" width="890" height="574"  xmlns:services="services.*"
+					 creationComplete="thecanvas1_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.collections.XMLListCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			import valueObjects.RuleCodeAndName;
+			import valueObjects.TRule;
+			
+			var tree1xml:XMLListCollection;
+			var list1array:ArrayCollection = new ArrayCollection();
+			var list2array:ArrayCollection = new ArrayCollection();
+			var selectedRuleItem:TRule = null;
+			var selectedRuleObject:Object;
+			var ruleInWhichList:int;
+			var objectToPutInLib:Object;
+			var theNewRule:TRule;
+			
+			var myExpressRuleModifyThenPopup;
+			var myModifyIfPopup;
+			var myInferenceModifyThenPopup;
+			var myGeoCoordinateThenPopup;
+			var myAddNewRulePopup;
+			var myTransUnitPopup;
+			
+			public override function loadData():void{
+				loadTreeXml();
+			} 
+			
+			/* protected function panel1_creationCompleteHandler(event:FlexEvent):void
+			{
+			
+			}  */
+			
+			//			protected function thecanvas1_creationCompleteHandler(event:FlexEvent):void
+			//			{
+			//				loadTreeXml();
+			//			}
+			
+			protected function loadTreeXml():void
+			{
+				loadTreeXmlResult.token = ruleManagerService.loadTreeXml();
+			}
+			
+			
+			protected function loadTreeXmlResult_resultHandler(event:ResultEvent):void
+			{
+				var ruleclassXmlString = loadTreeXmlResult.lastResult;
+				var theXml:XML = new XML(ruleclassXmlString);
+				var theXmlList = theXml.children();
+				tree1xml = new XMLListCollection(theXmlList);
+				tree1.dataProvider = tree1xml;
+				tree1.labelField = "@ruleclassCName";
+			}
+			
+			
+			protected function tree1_changeHandler(event:ListEvent):void
+			{
+				var treeSelectedItem:XML = tree1.selectedItem as XML;
+				if(treeSelectedItem.hasSimpleContent() == true)
+				{
+					ruleCodeText.text = "";
+					ruleCNameText.text = "";
+					ruleENameText.text = "";
+					ruleIFText.text = "";
+					ruleThenText.text = "";
+					ruleExtendText.text = "";
+					ruleDescriptionText.text = "";
+					ruleCreateDateText.text = "";
+					ruleModifyDateText.text = "";
+					btnModifyIF.enabled = false;
+					btnModifyThen.enabled = false;
+					btnSubmit.enabled = false;
+					btnDel.enabled  = false;
+					btnPutInLib.enabled = false;
+					btnTransUnit.enabled = false;
+					
+					btnAddNew.enabled = true;
+					
+					var _ruleclassCode:String = treeSelectedItem.attribute("ruleclassCode").toXMLString();
+					loadRules(_ruleclassCode);
+				}
+			}
+			
+			
+			protected function loadRules(arg0:String):void
+			{
+				loadRulesResult.token = ruleManagerService.loadRules(arg0);
+			}
+			
+			
+			protected function loadRulesResult_resultHandler(event:ResultEvent):void
+			{
+				var ruleResult:ArrayCollection = loadRulesResult.lastResult as ArrayCollection;
+				list1array.removeAll();
+				list2array.removeAll();
+				for each(var ruleitem:TRule in ruleResult)
+				{
+					if(ruleitem.isAdmitted == 1)
+					{
+						var tempitem:Object = new Object();
+						if(ruleitem.ruleCname != null && ruleitem.ruleCname != "")
+						{
+							tempitem.label = ruleitem.ruleCname + "-" + ruleitem.ruleCode;
+						}
+						else
+						{
+							tempitem.label = ruleitem.ruleCode;
+						}
+						tempitem.ruleitem = ruleitem;
+						list1array.addItem(tempitem);
+					}
+					else
+					{
+						var tempitem:Object = new Object();
+						if(ruleitem.ruleCname != null && ruleitem.ruleCname != "")
+						{
+							tempitem.label = ruleitem.ruleCname + "-" + ruleitem.ruleCode;
+						}
+						else
+						{
+							tempitem.label = ruleitem.ruleCode;
+						}
+						tempitem.ruleitem = ruleitem;
+						list2array.addItem(tempitem);
+					}
+				}
+			}
+			
+			
+			protected function list1_changeHandler(event:IndexChangeEvent):void
+			{
+				if(list1.selectedIndex != -1)
+				{
+					ruleInWhichList = 1;
+					selectedRuleObject = list1.selectedItem;
+					selectedRuleItem = list1.selectedItem.ruleitem as TRule;
+					btnSubmit.enabled = true;
+					btnDel.enabled  = true;
+					btnPutInLib.enabled = false;
+					
+					ruleCodeText.text = "";
+					ruleCNameText.text = "";
+					ruleENameText.text = "";
+					ruleIFText.text = "";
+					ruleThenText.text = "";
+					ruleExtendText.text = "";
+					ruleDescriptionText.text = "";
+					ruleCreateDateText.text = "";
+					ruleModifyDateText.text = "";
+					
+					ruleCodeText.text = selectedRuleItem.ruleCode;
+					ruleCNameText.text = selectedRuleItem.ruleCname;
+					ruleENameText.text = selectedRuleItem.ruleEname;
+					ruleIFText.text = selectedRuleItem.ruleIf;
+					ruleThenText.text = selectedRuleItem.ruleThen;
+					ruleExtendText.text = selectedRuleItem.ruleExtend;
+					ruleDescriptionText.text = selectedRuleItem.ruleDescription;
+					ruleCreateDateText.text = selectedRuleItem.ruleCreateDate;
+					ruleModifyDateText.text = selectedRuleItem.ruleModifyDate;
+					
+					if(selectedRuleItem.ruleCode.substr(0,7) == "R230213" || selectedRuleItem.ruleCode.substr(0,7) == "R230214")
+					{
+						btnTransUnit.enabled = true;
+					}
+					else if(selectedRuleItem.ruleCode.substr(0,5) == "R1302")
+					{
+						btnModifyThen.enabled = true;
+					}
+					else if(selectedRuleItem.ruleCode.substr(0,5) == "R1201")
+					{
+						btnModifyThen.enabled = true;
+					}
+					else if(selectedRuleItem.ruleCode.substr(0,5) == "R2302")
+					{
+						btnModifyIF.enabled = true;
+						btnModifyThen.enabled = true;
+					}
+					
+				}
+				else
+				{
+					ruleCodeText.text = "";
+					ruleCNameText.text = "";
+					ruleENameText.text = "";
+					ruleIFText.text = "";
+					ruleThenText.text = "";
+					ruleExtendText.text = "";
+					ruleDescriptionText.text = "";
+					ruleCreateDateText.text = "";
+					ruleModifyDateText.text = "";
+					
+					btnTransUnit.enabled = false;
+					btnModifyIF.enabled = false;
+					btnModifyThen.enabled = false;
+					btnSubmit.enabled = false;
+					btnDel.enabled  = false;
+					btnPutInLib.enabled = false;	
+				}
+				
+			}
+			
+			protected function list2_changeHandler(event:IndexChangeEvent):void
+			{
+				if(list2.selectedIndex != -1)
+				{
+					ruleInWhichList = 2;
+					selectedRuleObject = list2.selectedItem;
+					objectToPutInLib = list2.selectedItem;
+					selectedRuleItem = list2.selectedItem.ruleitem as TRule;
+					//btnSubmit.enabled = true;
+					btnDel.enabled  = true;
+					btnPutInLib.enabled = true;
+					
+					ruleCodeText.text = "";
+					ruleCNameText.text = "";
+					ruleENameText.text = "";
+					ruleIFText.text = "";
+					ruleThenText.text = "";
+					ruleExtendText.text = "";
+					ruleDescriptionText.text = "";
+					ruleCreateDateText.text = "";
+					ruleModifyDateText.text = "";
+					
+					ruleCodeText.text = selectedRuleItem.ruleCode;
+					ruleCNameText.text = selectedRuleItem.ruleCname;
+					ruleENameText.text = selectedRuleItem.ruleEname;
+					ruleIFText.text = selectedRuleItem.ruleIf;
+					ruleThenText.text = selectedRuleItem.ruleThen;
+					ruleExtendText.text = selectedRuleItem.ruleExtend;
+					ruleDescriptionText.text = selectedRuleItem.ruleDescription;
+					ruleCreateDateText.text = selectedRuleItem.ruleCreateDate;
+					ruleModifyDateText.text = selectedRuleItem.ruleModifyDate;
+				}
+				else
+				{
+					ruleCodeText.text = "";
+					ruleCNameText.text = "";
+					ruleENameText.text = "";
+					ruleIFText.text = "";
+					ruleThenText.text = "";
+					ruleExtendText.text = "";
+					ruleDescriptionText.text = "";
+					ruleCreateDateText.text = "";
+					ruleModifyDateText.text = "";
+					
+					btnModifyIF.enabled = false;
+					btnModifyThen.enabled = false;
+					btnSubmit.enabled = false;
+					btnDel.enabled  = false;
+					btnPutInLib.enabled = false;
+				}
+				
+			}
+			
+			protected function saveOrUpdateRule(arg0:TRule):void
+			{
+				saveOrUpdateRuleResult.token = ruleManagerService.saveOrUpdateRule(arg0);
+			}
+			
+			
+			protected function saveOrUpdateRuleResult_resultHandler(event:ResultEvent):void
+			{
+				if(saveOrUpdateRuleResult.lastResult == 0)
+				{
+					Alert.show("修改成功！");
+				}
+				else
+				{
+					Alert.show("写入数据库出错！！！","错误");
+				}
+			}
+			
+			protected function btnSubmit_clickHandler(event:MouseEvent):void
+			{
+				selectedRuleItem.ruleCname = ruleCNameText.text;
+				selectedRuleItem.ruleEname = ruleENameText.text;
+				selectedRuleItem.ruleIf = ruleIFText.text;
+				selectedRuleItem.ruleThen = ruleThenText.text;
+				selectedRuleItem.ruleExtend = ruleExtendText.text;
+				selectedRuleItem.ruleDescription = ruleDescriptionText.text;
+				/* selectedRuleItem.ruleCreateDate = ruleCreateDateText.text;
+				selectedRuleItem.ruleModifyDate = ruleModifyDateText.text; */
+				
+				saveOrUpdateRule(selectedRuleItem);
+			}
+			
+			protected function btnPutInLib_clickHandler(event:MouseEvent):void
+			{
+				putInLibResult.token = ruleManagerService.putInLib(selectedRuleItem);
+			}
+			
+			protected function putInLibResult_resultHandler(event:ResultEvent):void
+			{
+				if(putInLibResult.lastResult == 0)
+				{
+					Alert.show("规则成功入库！");
+					list2array.removeItemAt(list2array.getItemIndex(objectToPutInLib));
+					(objectToPutInLib.ruleitem as TRule).isAdmitted = 1;			
+					list1array.addItem(objectToPutInLib);
+				}
+				else
+				{
+					Alert.show("写入数据库失败！！","错误");
+				}
+			}
+			
+			
+			protected function btnModifyThen_clickHandler(event:MouseEvent):void
+			{
+				if(selectedRuleItem.ruleCode.substr(0,5) == "R1302")
+				{
+					myExpressRuleModifyThenPopup = PopUpManager.createPopUp(this,expressRuleModifyThenPopup,true);
+					myExpressRuleModifyThenPopup.fullString = selectedRuleItem.ruleThen;
+					myExpressRuleModifyThenPopup.addEventListener("expressRuleModifyThenPopupReadyMessage",expressRuleModifyThenPopupReadyMessageHandler);
+					PopUpManager.centerPopUp(myExpressRuleModifyThenPopup);
+				}
+				else if(selectedRuleItem.ruleCode.substr(0,5) == "R1201")
+				{
+					myGeoCoordinateThenPopup = PopUpManager.createPopUp(this,geoCoordinateRuleModifyThenPopop,true);
+					myGeoCoordinateThenPopup.ruleThenString = ruleThenText.text;
+					myGeoCoordinateThenPopup.addEventListener("geoCoorModifyThenReadyMessage",geoCoorModifyThenReadyMessageHandler);
+					PopUpManager.centerPopUp(myGeoCoordinateThenPopup);
+				}
+				else if(selectedRuleItem.ruleCode.substr(0,5) == "R2302")
+				{
+					myInferenceModifyThenPopup = PopUpManager.createPopUp(this, inferenceRuleModifyThenPopup, true);
+					if(ruleThenText.text.search(",") != -1)
+					{
+						myInferenceModifyThenPopup.tabSelectedIndex = 1;
+					}
+					else if(ruleThenText.text.search(";") != -1)
+					{
+						myInferenceModifyThenPopup.tabSelectedIndex = 2;
+					}
+					else
+					{
+						myInferenceModifyThenPopup.tabSelectedIndex = 0;
+					}
+					myInferenceModifyThenPopup.ruleThenString = ruleThenText.text;
+					myInferenceModifyThenPopup.addEventListener("inferenceModifyThenReadyMessage",inferenceModifyThenReadyMessageHandler);
+					PopUpManager.centerPopUp(myInferenceModifyThenPopup);
+				}
+			}
+			
+			protected function geoCoorModifyThenReadyMessageHandler(event:Event):void
+			{
+				ruleThenText.text = myGeoCoordinateThenPopup.ruleThenString;
+			}
+			
+			protected function inferenceModifyThenReadyMessageHandler(event:Event):void
+			{
+				ruleThenText.text = myInferenceModifyThenPopup.ruleThenString;
+			}
+			
+			protected function expressRuleModifyThenPopupReadyMessageHandler(event:Event):void
+			{
+				ruleThenText.text = myExpressRuleModifyThenPopup.fullString;
+			}
+			
+			
+			protected function btnModifyIF_clickHandler(event:MouseEvent):void
+			{
+				myModifyIfPopup = PopUpManager.createPopUp(this, inferenceRuleModifyIfPopup, true);
+				if(selectedRuleItem.ruleIf != null)
+				{
+					myModifyIfPopup.ruleIfString = ruleIFText.text;
+				}
+				myModifyIfPopup.addEventListener("modifyIfReadyMessage",modifyIfReadyMessageHandler);
+				PopUpManager.centerPopUp(myModifyIfPopup);
+			}
+			
+			protected function modifyIfReadyMessageHandler(event:Event):void
+			{
+				ruleIFText.text = myModifyIfPopup.ruleIfString;
+			}
+			
+			
+			protected function btnAddNew_clickHandler(event:MouseEvent):void
+			{
+				var treeSelectedItem:XML = tree1.selectedItem as XML;
+				if(treeSelectedItem.hasSimpleContent() == true)
+				{
+					var _ruleclassCode:String = treeSelectedItem.attribute("ruleclassCode").toXMLString();
+					
+					if(_ruleclassCode.length == 7)
+					{
+						myAddNewRulePopup = PopUpManager.createPopUp(this,addNewRule,true);
+						myAddNewRulePopup.ruleCodeFirst6 = _ruleclassCode;
+						myAddNewRulePopup.addEventListener("addNewRuleReadyMessage",addNewRuleReadyMessageHandler);
+						PopUpManager.centerPopUp(myAddNewRulePopup);
+					}
+					else
+					{
+						Alert.show("规则分类号长度错误，无法为该分类添加新规则。","error");
+					}
+					
+				}
+			}
+			
+			protected function addNewRuleReadyMessageHandler(event:Event):void
+			{
+				theNewRule = myAddNewRulePopup.newRule;
+				saveNewRule(theNewRule);
+			}
+			
+			
+			protected function saveNewRule(arg0:TRule):void
+			{
+				saveNewRuleResult.token = ruleManagerService.saveNewRule(arg0);
+			}
+			
+			
+			protected function saveNewRuleResult_resultHandler(event:ResultEvent):void
+			{
+				if(saveNewRuleResult.lastResult != null)
+				{
+					var newRuleCode:String = saveNewRuleResult.lastResult;
+					theNewRule.ruleCode = newRuleCode;
+					
+					var tempitem:Object = new Object();
+					if(theNewRule.ruleCname != null && theNewRule.ruleCname != "")
+					{
+						tempitem.label = theNewRule.ruleCname + "-" + theNewRule.ruleCode;
+					}
+					else
+					{
+						tempitem.label = theNewRule.ruleCode;
+					}
+					tempitem.ruleitem = theNewRule;
+					
+					list2array.addItem(tempitem);
+				}
+				else
+				{
+					Alert.show("添加新规则失败！","Error");
+				}
+			}
+			
+			
+			protected function btnTransUnit_clickHandler(event:MouseEvent):void
+			{
+				myTransUnitPopup = PopUpManager.createPopUp(this, transUnitPopup, true);
+				myTransUnitPopup.ruleIf = selectedRuleItem.ruleIf;
+				myTransUnitPopup.ruleThen = selectedRuleItem.ruleThen;
+				myTransUnitPopup.addEventListener("transUnitReadyMessage",transUnitReadyMessageHandler);
+				PopUpManager.centerPopUp(myTransUnitPopup);
+			}
+			
+			protected function transUnitReadyMessageHandler(event:Event):void
+			{
+				ruleIFText.text = myTransUnitPopup.ruleIf;
+				ruleThenText.text = myTransUnitPopup.ruleThen;
+			}
+			
+			protected function btnDel_clickHandler(event:MouseEvent):void
+			{
+				delRule(selectedRuleItem);
+			}
+			
+			
+			protected function delRule(arg0:TRule):void
+			{
+				delRuleResult.token = ruleManagerService.delRule(arg0);
+			}
+			
+			
+			protected function delRuleResult_resultHandler(event:ResultEvent):void
+			{
+				if(delRuleResult.lastResult == 0)
+				{
+					Alert.show("删除成功!");
+					if(ruleInWhichList == 1)
+					{
+						list1array.removeItemAt(list1array.getItemIndex(selectedRuleObject));
+					}
+					else if(ruleInWhichList == 2)
+					{
+						list2array.removeItemAt(list2array.getItemIndex(selectedRuleObject));
+					}
+				}
+				else 
+				{
+					Alert.show("删除失败!");
+				}
+			}
+			
+			
+			
+			
+
+			protected function thecanvas1_creationCompleteHandler(event:FlexEvent):void
+			{
+				loadTreeXml();
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<services:RuleManagerService id="ruleManagerService" fault="Alert.show(event.fault.faultString + '\n' + event.fault.faultDetail)" showBusyCursor="true"/>
+		<s:CallResponder id="loadTreeXmlResult" result="loadTreeXmlResult_resultHandler(event)"/>
+		<s:CallResponder id="loadRulesResult" result="loadRulesResult_resultHandler(event)"/>
+		<s:CallResponder id="saveOrUpdateRuleResult" result="saveOrUpdateRuleResult_resultHandler(event)"/>
+		<s:CallResponder id="putInLibResult" result="putInLibResult_resultHandler(event)"/>
+		<s:CallResponder id="saveNewRuleResult" result="saveNewRuleResult_resultHandler(event)"/>
+		<s:CallResponder id="delRuleResult" result="delRuleResult_resultHandler(event)"/>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:Form x="523" y="10">
+		<mx:FormItem label="规则编码">
+			<s:TextInput id="ruleCodeText" width="229" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则中文名称">
+			<s:TextInput id="ruleCNameText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则英文名称">
+			<s:TextInput id="ruleENameText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则前提">
+			<s:TextArea id="ruleIFText" width="229" height="115" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则结论">
+			<s:TextArea id="ruleThenText" width="229" height="104" editable="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则扩展">
+			<s:TextInput id="ruleExtendText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则描述">
+			<s:TextInput id="ruleDescriptionText" width="229"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则创建时间">
+			<s:TextInput id="ruleCreateDateText" width="229" enabled="false"/>
+		</mx:FormItem>
+		<mx:FormItem label="规则修改时间">
+			<s:TextInput id="ruleModifyDateText" width="229" enabled="false"/>
+		</mx:FormItem>
+	</mx:Form>
+	<s:HGroup x="10" y="10" width="500" height="556">
+		<mx:Tree id="tree1" width="50%" height="552" change="tree1_changeHandler(event)"></mx:Tree>
+		<s:VGroup width="50%" height="100%">
+			<s:BorderContainer height="65%" width="100%">
+				<s:Label x="0" y="0" text="已入库规则"/>
+				<s:List id="list1" dataProvider="{list1array}" labelField="label" x="0" y="17" width="100%" height="100%" change="list1_changeHandler(event)"></s:List>
+			</s:BorderContainer>
+			<s:BorderContainer height="186" width="100%">
+				<s:Label text="未入库规则" x="0" y="0"/>
+				<s:List id="list2" dataProvider="{list2array}" labelField="label" width="100%" height="162" y="17" change="list2_changeHandler(event)" x="4"></s:List>
+			</s:BorderContainer>
+		</s:VGroup>
+	</s:HGroup>
+	<s:Button x="649" y="481" label="修改规则前提" enabled="false" id="btnModifyIF" click="btnModifyIF_clickHandler(event)"/>
+	<s:Button x="706" y="534" label="提交修改"  enabled="false" id="btnSubmit" click="btnSubmit_clickHandler(event)"/>
+	<s:Button x="762" y="483" label="修改规则结论" enabled="false" id="btnModifyThen" click="btnModifyThen_clickHandler(event)"/>
+	<s:Button x="795" y="533" label="规则入库" enabled="false" id="btnPutInLib" click="btnPutInLib_clickHandler(event)"/>
+	<s:Button x="536" y="534" label="添加规则"  enabled="false" id="btnAddNew" click="btnAddNew_clickHandler(event)"/>
+	<s:Button x="552" y="481" label="单位转换" id="btnTransUnit" enabled="false" click="btnTransUnit_clickHandler(event)"/>
+	<s:Button x="621" y="534" label="删除规则" enabled="false" id="btnDel" click="btnDel_clickHandler(event)"/>
+</Container:TheCanvas >
